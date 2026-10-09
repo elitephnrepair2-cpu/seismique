@@ -1,0 +1,28 @@
+{
+  "source": "https://www.seismique.com/immersive-art-museum",
+  "checked_on": "2026-10-02",
+  "usage": "Linked official photographs; local copies not downloaded",
+  "images": {
+    "alien-grass": "https://static.wixstatic.com/media/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg",
+    "abduction": "https://static.wixstatic.com/media/51d719_8e6be0ddfec0411597bce74515604f4e~mv2.jpeg",
+    "archive": "https://static.wixstatic.com/media/51d719_05c50e841acf4b06ac38fa0f7e78ba9a~mv2.jpg",
+    "facemaking": "https://static.wixstatic.com/media/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg",
+    "kaleidral": "https://static.wixstatic.com/media/51d719_ce05bb6ddd9944afbdc72b3a26340b38~mv2.jpeg",
+    "eden": "https://static.wixstatic.com/media/51d719_66e90e469f3b499fa31c5d6d9b92b8fa~mv2.jpeg",
+    "brainwasher": "https://static.wixstatic.com/media/95b67b_64b2c29880e54c82be6fe2f3dfb731a3~mv2.jpg",
+    "venus": "https://static.wixstatic.com/media/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg",
+    "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
+  },
+  "display_images": {
+    "alien-grass": "https://static.wixstatic.com/media/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg",
+    "abduction": "https://static.wixstatic.com/media/51d719_8e6be0ddfec0411597bce74515604f4e~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_8e6be0ddfec0411597bce74515604f4e~mv2.jpeg",
+    "archive": "https://static.wixstatic.com/media/51d719_05c50e841acf4b06ac38fa0f7e78ba9a~mv2.jpg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_05c50e841acf4b06ac38fa0f7e78ba9a~mv2.jpg",
+    "facemaking": "https://static.wixstatic.com/media/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg",
+    "kaleidral": "https://static.wixstatic.com/media/51d719_ce05bb6ddd9944afbdc72b3a26340b38~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_ce05bb6ddd9944afbdc72b3a26340b38~mv2.jpeg",
+    "eden": "https://static.wixstatic.com/media/51d719_66e90e469f3b499fa31c5d6d9b92b8fa~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_66e90e469f3b499fa31c5d6d9b92b8fa~mv2.jpeg",
+    "brainwasher": "https://static.wixstatic.com/media/95b67b_64b2c29880e54c82be6fe2f3dfb731a3~mv2.jpg/v1/fill/w_980,h_550,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_64b2c29880e54c82be6fe2f3dfb731a3~mv2.jpg",
+    "venus": "https://static.wixstatic.com/media/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg",
+    "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg/v1/fill/w_980,h_1073,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
+  },
+  "rendition_note": "Uses the same Wix display-image transformation observed in the official gallery, at 980px width and original aspect ratio."
+}

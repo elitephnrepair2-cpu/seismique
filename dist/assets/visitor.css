@@ -1,0 +1,189 @@
+/* Visitor navigation surrounds the existing 3D entrance. */
+html{background:#080d16;color-scheme:dark}body{color:#f5f7fb}main{max-width:1100px}
+#seismique-jungle-reveal{max-width:none}#seismique-jungle-reveal a{color:inherit}#seismique-jungle-reveal a:focus-visible,#seismique-jungle-reveal summary:focus-visible{outline:3px solid #00e6ed;outline-offset:3px}
+#seismique-jungle-reveal .site-header{flex:none;background:#101521;color:#f5f7fb;border-bottom:1px solid #ffffff24;z-index:8;padding-top:env(safe-area-inset-top)}
+#seismique-jungle-reveal .brand-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:12px}
+#seismique-jungle-reveal .brand{text-decoration:none;font-size:24px;letter-spacing:-1.2px}#seismique-jungle-reveal .portal-link{font-size:14px;text-decoration:none;border-bottom:1px solid #6d798d;padding:4px 0}
+#seismique-jungle-reveal .direct-nav{display:grid;grid-template-columns:.8fr .9fr 1.25fr 1.1fr;padding:0 6px 5px;gap:2px}
+#seismique-jungle-reveal .direct-nav a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:5px 4px;text-align:center;text-decoration:none;font-size:14px;line-height:1.2;border-radius:7px;color:#d6dfec;border:1px solid transparent}
+#seismique-jungle-reveal .direct-nav a:hover,#seismique-jungle-reveal .direct-nav a[aria-current]{background:#25304a;border-color:#52637c;color:#fff}
+#seismique-jungle-reveal .tour-view{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;background:#0b1018}
+#seismique-jungle-reveal .intro-copy{flex:none;text-align:center;padding:14px 18px 12px;background:#0b1018;z-index:2}
+#seismique-jungle-reveal .intro-copy h1{font-family:Impact,'Arial Narrow',Arial,sans-serif;text-transform:uppercase;font-size:clamp(27px,3.6vw,36px);line-height:1.05;letter-spacing:-.5px;margin:0 0 8px;color:#fff}
+#seismique-jungle-reveal .intro-copy p{font-size:16px;line-height:1.4;color:#d9e4ee;margin:0 auto;max-width:500px}
+#seismique-jungle-reveal .scene{min-height:260px;max-width:620px;width:100%;margin:0 auto;flex:1}
+#seismique-jungle-reveal .headline,#seismique-jungle-reveal .arrival-shade{display:none}
+#seismique-jungle-reveal .foot{padding:28px 14px 10px;background:linear-gradient(transparent,#080f19d9 70%)}
+#seismique-jungle-reveal .movehint{font-size:14px;margin-bottom:0}
+#seismique-jungle-reveal .paths{margin-bottom:8px}#seismique-jungle-reveal .back{margin-bottom:8px}
+#seismique-jungle-reveal .tour-controls{flex:none;padding:10px 14px 4px;background:#101722;display:grid;gap:6px}
+#seismique-jungle-reveal .main-actions,#seismique-jungle-reveal .optional-actions{display:flex;gap:8px;align-items:center;justify-content:center}
+#seismique-jungle-reveal .main-actions>*{flex:1;max-width:300px}#seismique-jungle-reveal .button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 17px;border:1px solid transparent;border-radius:9px;text-decoration:none;font-family:inherit;font-weight:700;font-size:16px;line-height:1.25;text-align:center;cursor:pointer}
+#seismique-jungle-reveal .primary{background:#00e6ed;color:#06151c}#seismique-jungle-reveal .secondary{background:#1a273a;border-color:#596b87;color:#f6f8fc}
+#seismique-jungle-reveal .optional-actions button{font:inherit;font-size:14px;background:transparent;border:0;color:#cad7e7;padding:8px 12px;min-height:40px;border-radius:6px;cursor:pointer}
+#seismique-jungle-reveal .optional-actions button:hover{background:#253149}#seismique-jungle-reveal .optional-actions button:disabled{opacity:.5}
+#seismique-jungle-reveal .global-ticketbar{flex:none;padding:9px 14px max(10px,env(safe-area-inset-bottom));background:#101722;border-top:1px solid #ffffff16;display:flex;justify-content:center;z-index:8}
+#seismique-jungle-reveal .global-ticketbar .button{width:100%;max-width:620px;border-radius:24px;background:#00e6ed;color:#06151c;font-size:17px}
+#seismique-jungle-reveal .visitor-content{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;background:#0b101b;color:#edf4fc;scroll-behavior:auto}
+#seismique-jungle-reveal .content-inner{max-width:940px;margin:0 auto;padding:0 24px 32px}
+#seismique-jungle-reveal .content-section{padding:40px 0;border-bottom:1px solid #ffffff20;scroll-margin-top:20px;outline:none}
+#seismique-jungle-reveal .eyebrow{font-size:13px;font-weight:700;letter-spacing:1.5px;color:#63e0e8;margin:0 0 10px}
+#seismique-jungle-reveal .content-section h2{font-size:clamp(30px,5vw,44px);line-height:1.08;letter-spacing:-1px;margin:0 0 16px;max-width:720px}
+#seismique-jungle-reveal .content-section p{font-size:16px;line-height:1.6;color:#bdcadd;max-width:740px;margin:10px 0 18px}
+#seismique-jungle-reveal .content-section h3{font-size:23px;line-height:1.2;margin:0 0 16px}#seismique-jungle-reveal .content-section h4{font-size:17px;margin:20px 0 12px}
+#seismique-jungle-reveal .destination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0}
+#seismique-jungle-reveal .destination-card{display:flex;flex-direction:column;min-height:236px;padding:22px 18px;border:1px solid #ffffff35;border-top:3px solid #a777ff;border-radius:12px;background:#161b2d;text-decoration:none;transition:background .15s}
+#seismique-jungle-reveal .destination-card:hover{background:#212943}#seismique-jungle-reveal .golf-card{border-top-color:#00e6ed}#seismique-jungle-reveal .events-card{border-top-color:#ff80aa}
+#seismique-jungle-reveal .destination-card>span{font-size:12px;letter-spacing:1px;color:#b2c5d9;margin-bottom:22px}#seismique-jungle-reveal .destination-card h3{margin-bottom:8px}#seismique-jungle-reveal .destination-card p{font-size:15px;margin:0 0 22px}#seismique-jungle-reveal .destination-card b{margin-top:auto;font-size:14px;color:#eef8ff}
+#seismique-jungle-reveal .text-link{display:inline-block;color:#74e7ee;text-underline-offset:4px;font-size:16px;line-height:1.5}
+#seismique-jungle-reveal .inline-prices{display:flex;gap:32px;flex-wrap:wrap;margin:24px 0 10px}#seismique-jungle-reveal .inline-prices span{font-size:14px;color:#bac8dc}#seismique-jungle-reveal .inline-prices strong{display:block;font-size:30px;color:#fff;margin-top:5px}
+#seismique-jungle-reveal .action-row{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+#seismique-jungle-reveal .event-options{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}#seismique-jungle-reveal .event-options span{padding:8px 12px;border:1px solid #72537b;border-radius:6px;font-size:14px}
+#seismique-jungle-reveal .inquiry-panel{padding:24px;background:#211930;border-left:3px solid #ee8bb4;border-radius:0 10px 10px 0;margin-top:24px}
+#seismique-jungle-reveal .small-copy{font-size:14px!important;line-height:1.6!important;color:#bdcadd}
+#seismique-jungle-reveal .section-links{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}#seismique-jungle-reveal .section-links a{padding:9px 12px;font-size:14px;text-decoration:none;border:1px solid #45546a;border-radius:6px}
+#seismique-jungle-reveal .info-block{padding:32px 0 12px;scroll-margin-top:20px;outline:none}#seismique-jungle-reveal .price-table-wrap{overflow-x:auto}#seismique-jungle-reveal .price-table{width:100%;border-collapse:collapse;font-size:16px;table-layout:fixed}#seismique-jungle-reveal .price-table caption{text-align:left;font-size:14px;color:#b7c5d8;margin-bottom:12px}
+#seismique-jungle-reveal .price-table th,#seismique-jungle-reveal .price-table td{padding:16px 10px;text-align:left;border-bottom:1px solid #344054;vertical-align:top}#seismique-jungle-reveal .price-table th:first-child{width:46%;padding-left:0}#seismique-jungle-reveal .price-table thead th{font-size:14px;color:#aebed3}#seismique-jungle-reveal .price-table th span{display:block;font-size:13px;font-weight:400;color:#acbcd1;margin-top:6px}#seismique-jungle-reveal .price-table td{white-space:nowrap;font-weight:700}#seismique-jungle-reveal .bundle{background:#133036}#seismique-jungle-reveal .bundle th:first-child{padding-left:10px}
+#seismique-jungle-reveal .planning-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:32px}#seismique-jungle-reveal .hours{margin:0}#seismique-jungle-reveal .hours div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #ffffff18;font-size:15px}#seismique-jungle-reveal .hours dd{margin:0;text-align:right;white-space:nowrap}#seismique-jungle-reveal address{font-style:normal;line-height:1.7;margin-bottom:12px}
+#seismique-jungle-reveal .source-note{font-size:12px!important;color:#a3b4c8!important}#seismique-jungle-reveal details{border-bottom:1px solid #354055}#seismique-jungle-reveal summary{cursor:pointer;font-size:16px;font-weight:700;padding:19px 24px 19px 0;line-height:1.4}#seismique-jungle-reveal details p{padding-bottom:12px;margin-top:0}
+#seismique-jungle-reveal .contact-strip{padding:28px 0 0;display:flex;flex-direction:column;gap:12px}#seismique-jungle-reveal .contact-strip h3{margin:0}#seismique-jungle-reveal .content-footer{display:flex;gap:18px;flex-wrap:wrap;padding-top:28px;font-size:14px;line-height:1.5}
+@media(min-width:700px){#seismique-jungle-reveal .site-header{display:flex;align-items:center;gap:24px;padding:4px 18px}#seismique-jungle-reveal .brand-row{padding:8px 0;gap:22px}#seismique-jungle-reveal .direct-nav{flex:1;padding:0;gap:6px}#seismique-jungle-reveal .direct-nav a{padding:8px;font-size:15px}#seismique-jungle-reveal .tour-view{overflow:hidden}#seismique-jungle-reveal .tour-controls{padding-top:8px;grid-template-columns:1fr auto;align-items:center;max-width:620px;width:100%;margin:0 auto}}
+@media(max-width:650px){#seismique-jungle-reveal .destination-grid,#seismique-jungle-reveal .planning-grid{grid-template-columns:1fr}#seismique-jungle-reveal .destination-card{min-height:0}#seismique-jungle-reveal .destination-card>span{margin-bottom:12px}#seismique-jungle-reveal .destination-card p{margin-bottom:18px}#seismique-jungle-reveal .content-inner{padding:0 20px 28px}#seismique-jungle-reveal .planning-grid{gap:8px}}
+@media(max-height:700px){#seismique-jungle-reveal .intro-copy{padding:9px 14px}#seismique-jungle-reveal .intro-copy h1{font-size:25px}#seismique-jungle-reveal .intro-copy p{font-size:15px}#seismique-jungle-reveal .tour-controls{padding-top:6px}#seismique-jungle-reveal .scene{min-height:220px}}
+@media(prefers-reduced-motion:reduce){#seismique-jungle-reveal *{scroll-behavior:auto!important;transition:none!important}}
+
+/* The exhibit photography carries the gallery; the tour's cyan and violet frame it. */
+#seismique-jungle-reveal .gallery-return{margin-bottom:22px;font-size:14px}
+#seismique-jungle-reveal .gallery-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+#seismique-jungle-reveal .gallery-heading h2{margin-bottom:0;max-width:540px}
+#seismique-jungle-reveal .gallery-count{font-size:14px;line-height:1.5;color:#b6c6db;flex:none;padding-bottom:4px}
+#seismique-jungle-reveal .gallery-intro{max-width:580px;margin:18px 0 26px}
+#seismique-jungle-reveal .exhibit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+#seismique-jungle-reveal .exhibit-card{position:relative;isolation:isolate;overflow:hidden;padding:0;min-width:0;min-height:286px;border:1px solid #596077;border-radius:12px;background:#141d2f;color:#fff;text-align:left;font:inherit;cursor:pointer}
+#seismique-jungle-reveal .exhibit-card:first-child{grid-column:span 2}
+#seismique-jungle-reveal .exhibit-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+#seismique-jungle-reveal .exhibit-card::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 30%,#060b1480 58%,#060b14f5 100%);pointer-events:none}
+#seismique-jungle-reveal .exhibit-card-label{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;min-height:286px;padding:22px 18px}
+#seismique-jungle-reveal .exhibit-number{font-size:12px;letter-spacing:1.25px;color:#b9fffa;line-height:1.5;margin-bottom:7px}
+#seismique-jungle-reveal .exhibit-name{font-size:27px;line-height:1.12;font-weight:700;letter-spacing:-.6px}
+#seismique-jungle-reveal .exhibit-card-action{font-size:14px;color:#d4e1ef;line-height:1.5;margin-top:8px}
+#seismique-jungle-reveal .exhibit-card:hover,#seismique-jungle-reveal .exhibit-card:focus-visible{border-color:#68ede7}
+#seismique-jungle-reveal .exhibit-card:hover img{transform:scale(1.035)}
+#seismique-jungle-reveal .gallery-footer{display:flex;gap:20px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:28px}
+#seismique-jungle-reveal .exhibit-dialog{position:fixed;margin:auto;padding:0;width:min(880px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;border:1px solid #667185;border-radius:14px;background:#101723;color:#f4f8ff;box-shadow:0 24px 90px #0009}
+#seismique-jungle-reveal .exhibit-dialog::backdrop{background:#040710de;backdrop-filter:blur(7px)}
+#seismique-jungle-reveal .exhibit-dialog-bar{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 14px 10px 20px;background:#101723;border-bottom:1px solid #ffffff25}
+#seismique-jungle-reveal .exhibit-dialog-bar>span{font-size:12px;letter-spacing:1.3px;color:#85e3e5;line-height:1.5}
+#seismique-jungle-reveal .exhibit-close{display:flex;gap:12px;align-items:center;justify-content:center;min-width:90px;min-height:44px;border:1px solid #718198;border-radius:7px;color:#fff;background:#1e2c3f;font:inherit;font-size:14px;cursor:pointer}
+#seismique-jungle-reveal .exhibit-close span{font-size:24px;line-height:1}
+#seismique-jungle-reveal .exhibit-detail-layout{display:grid;grid-template-columns:1.25fr 1fr}
+#seismique-jungle-reveal .exhibit-image-wrap{display:flex;align-items:center;justify-content:center;background:#05080e;min-height:300px}
+#seismique-jungle-reveal .exhibit-image-wrap img{width:100%;height:auto;max-height:calc(100dvh - 110px);object-fit:contain;display:block}
+#seismique-jungle-reveal .exhibit-detail-copy{align-self:center;padding:32px}
+#seismique-jungle-reveal .exhibit-detail-copy h2{font-size:clamp(32px,5vw,42px);line-height:1.1;margin:0 0 18px;letter-spacing:-.8px}
+#seismique-jungle-reveal .exhibit-detail-copy>p:not(.eyebrow){font-size:16px;line-height:1.65;color:#cbd8e7;margin:0 0 26px}
+@media(max-width:650px){#seismique-jungle-reveal .gallery-heading{display:block}#seismique-jungle-reveal .gallery-count{display:block;margin-top:14px}#seismique-jungle-reveal .exhibit-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#seismique-jungle-reveal .exhibit-card,#seismique-jungle-reveal .exhibit-card-label{min-height:240px}#seismique-jungle-reveal .exhibit-card:first-child,#seismique-jungle-reveal .exhibit-card:first-child .exhibit-card-label{min-height:270px}#seismique-jungle-reveal .exhibit-card-label{padding:18px 13px}#seismique-jungle-reveal .exhibit-name{font-size:23px}#seismique-jungle-reveal .exhibit-detail-layout{display:block}#seismique-jungle-reveal .exhibit-image-wrap{min-height:0}#seismique-jungle-reveal .exhibit-image-wrap img{max-height:48dvh}#seismique-jungle-reveal .exhibit-detail-copy{padding:24px}#seismique-jungle-reveal .exhibit-dialog{max-height:calc(100dvh - 24px);width:calc(100vw - 24px)}}
+@media(max-width:340px){#seismique-jungle-reveal .exhibit-grid{grid-template-columns:1fr}#seismique-jungle-reveal .exhibit-card:first-child{grid-column:auto}#seismique-jungle-reveal .exhibit-dialog-bar>span{font-size:12px;letter-spacing:.2px}}
+
+/* Full-viewport walkthrough with compact controls over the scene. */
+html,body{width:100%;height:100%;overflow:hidden}
+main{width:100%;max-width:none;height:100vh;height:100dvh;margin:0}
+#seismique-jungle-reveal{position:relative;width:100%;max-width:none;height:100%;border-radius:0;overflow:hidden}
+#seismique-jungle-reveal .phone{position:relative;height:100%;border-radius:0}
+#seismique-jungle-reveal .tour-view{position:absolute;inset:0;overflow:hidden;display:block}
+#seismique-jungle-reveal .scene{position:absolute;inset:0;width:100%;height:100%;max-width:none;min-height:0;margin:0;aspect-ratio:auto}
+#seismique-jungle-reveal .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+#seismique-jungle-reveal .site-header{position:absolute;inset:0 0 auto;z-index:8;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:transparent;border:0;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));pointer-events:none}
+#seismique-jungle-reveal .site-header>*{pointer-events:auto}
+#seismique-jungle-reveal .menu-toggle,#seismique-jungle-reveal .skip-tour,#seismique-jungle-reveal .return-tour{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 16px;border:1px solid #ffffff55;border-radius:24px;background:#0d1829d9;backdrop-filter:blur(14px);color:#fff;text-decoration:none;font:inherit;font-size:14px;font-weight:700;line-height:1.3;cursor:pointer}
+#seismique-jungle-reveal .menu-toggle span{font-size:17px}
+#seismique-jungle-reveal[data-view="tour"] .return-tour,#seismique-jungle-reveal[data-view="info"] .skip-tour{display:none}
+#seismique-jungle-reveal .menu-panel{position:absolute;top:calc(max(16px,env(safe-area-inset-top)) + 54px);left:max(16px,env(safe-area-inset-left));width:min(288px,calc(100vw - 32px));max-height:calc(100dvh - 155px);overflow:auto;background:#101c2bf5;border:1px solid #62718b;border-radius:15px;box-shadow:0 16px 50px #0005;backdrop-filter:blur(16px);padding:10px}
+#seismique-jungle-reveal .direct-nav{display:flex;flex-direction:column;gap:3px;padding:0}
+#seismique-jungle-reveal .direct-nav a{justify-content:flex-start;text-align:left;font-size:16px;padding:12px;min-height:46px}
+#seismique-jungle-reveal .menu-settings{display:flex;flex-direction:column;gap:4px;border-top:1px solid #ffffff26;margin-top:8px;padding-top:8px}
+#seismique-jungle-reveal .menu-settings button{min-height:44px;border:0;border-radius:7px;background:transparent;color:#c9dce9;text-align:left;padding:10px 12px;font:inherit;font-size:14px;cursor:pointer}
+#seismique-jungle-reveal .menu-settings button:hover{background:#25334a}
+#seismique-jungle-reveal .tour-controls{position:absolute;z-index:5;left:50%;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 76px);transform:translateX(-50%);display:block;width:auto;max-width:none;padding:0;margin:0;background:transparent}
+#seismique-jungle-reveal .explore{min-width:148px;min-height:52px;padding:13px 28px;border-radius:30px;box-shadow:0 6px 28px #00151c44;font-size:18px}
+#seismique-jungle-reveal .global-ticketbar{position:absolute;z-index:7;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:auto;padding:0;border:0;background:none;pointer-events:none}
+#seismique-jungle-reveal .global-ticketbar .button{pointer-events:auto;width:auto;min-height:46px;height:auto;padding:12px 20px;font-size:15px;box-shadow:0 5px 25px #0004}
+#seismique-jungle-reveal .foot{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 66px);left:50%;right:auto;transform:translateX(-50%);width:min(560px,100%);padding:15px 16px 8px;background:none}
+#seismique-jungle-reveal .movehint{width:fit-content;max-width:100%;margin:0 auto 12px;padding:8px 14px;border-radius:22px;background:#071322c9;backdrop-filter:blur(8px);font-size:14px}
+#seismique-jungle-reveal .paths{margin:0;gap:10px}
+#seismique-jungle-reveal .paths button,#seismique-jungle-reveal .back{background:#102030e8;backdrop-filter:blur(12px);box-shadow:0 5px 22px #0004}
+#seismique-jungle-reveal .visitor-content{position:absolute;inset:0;width:100%;padding:80px 0 88px}
+#seismique-jungle-reveal[data-view="info"] .site-header{padding-bottom:10px;background:linear-gradient(#0b101bf5 70%,#0b101b00)}
+#seismique-jungle-reveal .content-section{scroll-margin-top:0}
+@media(max-height:500px){#seismique-jungle-reveal .tour-controls{bottom:max(16px,env(safe-area-inset-bottom))}#seismique-jungle-reveal .foot{bottom:68px}#seismique-jungle-reveal .menu-panel{max-height:calc(100dvh - 95px)}}
+
+/* Editorial pages for the next chapter, events and creative people. */
+#seismique-jungle-reveal .section-kicker{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+#seismique-jungle-reveal .section-kicker .eyebrow{margin:0}
+#seismique-jungle-reveal .preview-tag{font-size:13px;color:#dac7ff;padding:6px 10px;border:1px solid #806a9c;border-radius:20px;background:#39264d66}
+#seismique-jungle-reveal .future-feature{display:grid;grid-template-columns:1fr 2fr;gap:30px;padding:36px;margin:30px 0 16px;background:linear-gradient(120deg,#25183f,#132c36);border:1px solid #727190;border-radius:16px;min-height:260px}
+#seismique-jungle-reveal .future-feature h3{font-size:32px;margin:16px 0 12px}
+#seismique-jungle-reveal .project-index{font-size:14px;letter-spacing:1px;line-height:1.5;color:#98ece8}
+#seismique-jungle-reveal .project-status{display:inline-block;font-size:13px;line-height:1.5;color:#dbcaff}
+#seismique-jungle-reveal .project-date,#seismique-jungle-reveal .profile-pending{display:block;margin-top:24px;font-size:14px;color:#bbcada;line-height:1.5;border-top:1px solid #ffffff20;padding-top:16px}
+#seismique-jungle-reveal .project-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#seismique-jungle-reveal .project-card{padding:28px;border:1px solid #4b536b;border-radius:13px;background:#151b2b}
+#seismique-jungle-reveal .project-card h3{margin:20px 0 12px}
+#seismique-jungle-reveal .chapter-note{margin-top:28px;padding:26px 0 0;border-top:1px solid #4b536b}
+#seismique-jungle-reveal .calendar-layout{display:grid;grid-template-columns:1.7fr 1fr;gap:20px;margin-top:30px}
+#seismique-jungle-reveal .calendar-panel{padding:24px;border:1px solid #59627b;border-radius:14px;background:#131c2b}
+#seismique-jungle-reveal .calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:24px}
+#seismique-jungle-reveal .calendar-toolbar h3{margin:0;font-size:22px;text-align:center}
+#seismique-jungle-reveal .calendar-toolbar button{min-height:44px;padding:8px 10px;border:1px solid #566681;border-radius:7px;background:#243148;color:#fff;font:inherit;font-size:14px}
+#seismique-jungle-reveal .calendar-weekdays,#seismique-jungle-reveal .calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+#seismique-jungle-reveal .calendar-weekdays span{text-align:center;font-size:13px;color:#a9bbd1;padding-bottom:12px}
+#seismique-jungle-reveal .calendar-days button{min-height:48px;min-width:0;border:1px solid #37475b;border-radius:7px;background:#1b2739;color:#e7f0fb;font:inherit;font-size:16px}
+#seismique-jungle-reveal .calendar-days button:hover{border-color:#70dbdf}
+#seismique-jungle-reveal .calendar-days button[aria-pressed="true"]{background:#00d7df;color:#05151c;border-color:#00d7df;font-weight:700}
+#seismique-jungle-reveal .calendar-note{font-size:14px!important;margin:22px 0 0!important}
+#seismique-jungle-reveal .calendar-detail{padding:26px;background:#211b31;border:1px solid #6d557e;border-radius:14px}
+#seismique-jungle-reveal .calendar-detail h3{font-size:25px}
+#seismique-jungle-reveal .specials-preview{border-top:1px solid #6d557e;margin:26px 0;padding-top:22px}
+#seismique-jungle-reveal .specials-preview h4{margin-top:10px}
+#seismique-jungle-reveal .people-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:30px}
+#seismique-jungle-reveal .people-card{display:flex;flex-direction:column;padding:26px 22px;border:1px solid #52607c;border-radius:14px;background:#161c2e}
+#seismique-jungle-reveal .people-number{display:block;font-size:56px;line-height:1;font-weight:700;color:#8e77bd;margin-bottom:30px}
+#seismique-jungle-reveal .people-card .eyebrow{font-size:12px;letter-spacing:.9px}
+#seismique-jungle-reveal .people-card .profile-pending{margin-top:auto}
+#seismique-jungle-reveal .artist-directory{display:flex;align-items:center;justify-content:space-between;gap:24px;border-top:1px solid #52607c;padding-top:28px;margin-top:28px}
+#seismique-jungle-reveal .artist-directory p{margin-bottom:0}
+#seismique-jungle-reveal .artist-directory .button{flex:none}
+#seismique-jungle-reveal .future-shortcut{position:absolute;z-index:7;left:16px;bottom:max(16px,env(safe-area-inset-bottom));min-height:46px;display:flex;align-items:center;padding:12px 18px;border-radius:25px;border:1px solid #bc9fee;background:#1c2038e8;color:#f1e8ff;text-decoration:none;font-size:15px;font-weight:700}
+#seismique-jungle-reveal[data-view="info"] .future-shortcut,#seismique-jungle-reveal:not([data-phase="start"]) .future-shortcut{display:none}
+@media(max-width:700px){#seismique-jungle-reveal .future-feature,#seismique-jungle-reveal .project-grid,#seismique-jungle-reveal .calendar-layout,#seismique-jungle-reveal .people-grid{grid-template-columns:1fr}#seismique-jungle-reveal .future-feature{padding:26px;gap:20px}#seismique-jungle-reveal .calendar-panel{padding:16px}#seismique-jungle-reveal .calendar-toolbar h3{font-size:19px}#seismique-jungle-reveal .calendar-days{gap:4px}#seismique-jungle-reveal .calendar-days button{min-height:44px}#seismique-jungle-reveal .artist-directory{align-items:flex-start;flex-direction:column}}
+
+/* Page markers stay attached to discovery posts as the visitor walks. */
+#seismique-jungle-reveal .jungle-page-stops{position:absolute;inset:0;z-index:4;pointer-events:none}
+#seismique-jungle-reveal .jungle-page-stop{position:absolute;transform:translate(-50%,-50%);width:180px;min-height:94px;padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:auto;border:1px solid #b69ae2;border-top:3px solid #b69ae2;border-radius:9px;background:#111b2eea;box-shadow:0 8px 26px #0007;color:#f5f7ff;font:inherit;backdrop-filter:blur(6px)}
+#seismique-jungle-reveal .jungle-page-stop span{font-size:12px;line-height:1.4;letter-spacing:.7px;color:#d6c6ef}
+#seismique-jungle-reveal .jungle-page-stop strong{font-size:17px;line-height:1.25}
+#seismique-jungle-reveal .jungle-page-stop small{font-size:13px;color:#bbcada;line-height:1.4}
+#seismique-jungle-reveal .jungle-page-stop[data-jungle-page="calendar"]{border-color:#61dce3}
+#seismique-jungle-reveal .jungle-page-stop[data-jungle-page="artists-team"]{border-color:#efa67d}
+#seismique-jungle-reveal .jungle-page-stop:hover,#seismique-jungle-reveal .jungle-page-stop:focus-visible{background:#28324a}
+@media(max-width:360px){#seismique-jungle-reveal .jungle-page-stop{width:160px}}
+#seismique-jungle-reveal .paths{display:none!important}
+#seismique-jungle-reveal .jungle-page-stop[data-jungle-page="exhibits"]{border-color:#61dce3}
+#seismique-jungle-reveal .jungle-page-stop[data-jungle-page="mini-golf"]{border-color:#bba3ff}
+#seismique-jungle-reveal .jungle-page-stop[data-jungle-page="parties"]{border-color:#ee8ab9}
+
+/* Let the environment lead; destination labels stay calm and readable. */
+#seismique-jungle-reveal .jungle-page-stop{border-top-width:1px;border-radius:5px;background:rgba(9,15,25,.86);box-shadow:0 5px 20px #0005}
+#seismique-jungle-reveal .jungle-page-stop span{font-size:11px;letter-spacing:.9px;color:#c0becb}
+#seismique-jungle-reveal .jungle-page-stop:hover,#seismique-jungle-reveal .jungle-page-stop:focus-visible{background:#1b2331;border-color:#dad1ed}
+@media(max-width:700px){#seismique-jungle-reveal .jungle-page-stop{width:164px;min-height:88px;padding:11px 12px;gap:5px}#seismique-jungle-reveal .jungle-page-stop strong{font-size:16px}#seismique-jungle-reveal .jungle-page-stop small{font-size:12px}}
+
+/* Destination panels catch the nearby Alien Grass light without becoming neon frames. */
+#seismique-jungle-reveal .jungle-page-stop{--grass-rgb:133,163,184;--grass-power:0;border:1px solid rgba(222,235,241,.16);border-radius:15px 17px 20px 13px;background:radial-gradient(ellipse at 12% 0%,rgba(var(--grass-rgb),.16),transparent 68%),linear-gradient(160deg,rgba(13,23,30,.61),rgba(6,13,22,.77));box-shadow:0 12px 22px -12px #000c,inset 0 1px rgba(234,248,255,.09),0 0 24px -14px rgba(var(--grass-rgb),.38);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);text-shadow:0 1px 5px #050910;transition:background 1.4s,border-color 1.2s,box-shadow 1.4s}
+#seismique-jungle-reveal .jungle-page-stop[data-grass-active="true"]{border-color:rgba(var(--grass-rgb),.27)}
+#seismique-jungle-reveal .jungle-page-stop span{color:#c7d4db;font-size:10px;letter-spacing:1.15px}
+#seismique-jungle-reveal .jungle-page-stop strong{color:#faf9ff}
+#seismique-jungle-reveal .jungle-page-stop small{color:#c4d2d9}
+#seismique-jungle-reveal .jungle-page-stop:hover{background:radial-gradient(ellipse at 12% 0%,rgba(var(--grass-rgb),.23),transparent 72%),linear-gradient(160deg,rgba(17,29,36,.86),rgba(6,13,22,.92));border-color:rgba(var(--grass-rgb),.48)}
+#seismique-jungle-reveal .jungle-page-stop:focus-visible{outline:2px solid #e5f9ff;outline-offset:4px;border-color:#cfe4ec}
+@media(prefers-reduced-motion:reduce){#seismique-jungle-reveal .jungle-page-stop{transition:none}}
