@@ -25,3 +25,7 @@ body.jungle-home[data-footer-view="true"] #seismique-jungle-reveal .site-header{
 @media(max-width:430px){body.jungle-home #seismique-jungle-reveal .footer-shortcut{padding:10px 11px;font-size:12px;gap:4px}}
 
 body.jungle-home .seismique-footer,body.information-page .seismique-footer{scroll-margin-top:0}
+
+/* Shared brand accents follow the Seismique purple. */
+.seismique-footer{--sf-purple:#c5a5ff;--sf-pink:#d4baff;--sf-cyan:#c5a5ff;--sf-blue:#b990ff}
+.seismique-footer::before{background:linear-gradient(90deg,transparent,#600dff88,#ae7aff99,#600dff88,transparent)}

@@ -1,8 +1,8 @@
 /* Distant galaxy above the canopy. Scene depth keeps every leaf in front. */
-window.createJungleSky=({THREE:T,scene,reducedMotion})=>{
+window.createJungleSky=({THREE:T,scene,reducedMotion,pixelRatio=Math.min(devicePixelRatio,1.8)})=>{
   const group=new T.Group();group.name='Jungle galaxy';scene.add(group);
   const rand=n=>{const x=Math.sin(n*127.1+81.3)*43758.5453;return x-Math.floor(x);};
-  const uniforms={uTime:{value:0},uFade:{value:0},uEnding:{value:0},uPixelRatio:{value:Math.min(devicePixelRatio,1.8)}};
+  const uniforms={uTime:{value:0},uFade:{value:0},uEnding:{value:0},uPixelRatio:{value:pixelRatio}};
   // Camera-relative geometry gives the sky celestial distance without flattening the canopy.
   const skyMaterial=new T.ShaderMaterial({uniforms,side:T.BackSide,depthWrite:false,fog:false,
     vertexShader:`varying vec3 vDirection;void main(){vDirection=position;gl_Position=projectionMatrix*viewMatrix*vec4(position+cameraPosition,1.);}`,
@@ -11,7 +11,10 @@ window.createJungleSky=({THREE:T,scene,reducedMotion})=>{
       float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
       float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=noise(p)*a;p=p*2.07+vec3(1.7,3.1,2.4);a*=.5;}return v;}
       void main(){vec3 d=normalize(vDirection);float overhead=mix(smoothstep(.10,.42,d.y),smoothstep(-.62,.14,d.y),uEnding);vec3 base=vec3(.001,.002,.005);
-        if(overhead<.001){gl_FragColor=vec4(base,1.);return;}
+        if(overhead<.001){gl_FragColor=vec4(base,1.);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+          return;}
         vec3 p=d*3.6+vec3(uTime*.0015,0.,uTime*.0007);
         float cloud=fbm(p),detail=fbm(p*2.5+vec3(3.2,1.1,8.));
         float ribbon=exp(-pow((d.y-.43-d.x*.23+(cloud-.5)*.29)/.21,2.));
@@ -50,9 +53,9 @@ window.createJungleSky=({THREE:T,scene,reducedMotion})=>{
     fragmentShader:`varying vec2 vUv;uniform float uOpacity;void main(){float core=pow(1.-abs(vUv.y*2.-1.),1.6),tail=pow(vUv.x,1.8);vec3 color=mix(vec3(.30,.45,.80),vec3(.88,.96,1.),pow(vUv.x,5.));gl_FragColor=vec4(color,core*tail*uOpacity);}`});
   const meteor=new T.Mesh(new T.PlaneGeometry(1,1,20,1),meteorMaterial);meteor.frustumCulled=false;meteor.renderOrder=2;meteor.visible=false;group.add(meteor);
   let lastTime=null,skyTime=0,nextMeteor=3.5,event=0,flight=null;
-  return {update(progress,time){
+  return {setPixelRatio(value){uniforms.uPixelRatio.value=value;},update(progress,time){
     const dt=lastTime===null?0:Math.max(0,Math.min(.08,time-lastTime));lastTime=time;
-    const fade=T.MathUtils.smoothstep(progress,.43,.60);group.visible=fade>.001;
+    const fade=T.MathUtils.smoothstep(progress,.43,.60);group.visible=fade>.001;if(!group.visible)return;
     if(!reducedMotion&&progress>.55)skyTime+=dt;
     uniforms.uTime.value=reducedMotion?0:skyTime;uniforms.uFade.value=fade;uniforms.uEnding.value=T.MathUtils.smoothstep(progress,.84,.98);
     if(!reducedMotion&&group.visible&&skyTime>=nextMeteor){

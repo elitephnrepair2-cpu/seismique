@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500"><title>Seismique-inspired left field mural</title>
+<defs>
+ <g id="robot" stroke-width="5.5">
+  <path d="M53 423 C5 376 24 324 65 285 C13 258 17 205 38 180 C4 163 0 123 32 114 L78 116 C86 80 109 57 146 45 C200 23 252 56 267 101 L296 119 C329 134 322 173 291 184 C326 230 306 269 263 291 C309 339 296 395 326 435 L326 491 L43 491Z" fill="#151519" stroke="none"/>
+  <path d="M87 295 Q43 303 49 351 L57 388 L26 401 L23 423 L67 423 L88 383 L79 345 L109 335 M263 302 Q314 291 327 324 L334 353 L310 364 L302 337 L265 345" fill="white"/>
+  <path d="M30 399 L50 410 M304 339 L325 331 M315 350 L332 343" fill="none" stroke-width="3"/>
+  <path d="M103 282 Q176 299 247 283 L242 432 Q170 451 100 430Z" fill="white"/>
+  <path d="M99 315 Q171 340 245 315 L244 332 Q170 355 101 335Z M100 360 Q170 384 244 359 L243 377 Q170 401 100 378Z M100 406 Q170 425 243 404 L243 420 Q170 443 100 424Z" fill="#151519" stroke="none"/>
+  <path d="M99 299 Q170 322 247 300 M101 350 Q170 372 243 346 M102 394 Q170 416 244 390" fill="none" stroke-width="2.5"/>
+  <path d="M81 145 L65 85 L55 25 M247 140 L267 63 L275 13" fill="none" stroke-width="8"/>
+  <path d="M54 30 Q39 29 43 13 Q49 3 59 14 L59 27 M275 20 Q287 19 283 5 Q272-2 269 9 L270 21" fill="white" stroke-width="3"/>
+  <path d="M65 143 Q30 116 20 143 Q12 168 62 184 M269 141 Q304 117 315 140 Q323 166 278 183" fill="white"/>
+  <path d="M47 148 Q30 134 30 151 Q31 162 52 166 M288 145 Q306 134 305 150 Q300 160 286 164" fill="none" stroke-width="3"/>
+  <path d="M63 148 C56 95 89 52 161 48 C224 42 273 78 279 137 L274 195 Q263 235 222 253 L221 282 Q165 306 112 276 L114 250 Q69 227 62 187Z" fill="white"/>
+  <path d="M66 126 Q164 102 275 121 L281 145 Q166 128 62 152Z" fill="white"/>
+  <path d="M82 101 Q162 82 255 102 M97 83 Q158 65 231 85" fill="none" stroke-width="3.5"/>
+  <path d="M146 102 L146 80 Q157 75 172 80 L173 103Z" fill="white" stroke-width="3"/>
+  <ellipse cx="112" cy="189" rx="27" ry="34" fill="#151519" transform="rotate(-8 112 189)"/>
+  <ellipse cx="222" cy="184" rx="28" ry="35" fill="#151519" transform="rotate(7 222 184)"/>
+  <path d="M94 190 Q96 214 116 212 M206 182 Q205 209 227 210" fill="none" stroke="white" stroke-width="6"/>
+  <ellipse cx="120" cy="174" rx="8" ry="10" fill="white" stroke="none"/>
+  <ellipse cx="230" cy="170" rx="8" ry="10" fill="white" stroke="none"/>
+  <path d="M156 201 L168 187 L179 201Z M128 247 Q164 225 204 243 L203 263 Q165 250 130 267Z" fill="none" stroke-width="4"/>
+  <path d="M116 287 Q162 307 220 287 M145 245 L146 260 M164 240 L165 257 M184 241 L184 259" fill="none" stroke-width="2.5"/>
+  <path d="M89 438 Q163 419 252 439 L267 472 L80 475Z" fill="white"/>
+  <path d="M94 452 Q174 437 250 454 M93 466 Q173 453 255 466" fill="none" stroke-width="3"/>
+  <!-- Uneven wash and short, broken pen strokes give the metal drawn depth. -->
+  <g stroke="none" fill="#77757a" opacity=".28">
+   <path d="M235 67 Q274 91 275 122 L256 124 Q257 93 235 67Z"/>
+   <path d="M263 151 L271 150 L269 191 Q258 232 223 249 L223 270 L208 278 L210 247 Q247 223 252 198Z"/>
+   <path d="M229 291 L239 288 L234 426 L219 430Z M231 440 L250 443 L262 470 L247 470Z"/>
+   <path d="M56 335 L64 326 L67 376 L56 393 L48 394 L57 373Z"/>
+  </g>
+  <g fill="none" stroke-width="1.7" opacity=".75">
+   <path d="M245 86 L257 81 M252 94 L264 89 M257 102 L269 97 M260 110 L272 107 M239 226 L253 228 M233 235 L246 236 M226 243 L238 245"/>
+   <path d="M228 301 L240 304 M227 310 L239 313 M227 345 L239 348 M226 354 L239 357 M225 387 L238 390 M224 399 L237 401"/>
+   <path d="M89 453 L99 445 M93 462 L105 451 M236 451 L251 447 M242 460 L256 456 M49 343 L59 338 M50 353 L61 347"/>
+   <path d="M88 68 Q116 46 148 45 M180 45 Q210 46 229 59 M74 160 L76 177 M72 207 Q79 225 96 234 M91 288 Q87 302 86 312"/>
+  </g>
+ </g>
+ <g id="rocket" stroke-width="5">
+  <path d="M80 413 Q58 370 83 332 L53 282 Q16 248 11 206 L34 199 L95 243 L99 140 Q99 80 154 36 Q208 82 207 140 L213 246 L263 204 L287 218 Q279 258 239 281 L215 337 Q244 381 224 413Z" fill="white"/>
+  <path d="M101 122 Q149 130 206 119 M113 89 Q156 103 192 87 M154 38 L154 12 M153 18 Q167 16 160 4 Q148-2 147 10Z" fill="none" stroke-width="4"/>
+  <path d="M98 148 Q149 160 208 147 L209 167 Q157 180 98 166Z M91 299 Q152 315 218 298 L216 319 Q152 335 93 317Z" fill="white"/>
+  <ellipse cx="153" cy="213" rx="34" ry="43" fill="white"/>
+  <ellipse cx="153" cy="213" rx="23" ry="32" fill="#151519" stroke-width="3"/>
+  <path d="M143 219 Q135 199 152 192 M155 235 L166 227" fill="none" stroke="white" stroke-width="4"/>
+  <ellipse cx="151" cy="281" rx="17" ry="20" fill="white" stroke-width="3"/>
+  <path d="M149 269 L149 290 M141 280 L161 280 M113 340 L108 386 M196 339 L204 385" fill="none" stroke-width="3"/>
+  <path d="M83 338 Q46 346 45 399 L82 385 L99 352 M215 337 Q252 346 257 399 L225 385 L207 353" fill="white"/>
+  <path d="M105 399 Q154 413 204 398 L219 431 Q149 449 91 433Z" fill="#151519"/>
+  <path d="M118 406 L112 428 M142 411 L142 432 M165 412 L166 433 M189 408 L197 429" stroke="white" stroke-width="4"/>
+  <path d="M115 451 Q120 485 144 494 L152 470 Q159 503 179 510 Q207 481 192 451" fill="none" stroke-width="4"/>
+  <path d="M30 214 L68 247 M244 244 L272 222 M124 133 L126 143 M146 138 L147 148 M170 138 L172 147 M192 134 L193 145" fill="none" stroke-width="2"/>
+  <g stroke="none" fill="#77757a" opacity=".30">
+   <path d="M172 59 Q205 92 204 120 L190 122 Q194 91 172 59Z M194 170 L207 168 L212 295 L196 299 Q204 241 194 170Z"/>
+   <path d="M258 230 L274 222 Q267 258 236 274 L216 310 L218 284Z M192 339 L208 336 L220 397 L204 400Z"/>
+  </g>
+  <g fill="none" stroke-width="1.6" opacity=".8">
+   <path d="M187 94 L199 89 M192 103 L204 98 M194 112 L206 107 M198 181 L208 178 M198 191 L208 188 M201 248 L211 244 M201 258 L211 254 M201 270 L212 266 M200 282 L212 278"/>
+   <path d="M236 261 L250 263 M231 270 L240 273 M201 352 L211 350 M203 363 L214 361 M205 375 L217 373 M45 238 L54 229 M53 246 L62 237"/>
+   <path d="M94 193 L93 233 M104 114 Q108 78 140 52 M117 228 Q120 248 135 256 M177 203 Q182 222 174 239 M68 356 Q56 369 55 382"/>
+  </g>
+ </g>
+ <g id="ufo" stroke-width="3.5">
+  <path d="M24 46 Q29 6 66 7 Q100 9 106 43" fill="white"/>
+  <path d="M29 43 Q42 20 57 18 M83 19 Q94 26 96 37" fill="none" stroke-width="2.5"/>
+  <path d="M3 45 Q27 34 40 42 Q80 51 110 38 Q132 43 131 53 Q74 91 4 59 Q-3 53 3 45Z" fill="white"/>
+  <path d="M6 51 Q72 70 126 49 M43 75 L36 84 M87 74 L95 82" fill="none" stroke-width="2.5"/>
+  <ellipse cx="29" cy="58" rx="4" ry="3" fill="#151519"/><ellipse cx="62" cy="65" rx="4" ry="3" fill="#151519"/><ellipse cx="94" cy="61" rx="4" ry="3" fill="#151519"/>
+ </g>
+ <g id="planet" stroke-width="3.5">
+  <path d="M71 9 C108 4 134 36 133 69 C132 109 100 136 64 131 C27 130 5 100 8 64 C8 31 35 8 71 9Z" fill="white"/>
+  <path d="M22 33 Q40 40 58 42 M72 45 Q106 49 123 58 M10 61 Q58 51 131 80 M12 79 Q59 71 104 91 M21 102 Q46 94 68 103 M78 111 Q102 118 118 108 M33 20 Q73 19 93 32" fill="none" stroke-width="5"/>
+  <path d="M16 72 Q56 62 123 88 M31 115 Q60 109 86 122" fill="none" stroke-width="2"/>
+ </g>
+ <g id="saturn" stroke-width="3.5">
+  <path d="M36 37 C16 35-15 38 4 54 Q60 98 157 72 Q178 59 121 49" fill="none"/>
+  <path d="M35 57 C27 34 49 11 75 13 C100 12 123 32 121 57 Q75 77 35 57Z" fill="white"/>
+  <path d="M9 51 Q77 89 156 64 M43 73 Q86 91 117 72" fill="none"/>
+  <path d="M50 34 Q62 21 77 23" fill="none" stroke-width="2"/>
+ </g>
+ <g id="moon" stroke-width="3.5">
+  <path d="M54 7 L72 5 L86 17 L102 19 L114 38 L112 56 L121 74 L110 93 L93 102 L85 117 L61 114 L45 119 L30 108 L15 104 L9 82 L3 62 L12 42 L15 24 L36 20Z" fill="white"/>
+  <path d="M26 39 Q30 27 43 36 Q48 49 37 54 Q22 52 26 39Z M76 79 Q74 61 90 69 Q104 84 89 92Z M40 91 Q38 77 52 81 Q60 95 46 99Z M76 31 Q79 25 86 32 L84 40 L76 42Z" fill="none" stroke-width="2.5"/>
+  <path d="M53 59 Q60 49 68 60 Q68 74 56 68 M27 67 L32 64 M94 47 L98 51" fill="none" stroke-width="2.5"/>
+ </g>
+ <g id="star" fill="none" stroke-width="2.5"><path d="M0-15 Q2-2 13 0 Q2 3 0 16 Q-3 3-14 0 Q-3-2 0-15Z"/></g>
+ <g id="wave" fill="#151519" stroke="none">
+  <path d="M0 515 C123 491 52 413 112 390 C181 364 234 417 270 352 C299 299 232 237 283 210 C331 185 342 259 383 240 C434 215 438 124 507 151 C569 175 534 249 590 280 C615 307 568 369 603 427 C634 477 610 534 626 577 L0 577Z"/>
+  <path d="M0 521 C132 511 88 434 137 418 C201 397 253 454 294 379 C333 312 271 257 300 244 C325 235 350 303 401 268 C456 229 460 163 499 180 C532 195 521 264 565 298 C601 328 556 399 616 421 L618 448 C524 425 580 350 536 321 C486 288 515 219 487 216 C466 214 459 269 413 301 C360 336 325 282 318 293 C310 309 358 363 310 415 C254 476 200 430 159 446 C126 460 148 537 0 550Z" fill="white"/>
+  <path d="M0 568 C165 552 157 484 183 479 C217 471 259 506 323 450 C366 412 361 358 368 355 C386 348 395 378 436 335 C470 300 477 271 486 282 C493 291 475 341 447 367 C406 404 399 379 392 392 C382 411 379 449 340 481 C268 539 235 510 209 518 C185 526 189 566 139 577 L0 577Z" fill="white"/>
+ </g>
+ <g id="satellite" stroke-width="3.5">
+  <path d="M57 69 L17 44 L1 66 L42 94Z M112 99 L154 124 L175 98 L133 72Z" fill="white"/>
+  <path d="M13 56 L52 81 M26 50 L10 71 M39 58 L23 80 M51 66 L36 87 M124 92 L166 111 M138 77 L119 103 M151 85 L133 112" fill="none" stroke-width="2"/>
+  <path d="M52 65 L88 40 L133 69 L106 111 L60 96Z" fill="white"/>
+  <path d="M66 68 L87 53 L113 72 L99 95 L72 87Z" fill="#151519"/>
+  <path d="M76 49 L65 26 M55 11 Q40 47 83 38Z M58 17 L46 8 M45 9 L41 3 M90 110 L99 131 M97 129 L115 134" fill="white"/>
+  <path d="M38-2 Q24 7 26 20 M32-11 Q14-2 15 17 M85 67 L78 77 L98 81" fill="none" stroke-width="2"/>
+ </g>
+ <g id="telescope" stroke-width="4.5">
+  <path d="M114 201 L73 290 L85 296 L140 212 L178 298 L193 294 L165 204Z" fill="white"/>
+  <path d="M128 164 L123 216 L166 215 L164 176 M134 204 L153 204" fill="white"/>
+  <path d="M32 161 L173 56 L201 93 L62 202Z" fill="white"/>
+  <path d="M40 155 L66 192 M58 145 L85 183 M153 74 L179 111" fill="none"/>
+  <path d="M166 55 L187 40 L218 80 L199 96Z" fill="#151519"/>
+  <path d="M184 46 L210 81 M31 173 L16 183 L29 201 L48 192" fill="none" stroke-width="5"/>
+  <path d="M76 156 L148 103 M96 147 L146 112" fill="none" stroke-width="2"/>
+  <circle cx="143" cy="196" r="10" fill="white"/>
+  <path d="M141 190 L147 201" stroke-width="2"/>
+  <path d="M60 187 L191 84 L197 92 L63 198Z M151 217 L161 218 L184 288 L177 285Z" fill="#939198" stroke="none" opacity=".42"/>
+  <path d="M62 181 L71 187 M73 173 L82 179 M85 163 L94 170 M96 155 L105 161 M108 146 L117 152" fill="none" stroke-width="1.6"/>
+ </g>
+ <g id="rover" stroke-width="4.5">
+  <path d="M56 192 L36 169 L16 182 M193 193 L214 171 L236 183 M93 179 L79 208 M163 181 L177 209" fill="none" stroke-width="12"/>
+  <circle cx="29" cy="218" r="27" fill="#151519"/><circle cx="218" cy="219" r="26" fill="#151519"/>
+  <circle cx="29" cy="218" r="14" fill="white"/><circle cx="218" cy="219" r="13" fill="white"/>
+  <path d="M95 110 L68 60 L68 31 M162 112 L193 56 L206 50" fill="none" stroke-width="6"/>
+  <path d="M51 29 Q45 6 68 4 Q91 8 84 28Z" fill="white"/>
+  <path d="M194 57 L213 54 L211 45 L197 47" fill="white" stroke-width="3"/>
+  <path d="M24 142 C28 98 86 78 135 86 C193 85 223 123 221 161 L199 191 Q117 216 46 189Z" fill="white"/>
+  <path d="M30 147 Q119 171 218 150 L214 172 Q119 195 38 170Z" fill="#151519"/>
+  <path d="M63 124 Q82 104 105 115 L117 131 Q93 149 68 136Z" fill="#151519" stroke-width="2"/>
+  <ellipse cx="88" cy="123" rx="11" ry="7" fill="white" stroke="none"/>
+  <path d="M143 116 L177 120 M148 129 L188 134 M154 143 L190 146 M91 195 L96 181 M116 198 L116 184 M141 195 L138 183" fill="none" stroke-width="3"/>
+  <path d="M58 155 L58 168 M77 159 L78 173 M174 162 L173 175 M194 159 L191 172" stroke="white" stroke-width="3"/>
+ </g>
+ <g id="comet" stroke-width="3">
+  <path d="M0 8 C42 1 36 36 98 24 C75 49 120 46 143 66 C105 65 105 105 73 79 C74 66 49 71 44 56 C25 58 21 28 0 8Z" fill="white"/>
+  <path d="M28 19 Q66 42 86 36 M48 34 Q61 56 83 55 M82 63 Q89 72 102 71" fill="none" stroke-width="2"/>
+  <path d="M97 49 Q116 38 132 55 Q144 68 131 82 Q114 96 100 80 Q88 65 97 49Z" fill="white"/>
+  <path d="M109 55 L113 62 M119 71 L125 70 M103 72 L108 76" fill="none"/>
+ </g>
+ <g id="galaxy" fill="none" stroke-width="3">
+  <path d="M77 57 C105 30 46 18 39 55 C30 100 114 101 131 48 C130 93 88 115 51 103 C-5 83 9 7 62 4 C24 27 8 57 30 85 M69 45 C88 36 99 68 78 76 C64 84 44 70 55 53 C69 31 111 46 103 72 M83 10 Q146 5 145 64 M16 111 Q64 143 121 106"/>
+ </g>
+ <g id="observatory-base" stroke-width="4">
+  <path d="M9 380 C88 363 50 305 107 303 C169 307 151 372 205 344 C265 312 213 254 262 242 C311 230 334 305 392 282 L428 404 L0 404Z" fill="#151519" stroke="none"/>
+  <path d="M120 202 L119 378 L277 383 L281 203Z" fill="white"/>
+  <path d="M104 207 L112 185 L288 183 L297 204Z" fill="white"/>
+  <path d="M137 234 L137 297 L261 299 L260 230Z" fill="#151519"/>
+  <circle cx="176" cy="264" r="21" fill="white"/><path d="M163 273 L184 252" fill="none" stroke-width="3"/>
+  <path d="M218 246 L244 246 M218 258 L244 258 M218 270 L244 270 M142 329 L257 330 M143 341 L257 342 M143 353 L257 354" fill="none" stroke-width="3"/>
+  <path d="M3 379 Q51 392 75 350 M286 364 Q321 365 328 329 Q335 308 373 330" fill="none" stroke="white" stroke-width="9"/>
+  <path d="M262 211 L275 208 L273 378 L260 376Z M123 210 L262 210 L259 222 L124 222Z" fill="#939198" stroke="none" opacity=".38"/>
+  <path d="M263 309 L275 304 M263 318 L275 313 M263 327 L275 322 M263 337 L275 332 M264 347 L274 342 M124 360 L139 365 M124 370 L139 375" fill="none" stroke-width="1.6"/>
+ </g>
+</defs><g stroke="#151519" fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <g fill="none">
+  <g stroke-width="19"><path id="equipment-cable" d="M467 1394 C513 1356 539 1391 535 1428 C530 1471 567 1483 614 1467 C675 1446 683 1383 740 1391 C819 1403 811 1462 890 1452 C948 1443 941 1340 1015 1339 C1072 1337 1066 1385 1120 1376 C1161 1369 1160 1310 1210 1313"/></g>
+  <use href="#equipment-cable" stroke="#e4e2e2" stroke-width="10"/>
+  <g stroke-width="10"><path id="hand-cable" d="M1026 1277 C1087 1269 1105 1301 1079 1321 C1049 1345 1067 1361 1101 1349 C1151 1331 1149 1270 1206 1269"/></g>
+  <use href="#hand-cable" stroke="#d2cfd3" stroke-width="4"/>
+  <path d="M532 1414 L543 1411 M532 1424 L543 1422 M960 1379 L970 1385 M967 1369 L978 1375 M1146 1351 L1157 1355 M1151 1340 L1162 1345" stroke-width="3"/>
+ </g>
+ <path d="M624 1477 Q666 1468 691 1447 M875 1469 Q912 1471 934 1452 M1057 1396 Q1083 1406 1107 1395" fill="none" stroke-width="2"/>
+<g transform="translate(169 1070) rotate(0) scale(1.07)"><use href="#observatory-base"/></g><g transform="translate(243 932) rotate(-7) scale(1.12)"><use href="#telescope"/></g><g transform="translate(558 836) rotate(-5) scale(1.38)"><use href="#robot"/></g><g transform="translate(382 371) rotate(-14) scale(1.35)"><use href="#saturn"/></g><g transform="translate(795 525) rotate(18) scale(0.99)"><use href="#satellite"/></g><g transform="translate(850 191) rotate(12) scale(0.86)"><use href="#moon"/></g><path d="M215 546 L279 605 L247 702 L322 771" stroke-width="2" stroke-dasharray="2 13"/><g fill="white" stroke-width="2.5"><circle cx="215" cy="546" r="7"/><circle cx="279" cy="605" r="11"/><circle cx="247" cy="702" r="6"/><circle cx="322" cy="771" r="8"/></g><g transform="translate(697 384) rotate(0) scale(0.72)"><use href="#star"/></g><g transform="translate(627 677) rotate(0) scale(0.56)"><use href="#star"/></g><g transform="translate(1079 732) rotate(0) scale(0.68)"><use href="#star"/></g><g transform="translate(481 114) rotate(0) scale(0.46)"><use href="#star"/></g><g transform="translate(218 310) rotate(0) scale(0.72)"><use href="#star"/></g></g></svg>

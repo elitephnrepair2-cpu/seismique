@@ -1,0 +1,121 @@
+/* Mini Golf + Arcade: real photography, Seismique ink, quiet purple accents. */
+.golf-page{--ink:#08070d;background:var(--ink)}
+.golf-page .experience-header{padding-top:calc(14px + env(safe-area-inset-top));background:#08070de0}
+.golf-page .brand-image{filter:brightness(0) invert(1)}
+.golf-page .button{border-radius:3px;gap:12px}
+.golf-page .button svg{width:19px;height:19px;flex:none}
+.golf-page .header-ticket{background:#25113d;border:1px solid #b28aff80;box-shadow:inset 0 1px #e6d6ff19}
+.golf-page .header-ticket:hover{background:#492378}
+.golf-page .menu-toggle{color:#ddd5ea}
+.golf-hero{position:relative;isolation:isolate;min-height:min(900px,100svh);display:flex;align-items:flex-end;padding:160px var(--gutter) 112px;overflow:hidden}
+.golf-hero-media{position:absolute;inset:0;z-index:-2}
+.golf-hero-media img{object-position:61% center;animation:golf-arrive 10s ease-out both}
+.golf-hero:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#08070dda,transparent 85%),linear-gradient(0deg,#08070d,#08070d32 60%,#08070d25)}
+.golf-hero-copy{max-width:950px}
+.golf-hero .eyebrow{color:#ded0ff;font-size:.75rem;letter-spacing:.19em}
+.golf-hero h1{font-size:clamp(4rem,8.8vw,9.3rem);line-height:.98;letter-spacing:-.035em}
+.golf-hero h1 span{font-family:"Seismique Exhibit",Impact,sans-serif;font-weight:400;display:block;line-height:1.2;letter-spacing:0}
+.golf-hero-copy>p:not(.eyebrow){max-width:420px;margin-top:23px;color:#e4ddea;font-size:1.07rem;line-height:1.65}
+.golf-hero .hero-actions{margin-top:26px}
+.golf-hero-bottom{position:absolute;bottom:23px;left:var(--gutter);right:var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:22px}
+.golf-route{display:flex;gap:30px;align-items:center;font-size:.75rem;letter-spacing:.13em;font-weight:700}
+.golf-route a{min-height:44px;display:flex;align-items:center;border-bottom:1px solid transparent}
+.golf-route a:hover{color:#d4b7ff;border-color:#c5a5ff}
+.golf-route span{color:#baa2e0;margin-right:7px;font-size:.65rem}
+.golf-motion{background:transparent;color:#d6d0df;border:0;border-bottom:1px solid #ffffff50;min-height:44px;font-size:.75rem}
+.golf-intro{display:grid;grid-template-columns:.8fr 1.4fr;gap:9%;align-items:center;padding-top:80px;padding-bottom:85px}
+.eighteen-mark{position:relative;text-align:center;isolation:isolate}
+.eighteen-mark strong{display:block;font-family:"Seismique Exhibit",Impact,sans-serif;font-size:clamp(140px,22vw,340px);line-height:1.03;font-weight:400;transform:rotate(-7deg);color:#f5f2f8}
+.eighteen-mark>span{display:block;font-size:.75rem;letter-spacing:.28em;font-weight:700;margin-top:18px;color:#c5a5ff}
+.eighteen-mark:after{content:"";position:absolute;width:110%;height:50%;border:1px solid #b990ff80;transform:rotate(-22deg);border-radius:50%;left:-5%;top:24%;z-index:-1}
+.golf-intro h2{font-size:clamp(2.5rem,4.6vw,5rem)}
+.golf-intro-copy>p:not(.eyebrow){margin-top:24px;max-width:44ch;color:var(--muted)}
+.golf-facts{display:flex;gap:16px 28px;margin-top:28px;flex-wrap:wrap;font-size:.75rem;letter-spacing:.1em;font-weight:700}
+.golf-facts span:before{content:"✦";color:#c5a5ff;margin-right:9px}
+.course-scene{position:relative;margin:0 var(--gutter);height:clamp(410px,55vw,760px);overflow:hidden}
+.course-scene img{object-position:center;transition:transform 1.3s ease-out}
+.course-scene:after{content:"";position:absolute;inset:50% 0 0;background:linear-gradient(transparent,#08070dd9)}
+.course-scene figcaption{position:absolute;bottom:30px;left:34px;right:28px;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
+.course-scene figcaption strong{font-family:"Seismique Exhibit",Impact,sans-serif;font-size:clamp(2rem,4.5vw,4.8rem);line-height:1.15;font-weight:400;max-width:16ch}
+.course-scene figcaption span{font-size:.75rem;letter-spacing:.1em;white-space:nowrap;color:#e4d9fa}
+.golf-crew{display:grid;grid-template-columns:1.25fr .85fr;gap:clamp(30px,7vw,110px);align-items:center}
+.crew-image{position:relative}
+.crew-image>img{aspect-ratio:1.15;object-fit:cover}
+.crew-image:before{content:"";position:absolute;inset:12px -12px -12px 12px;border:1px solid #ae87db55;z-index:-1}
+.crew-copy h2{font-size:clamp(2.8rem,4.7vw,5rem)}
+.crew-copy>p:not(.eyebrow){color:var(--muted);margin-top:24px;max-width:36ch}
+.crew-copy .text-link{margin-top:24px}
+.alien-note{display:flex;gap:20px;align-items:center;margin-top:35px;padding-top:25px;border-top:1px solid var(--line)}
+.alien-note img{width:88px;height:105px;object-fit:cover;object-position:center 20%;border-radius:45% 45% 10% 10%;flex:none}
+.alien-note p{font-size:.85rem;max-width:22ch;color:#c9bfd8}
+.golf-page .optical-divider{height:clamp(80px,9vw,150px);background:#08070d}
+.golf-page .optical-divider:before{filter:none;transform:none}
+.arcade-section{background:#f5f2f8;color:#131019;padding-bottom:clamp(65px,8vw,120px)}
+.arcade-heading{display:grid;grid-template-columns:1.3fr 1fr;gap:8%;align-items:end;padding-top:30px;padding-bottom:44px}
+.arcade-heading h2{font-size:clamp(3.4rem,7vw,7.8rem)}
+.arcade-heading .eyebrow{color:#600dff}
+.arcade-heading>p{color:#5b5364;font-size:1.05rem;max-width:35ch}
+.arcade-layout{display:grid;grid-template-columns:1.25fr 1fr;gap:30px;margin:0 auto;padding:0 var(--gutter);max-width:1600px}
+.arcade-layout figure{min-width:0}
+.arcade-layout img{aspect-ratio:1.3;object-fit:cover}
+.arcade-layout figure:nth-child(2){margin-top:100px}
+.arcade-layout figure:nth-child(2) img{aspect-ratio:1.13}
+.arcade-layout figcaption{padding:24px 0 0}
+.arcade-layout h3{font-family:"Seismique Exhibit",Impact,sans-serif;font-weight:400;font-size:clamp(2.2rem,4vw,4rem);line-height:1.2;letter-spacing:0}
+.arcade-layout p{color:#5b5364;margin-top:12px;font-size:1rem;max-width:40ch}
+.tabletop-note{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:50px var(--gutter) 0;padding-top:28px;border-top:1px solid #18101e30}
+.tabletop-note p{max-width:55ch;color:#5b5364}
+.tabletop-note strong{color:#131019;display:block;margin-bottom:4px}
+.tabletop-note a{white-space:nowrap;color:#600dff}
+.golf-admission{background:radial-gradient(ellipse at 85% 0,#600dff16,transparent 65%);max-width:none}
+.golf-admission>.section-heading,.golf-ticket-options,.golf-ticket-note{max-width:1320px;margin-left:auto;margin-right:auto}
+.golf-admission h2{font-size:clamp(3rem,5vw,5.5rem)}
+.golf-ticket-options{display:grid;grid-template-columns:1fr 1.15fr;gap:28px}
+.golf-ticket{border-top:1px solid #ffffff60;padding:30px 0 0;display:flex;flex-direction:column;align-items:flex-start}
+.golf-ticket .eyebrow{font-size:.75rem;color:#c5a5ff}
+.golf-ticket h3{font-size:clamp(2.2rem,3.6vw,3.8rem);line-height:1.06}
+.golf-ticket>p:not(.eyebrow){color:var(--muted);max-width:36ch;margin-top:18px;min-height:3.2em}
+.golf-ticket .prices{gap:55px;border-top:0;padding-top:0;margin-top:27px}
+.golf-ticket .prices dd{font-size:2.5rem}
+.golf-ticket .button{width:100%;margin-top:32px}
+.golf-ticket.bundle{padding:30px;background:#600dff14;border:1px solid #ad77ff88}
+.golf-ticket.bundle .button{margin-top:auto}
+.golf-ticket.bundle .bundle-extra{margin:25px 0 30px;color:#ddd1ec;font-size:.95rem;min-height:0}
+.golf-ticket-note{margin-top:23px;color:var(--muted);font-size:.8rem;line-height:1.7}
+.golf-practical{display:grid;grid-template-columns:.85fr 1.15fr;gap:10%;padding-top:25px}
+.golf-practical h2{font-size:clamp(2.5rem,4.1vw,4.5rem)}
+.golf-practical address{font-style:normal;color:#cfc6dc;margin-top:26px}
+.golf-practical .text-link{margin-top:22px}
+.golf-faq{border-top:1px solid #ffffff35}
+.golf-faq details{border-bottom:1px solid #ffffff35}
+.golf-faq summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 0;font-weight:700;font-size:1rem;min-height:66px}
+.golf-faq summary::-webkit-details-marker{display:none}
+.golf-faq summary:after{content:"+";font-size:1.5rem;font-weight:400;color:#c5a5ff}
+.golf-faq details[open] summary:after{content:"−"}
+.golf-faq summary:hover{color:#c5a5ff}
+.golf-faq summary:focus-visible{outline:2px solid #c5a5ff;outline-offset:4px}
+.golf-faq details>p{padding:0 24px 24px 0;color:var(--muted);font-size:.95rem}
+.golf-faq a{text-decoration:underline;text-underline-offset:4px;color:#e5d4ff}
+.golf-finale{position:relative;isolation:isolate;min-height:530px;display:grid;place-items:center;text-align:center;padding:100px var(--gutter);overflow:hidden}
+.golf-finale>img{position:absolute;inset:0;z-index:-2;object-position:center 42%}
+.golf-finale:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(#08070dc9,#08070d99 45%,#08070df2)}
+.golf-finale h2{font-size:clamp(3.5rem,7.8vw,8.5rem)}
+.golf-finale h2 span{font-family:"Seismique Exhibit",Impact,sans-serif;font-weight:400;letter-spacing:0;line-height:1.2;color:#dac4ff}
+.golf-finale .button{margin-top:32px;min-width:210px}
+.golf-page .motion-off .golf-hero-media img,.golf-page.motion-off .golf-hero-media img{animation-play-state:paused}
+.golf-page.motion-off .course-scene img{transition:none;transform:none}
+@keyframes golf-arrive{from{transform:scale(1.055)}to{transform:scale(1)}}
+@media(min-width:1600px){.golf-hero-copy{margin-left:max(0px,calc((100vw - 1424px)/2))}}
+@media(max-width:850px){.golf-intro{gap:7%;grid-template-columns:.8fr 1.2fr}.golf-crew{gap:35px}.arcade-heading{gap:35px}.arcade-layout{gap:22px}.golf-practical{gap:7%}.golf-ticket .prices{gap:35px}}
+@media(max-width:700px){
+ .golf-page .experience-header{padding:calc(12px + env(safe-area-inset-top)) 18px 12px;min-height:72px}.golf-page .header-ticket{min-height:44px;padding:10px 12px;font-size:.7rem}.golf-page .header-ticket svg{width:17px}.golf-page .menu-toggle{min-width:44px}.golf-page .menu-panel{max-height:calc(100svh - 105px - env(safe-area-inset-top))}
+ .golf-hero{min-height:100svh;padding:145px 23px 104px}.golf-hero-media img{object-position:57% center}.golf-hero:after{background:linear-gradient(0deg,#08070d 0%,#08070dbb 33%,#08070d16 100%)}.golf-hero .eyebrow{font-size:.65rem;letter-spacing:.13em;max-width:290px;margin-bottom:17px}.golf-hero h1{font-size:clamp(3.3rem,13.5vw,5.9rem)}.golf-hero-copy>p:not(.eyebrow){font-size:.98rem;max-width:32ch;margin-top:18px}.golf-hero .hero-actions{gap:16px;align-items:center;margin-top:23px}.golf-hero .hero-actions .button{padding:14px 20px;font-size:.8rem;min-height:52px}.golf-hero .text-link{font-size:.85rem}.golf-hero-bottom{left:23px;right:23px;bottom:calc(18px + env(safe-area-inset-bottom));gap:12px}.golf-route{font-size:.63rem;gap:16px;letter-spacing:.07em}.golf-route span{display:none}.golf-motion{font-size:.68rem}
+ .golf-intro{grid-template-columns:1fr;padding-top:60px;padding-bottom:45px;gap:45px}.eighteen-mark{width:190px;margin:auto}.eighteen-mark strong{font-size:190px}.eighteen-mark>span{font-size:.7rem;margin-top:10px}.golf-intro h2{font-size:clamp(2.6rem,10vw,4.5rem)}.golf-intro-copy>p:not(.eyebrow){margin-top:21px}.golf-facts{font-size:.68rem;gap:16px}
+ .course-scene{margin:0;height:570px;max-height:85svh}.course-scene img{object-position:53% center}.course-scene figcaption{left:23px;right:23px;bottom:25px;display:block}.course-scene figcaption strong{font-size:clamp(2.4rem,10vw,4rem);max-width:11ch;display:block}.course-scene figcaption span{display:block;margin-top:14px;font-size:.65rem}
+ .golf-crew{grid-template-columns:1fr;gap:44px;padding-top:65px;padding-bottom:65px}.crew-image>img{aspect-ratio:1.1}.crew-copy h2{font-size:clamp(2.8rem,11vw,4.5rem)}.alien-note{margin-top:25px}.alien-note img{width:73px;height:88px}.alien-note p{max-width:25ch}
+ .arcade-heading{grid-template-columns:1fr;gap:24px;padding-top:20px;padding-bottom:35px}.arcade-heading h2{font-size:clamp(3.5rem,14vw,5.5rem)}.arcade-heading>p{font-size:1rem}.arcade-layout{grid-template-columns:1fr;gap:40px}.arcade-layout figure:nth-child(2){margin-top:0}.arcade-layout img,.arcade-layout figure:nth-child(2) img{aspect-ratio:1.2}.arcade-layout figcaption{padding-top:20px}.arcade-layout h3{font-size:2.7rem}.arcade-layout p{font-size:.95rem}.tabletop-note{display:block;margin-top:38px}.tabletop-note p{font-size:.95rem}.tabletop-note a{margin-top:18px}
+ .golf-ticket-options{grid-template-columns:1fr;gap:35px}.golf-ticket.bundle{padding:28px 24px}.golf-ticket h3{font-size:2.7rem}.golf-ticket>p:not(.eyebrow){min-height:0}.golf-ticket .prices dd{font-size:2.1rem}.golf-ticket .prices{gap:45px}.golf-ticket .button{font-size:.8rem}.golf-practical{grid-template-columns:1fr;gap:42px;padding-top:0}.golf-practical h2{font-size:2.9rem}.golf-finale{min-height:500px;padding:80px 23px}.golf-finale h2{font-size:clamp(3.2rem,13vw,5.5rem)}
+}
+@media(max-width:360px){.golf-page .brand{width:110px}.golf-page .header-ticket{gap:6px;padding:10px}.golf-page .header-actions{gap:5px}.golf-route{gap:12px}.golf-hero h1{font-size:12.8vw}.golf-hero .hero-actions{gap:13px}.golf-hero .hero-actions .button{padding:12px 15px}}
+@media(max-height:600px) and (orientation:landscape){.golf-hero{min-height:680px}.golf-page .experience-header{padding-top:8px;padding-bottom:8px;min-height:65px}}
+@media(prefers-reduced-motion:reduce){.golf-hero-media img{animation:none}.course-scene img{transition:none}.golf-page *{scroll-behavior:auto!important}}

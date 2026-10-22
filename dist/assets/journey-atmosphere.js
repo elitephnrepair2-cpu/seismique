@@ -1,5 +1,5 @@
 /* Entrance-inspired atmosphere layered onto the existing portal and jungle. */
-window.createJourneyAtmosphere=({THREE:T,scene,machine,revealWorld,apertureY,mouthZ,portalDepth,vortexRadius,softMap,reducedMotion})=>{
+window.createJourneyAtmosphere=({THREE:T,scene,machine,revealWorld,apertureY,mouthZ,portalDepth,vortexRadius,softMap,reducedMotion,mapJungleZ=z=>z,light=null})=>{
   const portalLayer=new T.Group();machine.add(portalLayer);
   const edgeLayer=new T.Group();revealWorld.add(edgeLayer);
   const uniforms={uTravel:{value:0},uTime:{value:0},uJungle:{value:0},uPower:{value:0},uMotion:{value:0},uRichness:{value:0}};
@@ -70,28 +70,11 @@ window.createJourneyAtmosphere=({THREE:T,scene,machine,revealWorld,apertureY,mou
     }
   }
   rimLeaves.count=leafCount;edgeLayer.add(rimLeaves);
-  const bridgeLight=new T.PointLight(0x32b9a2,8,11,2);bridgeLight.position.set(0,3.8,-10.8);edgeLayer.add(bridgeLight);
-  // Dark, interrupted side surfaces sit behind the planting. No rings or tunnel walls in view.
-  const edgeMaterial=new T.ShaderMaterial({uniforms,side:T.DoubleSide,
-    vertexShader:`varying vec2 vUv;varying vec3 vWorld;void main(){vUv=uv;vec4 w=modelMatrix*vec4(position,1.);vWorld=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
-    fragmentShader:`varying vec2 vUv;varying vec3 vWorld;uniform float uTravel,uMotion,uJungle;
-      void main(){float soft=sin(vUv.x*3.14159)*sin(vUv.y*3.14159);
-        float face=floor(vUv.x*3.+vUv.y*1.3),plane=.5+.5*sin(face*3.1+vUv.y*2.);
-        float spill=pow(.5+.5*sin(vUv.x*2.8+vUv.y*2.+face*1.7+uTravel*.23),7.)*soft;
-        float glint=pow(.5+.5*sin(vUv.y*3.+vUv.x*1.8+uTravel*.9+vWorld.z*.05),35.)*soft*uMotion;
-        vec3 hue=mix(vec3(.055,.012,.075),vec3(.008,.040,.045),.5+.5*sin(vWorld.z*.19));
-        vec3 col=vec3(.004,.006,.012)+hue*(plane*.10+spill*.36+glint*.18)*uJungle;
-        gl_FragColor=vec4(col,1.);
-        #include <tonemapping_fragment>
-        #include <colorspace_fragment>
-      }`});
-  for(const side of [-1,1])for(let row=0;row<5;row++){
-    const panel=new T.Mesh(new T.PlaneGeometry(8.0,7.7),edgeMaterial);panel.position.set(side*10.9,3.95,-18.5-row*8.0);panel.rotation.y=-side*Math.PI/2;edgeLayer.add(panel);
-  }
+  const bridgeLight=light||new T.PointLight(0x32b9a2,8,11,2);bridgeLight.position.set(0,3.8,-10.8);if(!light)scene.add(bridgeLight);
   // Reuse the existing mist pockets for soft, broken shafts between foliage layers.
   const mists=[];
-  for(let i=0;i<10;i++){
-    const side=i%2?1:-1,z=-19-Math.floor(i/2)*8;
+  for(let i=0;i<6;i++){
+    const side=i%2?1:-1,z=mapJungleZ(-19-Math.floor(i/2)*18);
     const material=new T.ShaderMaterial({uniforms:{...uniforms,uSoft:{value:softMap},uSeed:{value:i},uHue:{value:new T.Color(i%3===0?0xb45bc3:0x36c5b5)}},transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,
       vertexShader:`varying vec2 vMistUv;void main(){vMistUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
       fragmentShader:`varying vec2 vMistUv;uniform sampler2D uSoft;uniform float uTime,uSeed,uRichness,uJungle;uniform vec3 uHue;
@@ -99,20 +82,24 @@ window.createJourneyAtmosphere=({THREE:T,scene,machine,revealWorld,apertureY,mou
           float shaft=exp(-pow((uv.x-.44+(uv.y-.5)*.33+drift)/.14,2.));
           float broken=.65+.35*sin(uv.y*5.+uSeed+sin(uv.x*6.));
           float feather=texture2D(uSoft,uv).a;
-          gl_FragColor=vec4(uHue,feather*(.016+shaft*broken*.043)*uJungle*(.65+.65*uRichness));
+          gl_FragColor=vec4(uHue,feather*(.009+shaft*broken*.026)*uJungle*(.65+.65*uRichness));
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`});
-    const mist=new T.Mesh(new T.PlaneGeometry(5.0,4.5),material);mist.position.set(side*6.3,3.3,z);mist.rotation.y=-side*.28;edgeLayer.add(mist);mists.push({mist,baseX:side*6.3});
+    const mist=new T.Mesh(new T.PlaneGeometry(6.5,4.5),material);mist.position.set(side*6.3,3.3,z);mist.rotation.y=-side*.28;edgeLayer.add(mist);mists.push({mist,baseX:side*6.3});
   }
   let previous=0,motion=0;
-  return {update(progress,time,power){
+  return {update(progress,time,power,cameraZ=0,mistRange=40){
     motion+=(Math.min(1,Math.abs(progress-previous)*90)-motion)*.1;previous=progress;
     uniforms.uTravel.value=reducedMotion?0:progress*3;uniforms.uTime.value=reducedMotion?0:time;
     uniforms.uJungle.value=T.MathUtils.smoothstep(progress,.28,.56);uniforms.uPower.value=power;uniforms.uMotion.value=reducedMotion?0:motion;
     uniforms.uRichness.value=T.MathUtils.smoothstep(progress,.56,.94);
     portalLayer.visible=progress>.012&&progress<.61;inlayMaterial.opacity=.30*power;
     bridgeLight.intensity=6+5*T.MathUtils.smoothstep(progress,.30,.52);
-    mists.forEach(({mist,baseX},i)=>{mist.position.x=baseX+(reducedMotion?0:Math.sin(time*.025+i)*.12);});
+    mists.forEach(({mist,baseX},i)=>{
+      const distance=cameraZ-mist.position.z;
+      mist.visible=progress>.30&&distance>-7&&distance<mistRange;
+      if(mist.visible)mist.position.x=baseX+(reducedMotion?0:Math.sin(time*.025+i)*.12);
+    });
   }};
 };
