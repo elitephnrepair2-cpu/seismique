@@ -120,3 +120,9 @@ This repository intentionally cannot charge live payments. Still required: verif
 - `tests/checkout.test.mjs`: local automated behavior/security tests (simulated gateway/storage plus actual Stripe signature cryptography).
 
 Official references: https://docs.stripe.com/payments/quickstart, https://docs.stripe.com/checkout/fulfillment, https://docs.stripe.com/webhooks, https://docs.stripe.com/elements/express-checkout-element.
+
+## Deployment verification notes
+
+The initial GitHub-connected Vercel deployment served the checkout but its API failed at startup because a nested `api/package.json` caused dependencies to be installed from the empty API scope. The correction removes that nested manifest, uses ESM at the repository root, and scopes the legacy `dist` assets to CommonJS for existing tests. The corrected deployed API was observed returning its controlled `not_configured` JSON response rather than a startup exception. Sandbox config variables were then saved in Vercel with payments and tax disabled. Secret key, database and webhook configuration still require verification in the deployed runtime.
+
+The initial Vercel setup saved the sandbox credential under `Secretkey`, then `sksksk`. The server accepts these existing names as compatibility aliases, preferring canonical `STRIPE_SECRET_KEY` if present, then `sksksk`, then `Secretkey`. Prefix and account checks are identical for every name. No secret value was retrieved or copied by the agent. Use the canonical name for future setup; do not delete or rotate credentials merely to rename the environment variable.

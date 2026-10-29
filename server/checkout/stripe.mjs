@@ -3,7 +3,8 @@ import { ACCOUNT_ID, CheckoutError } from './catalog.mjs';
 let cached;
 export function stripeClient(env = process.env) {
   if(env.STRIPE_TAX_ENABLED==='true')throw new CheckoutError('Stripe Tax setup requires review before it can be enabled.',503,'tax_not_configured');
-  const key=env.STRIPE_SECRET_KEY;
+  // Compatibility with the names already saved in this project's Vercel setup.
+  const key=env.STRIPE_SECRET_KEY||env.sksksk||env.Secretkey;
   if (!key || !/^(sk|rk)_test_/.test(key) || env.STRIPE_ACCOUNT_ID !== ACCOUNT_ID) throw new CheckoutError('Sandbox payments are not configured yet.',503,'not_configured');
   if (!cached || cached.key!==key) cached={key,client:new Stripe(key,{maxNetworkRetries:2,timeout:15000})};
   return cached.client;
