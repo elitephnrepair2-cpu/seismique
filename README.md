@@ -44,3 +44,9 @@ Use `dist` as the publish directory on a static host that serves this site at th
 Some exhibit photographs and fonts load from existing external URLs, so those assets need an internet connection. Ticket and contact links retain their existing external destinations.
 
 The source snapshot corresponds to commit `205ab92f5f3fe4072e4635ada96df1779cddd00f` in the original site repository. Hosting credentials and provider-specific deployment identity are not included.
+
+## Stripe sandbox checkout — October 29, 2026
+
+A separate branded `/checkout/` route adds ticket selection, adult/child quantities, visit date, server-priced review, a $15-per-ticket museum-to-bundle upgrade, and Stripe Elements payment integration. The existing navigation and Toast links are unchanged.
+
+The backend runs on Vercel, not the static Sites publication. Payments remain disabled until sandbox credentials, PostgreSQL storage/migration, and the required Stripe webhook are configured. Email delivery and live payments are not active. See [checkout setup and verification status](checkout-docs/SETUP.md) for required environment variables and remaining launch work. Run `npm test` for the simulated gateway/storage and signature-verification tests.

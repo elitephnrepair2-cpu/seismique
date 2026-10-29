@@ -1664,6 +1664,8 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     let sampleFrames=0,sampleSeconds=0,totalFrames=0;
     function frame(dt,now,elapsed){
       if(!portalReady)return true;
+      // Resizing the drawing buffer clears it: adjust quality before this frame's draw.
+      if(revealReady&&performanceBudget.sample(elapsed))applyQuality();
       const previousMode=guideState.mode;updateJourney(dt);
       const modeChanged=previousMode!==guideState.mode;
       applyJourneyCamera();camera.updateMatrixWorld();
@@ -1699,7 +1701,6 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
         root.dataset.renderedFrames=String(totalFrames);
         if(sampleSeconds>=2){root.dataset.measuredFps=(sampleFrames/sampleSeconds).toFixed(1);sampleFrames=sampleSeconds=0;}
       }
-      if(revealReady&&performanceBudget.sample(elapsed))applyQuality();
       return machineRunning||guideState.mode==='transition'||(auto&&(machineRunning||reducedMotion))||!revealReady;
     }
     journeyLoop=window.createJourneyLoop({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),render:frame});

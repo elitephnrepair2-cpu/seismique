@@ -1,0 +1,71 @@
+{
+  "sandbox": true,
+  "accountId": "acct_1UVus1BRtAmy9egL",
+  "ready": false,
+  "publishableKey": null,
+  "taxMode": "sandbox-disabled",
+  "catalog": {
+    "museum_adult": {
+      "sku": "museum_adult",
+      "label": "Museum · Adult",
+      "experience": "museum",
+      "age": "adult",
+      "priceId": "price_1UW12uBRtAmy9egLFc56mTJL",
+      "expected": 3499,
+      "unitAmount": 3499,
+      "currency": "usd"
+    },
+    "museum_child": {
+      "sku": "museum_child",
+      "label": "Museum · Child",
+      "experience": "museum",
+      "age": "child",
+      "priceId": "price_1UW13HBRtAmy9egLtcoyCSKq",
+      "expected": 2499,
+      "unitAmount": 2499,
+      "currency": "usd"
+    },
+    "golf_adult": {
+      "sku": "golf_adult",
+      "label": "Glow Mini Golf · Adult",
+      "experience": "golf",
+      "age": "adult",
+      "priceId": "price_1UW13JBRtAmy9egLAaiOncAj",
+      "expected": 2499,
+      "unitAmount": 2499,
+      "currency": "usd"
+    },
+    "golf_child": {
+      "sku": "golf_child",
+      "label": "Glow Mini Golf · Child",
+      "experience": "golf",
+      "age": "child",
+      "priceId": "price_1UW13LBRtAmy9egLDszsPF6v",
+      "expected": 2199,
+      "unitAmount": 2199,
+      "currency": "usd"
+    },
+    "bundle_adult": {
+      "sku": "bundle_adult",
+      "label": "Museum + Mini Golf · Adult",
+      "experience": "bundle",
+      "age": "adult",
+      "priceId": "price_1UW13NBRtAmy9egLIoM7kRHw",
+      "expected": 4999,
+      "unitAmount": 4999,
+      "currency": "usd"
+    },
+    "bundle_child": {
+      "sku": "bundle_child",
+      "label": "Museum + Mini Golf · Child",
+      "experience": "bundle",
+      "age": "child",
+      "priceId": "price_1UW13OBRtAmy9egL0Smq6Elb",
+      "expected": 3999,
+      "unitAmount": 3999,
+      "currency": "usd"
+    }
+  },
+  "verifiedAt": "2026-10-29",
+  "notice": "Prices verified against the connected Stripe sandbox. Preview estimates only; payment requires a configured backend."
+}

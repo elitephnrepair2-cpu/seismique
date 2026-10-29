@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci --ignore-scripts",
+  "functions": { "api/checkout.js": { "maxDuration": 60 } },
+  "headers": [
+    {"source":"/checkout/(.*)","headers":[
+      {"key":"X-Robots-Tag","value":"noindex, nofollow"},
+      {"key":"Referrer-Policy","value":"no-referrer"},
+      {"key":"X-Content-Type-Options","value":"nosniff"},
+      {"key":"Content-Security-Policy","value":"default-src 'self'; script-src 'self' https://js.stripe.com; connect-src 'self' https://*.stripe.com https://*.link.com; frame-src https://*.stripe.com https://*.link.com https://*.stripe.network; img-src 'self' data: blob: https://*.stripe.com; style-src 'self' 'unsafe-inline'; font-src 'self' https://*.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self' https://*.stripe.com; frame-ancestors 'self'"}
+    ]}
+  ]
+}

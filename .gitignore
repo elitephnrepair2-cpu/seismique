@@ -9,3 +9,11 @@ __pycache__/
 *.tar
 *.tar.gz
 *.zip
+
+# Checkout runtime and credentials
+node_modules/
+.env
+.env.*
+!.env.example
+.vercel/
+.checkout-local/
