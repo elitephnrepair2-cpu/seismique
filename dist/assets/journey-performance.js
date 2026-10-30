@@ -24,6 +24,14 @@
       reset();cooldown=6;return true;
     }};
   }
+  function createJourneyCadence(hz=30){
+    const interval=1/hz;let phase=0,total=0;
+    return {consume(seconds,force=false){
+      total+=seconds;phase+=seconds;
+      if(!force&&phase+1e-7<interval)return null;
+      const delta=total;total=0;phase=force?0:Math.max(0,phase-Math.floor((phase+1e-7)/interval)*interval);return delta;
+    }};
+  }
   function createJourneyLoop({request,cancel,render}){
     let id=null,visible=true,disposed=false,last=null;
     function tick(now){
@@ -38,6 +46,6 @@
       if(visible)wake();
     },dispose(){disposed=true;if(id!==null)cancel(id);id=null;last=null;}};
   }
-  scope.createJourneyPerformance=createJourneyPerformance;scope.createJourneyLoop=createJourneyLoop;
-  if(typeof module!=='undefined')module.exports={createJourneyPerformance,createJourneyLoop};
+  scope.createJourneyPerformance=createJourneyPerformance;scope.createJourneyLoop=createJourneyLoop;scope.createJourneyCadence=createJourneyCadence;
+  if(typeof module!=='undefined')module.exports={createJourneyPerformance,createJourneyLoop,createJourneyCadence};
 })(typeof window!=='undefined'?window:globalThis);

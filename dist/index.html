@@ -147,7 +147,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
   <script src="/assets/portal-energy.js?v=52" defer></script>
   <script src="/assets/journey-guide.js?v=intro-only-20261030" defer></script>
   <script src="/assets/static-scenery.js?v=1" defer></script>
-  <script src="/assets/journey-performance.js?v=mobile-stability-20261030" defer></script>
+  <script src="/assets/journey-performance.js?v=frame-pacing-20261030" defer></script>
   <script>
   document.addEventListener('DOMContentLoaded',()=>{
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -1243,10 +1243,33 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       for(const texture of textures){renderer.initTexture(texture);yield;}
     }
     function prepareJungle(){if(preparing)return;preparing=true;root.dataset.scenePreparation='building';preparation=prepareResources();queuePreparation();}
+    async function warmJungleBuffers(){
+      root.dataset.gpuPreparation='warming';
+      const target=new T.WebGLRenderTarget(32,32),probe=camera.clone();
+      const previousTarget=renderer.getRenderTarget(),previousVisibility=revealWorld.visible;
+      try{
+        // A tiny offscreen draw uploads geometry as well as compiling shaders.
+        // The visible camera and canvas are never changed by this preparation.
+        for(const progress of [.58,...stopProgress(),1]){
+          await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:200}):setTimeout(resolve,16));
+          while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'){
+            await new Promise(resolve=>setTimeout(resolve,200));
+          }
+          const view=pose(progress);probe.position.set(...view.pos);probe.lookAt(...view.look);probe.updateMatrixWorld();
+          revealWorld.visible=true;renderer.setRenderTarget(target);
+          renderer.render(scene,probe);
+          renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;
+        }
+      }finally{
+        renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;target.dispose();
+      }
+      root.dataset.gpuPreparation='ready';
+    }
     async function finishPreparation(){
       root.dataset.scenePreparation='compiling';
       // compileAsync uses parallel shader compilation where the GPU supports it.
       await renderer.compileAsync(scene,camera);
+      await warmJungleBuffers();
       const dynamicRoots=new Set(hangingPods.map(pod=>pod.pivot));
       function freezeScenery(node){
         if(dynamicRoots.has(node)||node.name==='Alien Grass destination accents')return;
@@ -1675,32 +1698,35 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       const {w,h}=pendingViewport;pendingViewport=null;
       viewportWidth=drawWidth=w;viewportHeight=drawHeight=h;
       renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
-      fitEntranceWordmark();destinationGrass?.resize(w<700);
+      fitEntranceWordmark();destinationGrass?.resize(w<700);return true;
     }
     const sceneResize=new ResizeObserver(resize),headerResize=new ResizeObserver(fitEntranceWordmark);
     sceneResize.observe(stage);headerResize.observe(root.querySelector('.site-header'));resize();
-    let lastLabelUpdate=-Infinity,lastVisualProgress=-1,lastEffectTime=-1,secondaryElapsed=0;
+    let lastLabelUpdate=-Infinity,lastVisualProgress=-1,lastEffectTime=-1,qualityPending=false;
+    const effectsCadence=window.createJourneyCadence(quality.compact?30:60);
     const profileFrames=new URLSearchParams(location.search).has('profile');
     let sampleFrames=0,sampleSeconds=0,totalFrames=0;
     function frame(dt,now,elapsed){
-      applyViewport();
+      const viewportChanged=applyViewport();
       if(!portalReady)return true;
       // Resizing the drawing buffer clears it: adjust quality before this frame's draw.
-      if(revealReady&&performanceBudget.sample(elapsed))applyQuality();
+      if(revealReady&&performanceBudget.sample(elapsed))qualityPending=true;
       const previousMode=guideState.mode;updateJourney(dt);
       const modeChanged=previousMode!==guideState.mode;
-      applyJourneyCamera();camera.updateMatrixWorld();
+      // Buffer reallocations wait for a settled destination, never mid-camera travel.
+      if(qualityPending&&guideState.mode==='idle'){applyQuality();qualityPending=false;}
       const changed=p!==lastVisualProgress;
+      if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();}
+      const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);
       if(machineRunning||changed||lastEffectTime<0){
         updateMachine(dt);
         const jungleActive=revealReady&&p>.27;
-        secondaryElapsed+=dt;
-        // Camera and portal stay at display cadence; soft distant motion can use 30 Hz.
-        if(changed||secondaryElapsed>=(quality.compact?1/30:1/60)||lastEffectTime<0){
+        // Camera remains at display cadence. Movement does not bypass this budget.
+        if(effectDelta!==null){
           if(jungleActive)updateReveal();
           journeyAtmosphere?.update(p,energyTime,formation,camera.position.z,quality.mistRange);
           jungleSky?.update(p,energyTime);endingAfterglow?.update(energyTime,camera.position.z);
-          secondaryElapsed=0;
+
         }
         if(p<.40)enclosureFans.forEach((fan,i)=>fan.rotation.z=energyTime*(i?-.8:.8));
         lastEffectTime=energyTime;
@@ -1713,10 +1739,10 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
         thresholdWash.style.opacity=String(crossing*.65);
         const lens=74+pull*3;if(Math.abs(camera.fov-lens)>.01){camera.fov=lens;camera.updateProjectionMatrix();}
       }
-      if(now-lastLabelUpdate>=66||modeChanged){updateLabels();lastLabelUpdate=now;}
+      if((changed&&now-lastLabelUpdate>=66)||modeChanged||lastVisualProgress<0){updateLabels();lastLabelUpdate=now;}
       if(changed||modeChanged||lastVisualProgress<0)updatePageStops();
-      if(revealReady)destinationGrass?.update(p,energyTime,dt,machineRunning);
-      motionVeil.style.opacity=String(guideState.motionVeil||0);
+      if(revealReady&&effectDelta!==null)destinationGrass?.update(p,energyTime,effectDelta,machineRunning);
+      const veil=String(guideState.motionVeil||0);if(motionVeil.style.opacity!==veil)motionVeil.style.opacity=veil;
       renderer.render(scene,camera);lastVisualProgress=p;
       if(root.dataset.firstFrame!=='true')root.dataset.firstFrame='true';
       if(profileFrames){
