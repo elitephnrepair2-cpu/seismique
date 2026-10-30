@@ -146,6 +146,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
   <script src="/assets/entrance-mural.js?v=52" defer></script>
   <script src="/assets/portal-energy.js?v=52" defer></script>
   <script src="/assets/journey-guide.js?v=intro-only-20261030" defer></script>
+  <script src="/assets/static-scenery.js?v=1" defer></script>
   <script src="/assets/journey-performance.js?v=mobile-stability-20261030" defer></script>
   <script>
   document.addEventListener('DOMContentLoaded',()=>{
@@ -279,7 +280,9 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     function revealRandom(n){const v=Math.sin(n*127.13+53.7)*43758.5453;return v-Math.floor(v);}
     function organicBranch(points,r0,r1,material,segments=36,parent=revealWorld){
       const curve=new T.CatmullRomCurve3(points.map(v=>new T.Vector3(...v))),sculpted=!!material.userData.bark;
-      const radial=sculpted?(r0>.65?64:r0>.28?48:24):9,geometry=new T.TubeGeometry(curve,segments,1,radial,false),positions=geometry.attributes.position;
+      // Phone-size silhouettes retain carved channels with fewer hidden triangles.
+      if(quality.compact)segments=Math.max(12,Math.round(segments*.75));
+      const radial=sculpted?(r0>.65?(quality.compact?48:64):r0>.28?(quality.compact?32:48):24):9,geometry=new T.TubeGeometry(curve,segments,1,radial,false),positions=geometry.attributes.position;
       const seed=points[0][0]*.7+points[0][2]*.21;
       const barkUV=geometry.attributes.uv,barkLength=curve.getLength()/3.5;
       // Broad channels are carved into the mesh; the color texture adds no lines.
@@ -1227,6 +1230,8 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     }
     function* prepareResources(){
       yield* buildRevealWorld();
+      const batching=yield* window.batchStaticScenery(T,revealWorld,new Set([...hangingPods.map(pod=>pod.pivot),revealWorld.getObjectByName('Alien Grass destination accents')]));
+      root.dataset.sceneryDraws=String(batching.after)+'/'+String(batching.before);
       journeyAtmosphere=window.createJourneyAtmosphere({THREE:T,scene,machine,revealWorld,apertureY,mouthZ,portalDepth,vortexRadius,softMap,reducedMotion,mapJungleZ:jungleZ,light:jungleLight(0x32b9a2,0,11)});yield;
       jungleSky=window.createJungleSky({THREE:T,scene,reducedMotion,pixelRatio:quality.ratio});yield;
       // Upload each small procedural map before the first jungle frame needs it.
@@ -1717,7 +1722,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       if(profileFrames){
         totalFrames++;sampleFrames++;sampleSeconds+=elapsed;
         root.dataset.renderedFrames=String(totalFrames);
-        if(sampleSeconds>=2){root.dataset.measuredFps=(sampleFrames/sampleSeconds).toFixed(1);sampleFrames=sampleSeconds=0;}
+        if(sampleSeconds>=2){root.dataset.measuredFps=(sampleFrames/sampleSeconds).toFixed(1);root.dataset.drawCalls=String(renderer.info.render.calls);root.dataset.triangles=String(renderer.info.render.triangles);sampleFrames=sampleSeconds=0;}
       }
       return machineRunning||guideState.mode==='transition'||(auto&&(machineRunning||reducedMotion))||!revealReady;
     }
