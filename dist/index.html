@@ -144,7 +144,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
   <script src="/assets/entrance-mural.js?v=52"></script>
   <script src="/assets/portal-energy.js?v=52"></script>
   <script src="/assets/journey-guide.js?v=pace-20261030"></script>
-  <script src="/assets/journey-performance.js?v=61"></script>
+  <script src="/assets/journey-performance.js?v=mobile-stability-20261030"></script>
   <script>
   (()=>{
     const root=document.getElementById('seismique-jungle-reveal');
@@ -156,7 +156,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     const performanceBudget=window.createJourneyPerformance({compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
     const quality=performanceBudget.budget;
     let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
-    let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
+    let renderer;try{renderer=new T.WebGLRenderer({antialias:!quality.compact,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     renderer.setPixelRatio(quality.ratio);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(0x080c16);stage.prepend(renderer.domElement);
     const scene=new T.Scene();scene.fog=new T.Fog(0x171328,24,70);
     const camera=new T.PerspectiveCamera(76,1,.08,110);
@@ -1652,13 +1652,29 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       jungleSky?.setPixelRatio(quality.ratio);
       root.dataset.renderScale=quality.ratio.toFixed(2);
     }
-    function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(w<1||h<1)return;viewportWidth=w;viewportHeight=h;renderer.setSize(w,h);camera.aspect=w/h;camera.fov=74;camera.updateProjectionMatrix();fitEntranceWordmark();destinationGrass?.resize(w<700);root.wakeJourney?.();}
+    // Mobile browser chrome can resize dvh repeatedly. Coalesce changes and resize
+    // only inside the next draw, so a cleared WebGL buffer is never presented.
+    let pendingViewport=null,drawWidth=0,drawHeight=0;
+    function resize(){
+      const w=stage.clientWidth,h=stage.clientHeight;
+      if(w<1||h<1)return;
+      pendingViewport=w===drawWidth&&h===drawHeight?null:{w,h};
+      if(pendingViewport)root.wakeJourney?.();
+    }
+    function applyViewport(){
+      if(!pendingViewport)return;
+      const {w,h}=pendingViewport;pendingViewport=null;
+      viewportWidth=drawWidth=w;viewportHeight=drawHeight=h;
+      renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+      fitEntranceWordmark();destinationGrass?.resize(w<700);
+    }
     const sceneResize=new ResizeObserver(resize),headerResize=new ResizeObserver(fitEntranceWordmark);
     sceneResize.observe(stage);headerResize.observe(root.querySelector('.site-header'));resize();
     let lastLabelUpdate=-Infinity,lastVisualProgress=-1,lastEffectTime=-1,secondaryElapsed=0;
     const profileFrames=new URLSearchParams(location.search).has('profile');
     let sampleFrames=0,sampleSeconds=0,totalFrames=0;
     function frame(dt,now,elapsed){
+      applyViewport();
       if(!portalReady)return true;
       // Resizing the drawing buffer clears it: adjust quality before this frame's draw.
       if(revealReady&&performanceBudget.sample(elapsed))applyQuality();

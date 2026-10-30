@@ -3,13 +3,13 @@
   'use strict';
   function createJourneyPerformance({compact=false,cores=8,memory=8,pixelRatio=1}={}){
     const constrained=compact||cores<=4||memory<=4;
-    const ceiling=Math.min(pixelRatio,constrained?1.35:1.8),floor=Math.min(ceiling,.9);
+    const ceiling=Math.min(pixelRatio,constrained?1.15:1.8),floor=Math.min(ceiling,.9);
     let ratio=ceiling,elapsed=0,frames=0,slow=0,fast=0,cooldown=0;
     const budget={compact:constrained,ratio,density:constrained?.65:1,arcs:constrained?2:3,mistRange:constrained?28:40};
     function reset(){elapsed=frames=slow=fast=0;cooldown=2;}
     return {budget,reset,sample(seconds){
-      // Ignore suspension/initialization gaps. Require sustained pressure, not one hiccup.
-      if(seconds<=0||seconds>.15){reset();return false;}
+      // Ignore suspension gaps, but include genuinely slow phones in adaptation.
+      if(!Number.isFinite(seconds)||seconds<=0||seconds>1){reset();return false;}
       cooldown=Math.max(0,cooldown-seconds);elapsed+=seconds;frames++;
       if(elapsed<2)return false;
       const average=elapsed/frames;elapsed=frames=0;
