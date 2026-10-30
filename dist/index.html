@@ -9,7 +9,7 @@
 <title>Seismique — Explore &amp; Plan Your Visit</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%2311131b%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22%2300e6ed%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22m18%206-6%2011h6l-4%209%209-13h-7z%22%20fill%3D%22%23f5f5ff%22%2F%3E%3C%2Fsvg%3E">
 <style>
-html{height:100%;background:#10131b;color-scheme:light;overflow:hidden}
+html{height:100%;background:#10131b;color-scheme:dark;overflow:hidden}
 body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif}
 main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
 #seismique-jungle-reveal button{cursor:pointer}
@@ -24,7 +24,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     #seismique-jungle-reveal .nav{height:54px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 19px;position:relative;z-index:3}
     #seismique-jungle-reveal .brand{font-size:23px;font-weight:900;letter-spacing:-1.5px}
     #seismique-jungle-reveal .tag{font-size:10px;font-weight:700;letter-spacing:1px;color:#666}
-    #seismique-jungle-reveal .scene{height:450px;position:relative;overflow:hidden;background:#eeece5;touch-action:none}
+    #seismique-jungle-reveal .scene{height:450px;position:relative;overflow:hidden;background:#080c16;touch-action:none}
     #seismique-jungle-reveal canvas{display:block;width:100%;height:100%}
     #seismique-jungle-reveal .headline{position:absolute;top:18px;left:12px;right:12px;text-align:center;pointer-events:none}
     #seismique-jungle-reveal .headline h2{font-family:Impact,'Arial Narrow',Arial,sans-serif;font-size:38px;line-height:.98;letter-spacing:-1px;font-weight:900;margin:0 auto;max-width:310px;color:#111;text-shadow:0 1px 9px #fff}
@@ -36,7 +36,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     #seismique-jungle-reveal input{width:100%;accent-color:#00aeb8;margin:0;min-height:22px}
     #seismique-jungle-reveal .error{position:absolute;inset:145px 20px auto;text-align:center;background:#fff;padding:16px;border-radius:8px;color:#181818;font-size:13px}
     @media(max-width:360px){#seismique-jungle-reveal .scene{height:405px}#seismique-jungle-reveal .headline h2{font-size:32px}#seismique-jungle-reveal .tag{font-size:9px}}
-    #seismique-jungle-reveal .scene{height:auto;aspect-ratio:940/1672;background:#e9dfd1}
+    #seismique-jungle-reveal .scene{height:auto;aspect-ratio:940/1672;background:#080c16}
     #seismique-jungle-reveal .scene canvas{position:absolute;inset:0}
     #seismique-jungle-reveal .entrance-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 58.5%;pointer-events:none;will-change:transform,opacity}
     #seismique-jungle-reveal .headline h2{font-size:29px;max-width:280px;text-shadow:none}
@@ -78,7 +78,8 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     /* The reference image is a texture source, never a mismatched loading poster. */
     #seismique-jungle-reveal .entrance-art{visibility:hidden}
     #seismique-jungle-reveal .loading-portal{position:absolute;inset:0;z-index:2;display:grid;place-items:center;background:#10121e;color:#dce5ed;font-size:14px;letter-spacing:.06em;pointer-events:none}
-    #seismique-jungle-reveal[data-portal-ready="true"] .loading-portal{display:none}
+    #seismique-jungle-reveal[data-first-frame="true"] .loading-portal{display:none}
+    #seismique-jungle-reveal .motion-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:#080c16;opacity:0}
     #seismique-jungle-reveal .error{z-index:5}
     #seismique-jungle-reveal .threshold-wash{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 49%,transparent 24%,rgba(60,171,255,.10) 57%,rgba(120,94,245,.43) 83%,rgba(92,225,255,.60));mix-blend-mode:screen}
     @media(max-height:580px){#seismique-jungle-reveal[data-phase="start"] .headline{top:auto;bottom:106px}#seismique-jungle-reveal[data-phase="start"] .headline h2{font-size:26px}}
@@ -109,6 +110,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       </div>
       <div class="arrival-shade" aria-hidden="true"></div>
       <div class="threshold-wash" aria-hidden="true"></div>
+      <div class="motion-veil" aria-hidden="true"></div>
       <div class="loading-portal" role="status">Powering up…</div>
       <div class="error" hidden>The 3D tour couldn’t load. Use the navigation above or skip the tour to explore and plan your visit.</div>
     </div>
@@ -132,26 +134,28 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
 
     <div class="global-ticketbar"><a class="tickets button primary" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener"><svg class="ticket-mark" viewBox="0 0 24 18" aria-hidden="true" focusable="false"><path d="M3 3h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V3Z"/><path class="ticket-perforation" d="M16 4v10"/></svg><span>Get tickets</span></a></div>
   </div>
-  <script src="/assets/visitor.js?v=58"></script>
+  <script src="/assets/visitor.js?v=58" defer></script>
 
 
-  <script src="/assets/three.min.js"></script>
-  <script src="/assets/journey-atmosphere.js?v=61"></script>
-  <script src="/assets/jungle-lighting.js?v=57"></script>
-  <script src="/assets/jungle-sky.js?v=61"></script>
-  <script src="/assets/ending-portal.js?v=64"></script>
-  <script src="/assets/destination-grass.js?v=61"></script>
-  <script src="/assets/entrance-mural.js?v=52"></script>
-  <script src="/assets/portal-energy.js?v=52"></script>
-  <script src="/assets/journey-guide.js?v=pace-20261030"></script>
-  <script src="/assets/journey-performance.js?v=mobile-stability-20261030"></script>
+  <script src="/assets/three.min.js" defer></script>
+  <script src="/assets/journey-atmosphere.js?v=61" defer></script>
+  <script src="/assets/jungle-lighting.js?v=57" defer></script>
+  <script src="/assets/jungle-sky.js?v=61" defer></script>
+  <script src="/assets/ending-portal.js?v=64" defer></script>
+  <script src="/assets/destination-grass.js?v=61" defer></script>
+  <script src="/assets/entrance-mural.js?v=52" defer></script>
+  <script src="/assets/portal-energy.js?v=52" defer></script>
+  <script src="/assets/journey-guide.js?v=intro-only-20261030" defer></script>
+  <script src="/assets/journey-performance.js?v=mobile-stability-20261030" defer></script>
   <script>
+  document.addEventListener('DOMContentLoaded',()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
   (()=>{
     const root=document.getElementById('seismique-jungle-reveal');
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
     if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
-    const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash');
+    const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const performanceBudget=window.createJourneyPerformance({compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
     const quality=performanceBudget.budget;
@@ -1707,7 +1711,9 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       if(now-lastLabelUpdate>=66||modeChanged){updateLabels();lastLabelUpdate=now;}
       if(changed||modeChanged||lastVisualProgress<0)updatePageStops();
       if(revealReady)destinationGrass?.update(p,energyTime,dt,machineRunning);
+      motionVeil.style.opacity=String(guideState.motionVeil||0);
       renderer.render(scene,camera);lastVisualProgress=p;
+      if(root.dataset.firstFrame!=='true')root.dataset.firstFrame='true';
       if(profileFrames){
         totalFrames++;sampleFrames++;sampleSeconds+=elapsed;
         root.dataset.renderedFrames=String(totalFrames);
@@ -1739,6 +1745,8 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     root.constructionAngle=()=>{camera.position.set(9,6.7,16);camera.lookAt(0,4.8,0);renderer.render(scene,camera);return renderer.domElement.toDataURL('image/png');};
     root.previewState=()=>({progress:p,playing:auto,machineRunning,machineTime,portalReady,formation,powerUpTime,powerUpComplete:powerUpTime>=powerUpDuration,emitters:activeHeads.length,parts:outerModules.length,fixtures:fixtureNodes.length,hoses:hoses.length,structureFixed:machine.position.y===0&&machine.rotation.y===0,spin:activeHeads[0]?.spinner.rotation.z,charge,energyTime,opening,fieldVisible:electricalField?.visible,tunnelVisible:portalSurface?.visible,activeBolts:activeHeads.filter(h=>h.power>.5).length,cableClamps:cableClamps.length,portalDepth,fov:camera.fov,camera:camera.position.toArray()});
   })();
+  }));
+  },{once:true});
   </script>
 </div>
 
