@@ -1,10 +1,9 @@
 (()=>{
   const root=document.getElementById('seismique-jungle-reveal');
   const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
-  const motionButton=root.querySelector('.motion-toggle');
   let paused=preference.matches;
-  function motionState(){document.body.classList.toggle('motion-off',paused);motionButton.textContent=paused?'Play motion':'Pause motion';motionButton.setAttribute('aria-pressed',String(paused));}
-  motionButton.hidden=false;motionState();motionButton.addEventListener('click',()=>{paused=!paused;motionState();});
+  function motionState(){document.body.classList.toggle('motion-off',paused);}
+  motionState();
   preference.addEventListener?.('change',event=>{paused=event.matches;motionState();});
   document.body.classList.add('enhanced');
   if('IntersectionObserver' in window){

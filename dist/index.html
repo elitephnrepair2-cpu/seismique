@@ -84,7 +84,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     @media(max-height:580px){#seismique-jungle-reveal[data-phase="start"] .headline{top:auto;bottom:106px}#seismique-jungle-reveal[data-phase="start"] .headline h2{font-size:26px}}
   </style>
 <link rel="stylesheet" href="/assets/visitor.css?v=61">
-<link rel="stylesheet" href="/assets/journey-interface.css?v=64">
+<link rel="stylesheet" href="/assets/journey-interface.css?v=controls-20261030">
 <link rel="stylesheet" href="/assets/navigation.css?v=58">
 </head>
 <body class="jungle-home"><main aria-label="Seismique interactive walkthrough">
@@ -95,7 +95,6 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span aria-hidden="true">☰</span> Menu</button>
       <div id="site-navigation" class="menu-panel" hidden>
         <a class="menu-home" href="/" aria-label="Seismique — home"><img class="brand-image" src="https://static.wixstatic.com/media/51d719_1a8dbfba7f3c4153bf21afae44b1c128~mv2.png/v1/fill/w_506,h_126,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SEISMIQUE%20LOGO%20%20no%20squiggle.png" alt="Seismique" width="506" height="126" loading="lazy" decoding="async"></a><nav class="direct-nav" aria-label="Main navigation"><a href="/exhibits/">Immersive Museum</a><a href="/mini-golf/">Glow Mini Golf</a><a href="/parties/">Parties &amp; Events</a><a href="/whats-happening/">What’s Happening</a><a href="#visit-room">Plan Your Visit</a></nav>
-        <div class="menu-settings"><button class="led-toggle" type="button" aria-pressed="true">Pause effects</button></div>
       </div>
       <a class="footer-shortcut" href="#visit-room">Plan Your Visit <span aria-hidden="true">↗</span></a><a class="return-tour" href="#tour">Back to tour</a>
     </header>
@@ -144,20 +143,20 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
   <script src="/assets/destination-grass.js?v=61"></script>
   <script src="/assets/entrance-mural.js?v=52"></script>
   <script src="/assets/portal-energy.js?v=52"></script>
-  <script src="/assets/journey-guide.js?v=64"></script>
+  <script src="/assets/journey-guide.js?v=pace-20261030"></script>
   <script src="/assets/journey-performance.js?v=61"></script>
   <script>
   (()=>{
     const root=document.getElementById('seismique-jungle-reveal');
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
-    if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;root.querySelector('.led-toggle').disabled=true;return;}
+    if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
     const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash');
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const performanceBudget=window.createJourneyPerformance({compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
     const quality=performanceBudget.budget;
     let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
-    let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;root.querySelector('.led-toggle').disabled=true;return;}
+    let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     renderer.setPixelRatio(quality.ratio);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(0x080c16);stage.prepend(renderer.domElement);
     const scene=new T.Scene();scene.fog=new T.Fog(0x171328,24,70);
     const camera=new T.PerspectiveCamera(76,1,.08,110);
@@ -755,7 +754,7 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
         if(distance < -7 || distance > (quality.compact?25:38))return;
         pivot.rotation.z=Math.sin(revealTime*.42+phase)*.021;pivot.rotation.x=Math.sin(revealTime*.31+phase*.7)*.017;
         const color=pod.material.uniforms.uColor.value;
-        // A continuous hue loop has no abrupt reset and freezes with Pause effects.
+        // A continuous hue loop has no abrupt reset and respects the shared effects clock.
         color.setHSL((colorOffset+revealTime/colorPeriod)%1,.86,.55);
         halo.material.color.copy(color);pool.material.color.copy(color);if(light)light.color.copy(color);
         const localDepth=T.MathUtils.smoothstep(-pivot.position.z,17,51),bloom=1+arrival*.12+richness*(.08+.16*localDepth);
@@ -777,9 +776,6 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     const portalEnergy=window.createPortalEnergyTimeline({reducedMotion});
     const powerUpDuration=portalEnergy.duration;
     let portalClock=reducedMotion?powerUpDuration:0,powerUpTime=portalClock;
-    const machineButton=root.querySelector('.led-toggle');
-    function machineLabel(){machineButton.textContent=machineRunning?'Pause effects':'Play effects';machineButton.setAttribute('aria-pressed',String(machineRunning));}
-    machineLabel();machineButton.addEventListener('click',()=>{machineRunning=!machineRunning;machineLabel();journeyLoop?.wake();});
     const machine=new T.Group();scene.add(machine);
     const ink=new T.MeshStandardMaterial({color:0x131416,roughness:.6});
     const cream=new T.MeshStandardMaterial({color:0xf3efdf,roughness:.61,metalness:.10});
@@ -1750,5 +1746,5 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
   </div>
 </dialog>
 <!-- VISIT_ROOM_END -->
-<script src="/assets/journey-interface.js?v=64" defer></script></body>
+<script src="/assets/journey-interface.js?v=controls-20261030" defer></script></body>
 </html>

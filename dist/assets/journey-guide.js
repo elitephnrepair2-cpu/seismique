@@ -2,6 +2,7 @@
 (function(scope){
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const ease=t=>t*t*(3-2*t);
+  const travelSpeed=1.2;
   function createJourneyGuide({stops,reducedMotion=false,initialProgress=null}){
     const points=()=>[...stops(),1];
     const first=stops()[0];
@@ -9,7 +10,7 @@
     let index=progress>=first-.006?points().reduce((best,n,i,all)=>Math.abs(n-progress)<Math.abs(all[best]-progress)?i:best,0):-1;
     let mode=index<0?'intro':'idle',ready=false,skipPending=false,transition=null;
     let introFrom=progress,introElapsed=0;
-    const introDuration=Math.max(1,11*(first-progress)/first);
+    const introDuration=Math.max(1,11/travelSpeed*(first-progress)/first);
     function state(){return {progress,target:mode==='intro'?stops()[0]:points()[index],index,mode,busy:mode!=='idle',skipPending,ready};}
     function settle(i){index=i;progress=points()[i];mode='idle';transition=null;skipPending=false;}
     return {
@@ -20,7 +21,7 @@
         const next=clamp(index+Math.sign(direction),0,points().length-1);
         if(next===index)return false;
         index=next;mode='transition';
-        transition={from:progress,elapsed:0,duration:clamp(Math.abs(points()[index]-progress)/.055,1.4,2.6)};
+        transition={from:progress,elapsed:0,duration:clamp(Math.abs(points()[index]-progress)/.055,1.4,2.6)/travelSpeed};
         return true;
       },
       tick(seconds,{sceneReady=true,introPlaying=true}={}){

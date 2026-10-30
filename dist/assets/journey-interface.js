@@ -14,7 +14,7 @@
     if(room.open)return;
     root.tourControls?.pause();returnFocus=document.activeElement;root.closeNavigation?.();
     root.dataset.visitOpen='true';
-    room.dataset.effectsPaused=String(root.querySelector('.led-toggle')?.getAttribute('aria-pressed')==='false');
+    room.dataset.effectsPaused=String(matchMedia('(prefers-reduced-motion: reduce)').matches);
     room.showModal();scroller.scrollTop=roomScroll;
     room.querySelector('.vr-return').focus({preventScroll:true});
     if(history&&location.hash!=='#visit-room')window.history.pushState({seismiqueVisitRoom:true},'', '#visit-room');

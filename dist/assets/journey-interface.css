@@ -52,7 +52,6 @@ body.jungle-home .tour-controls:not(:has(.explore[data-entry-state="ready"])) .e
  body.jungle-home .explore[data-entry-state="ready"] .enter-direction{display:none}
  body.jungle-home .explore:not([data-entry-state="ready"]) .enter-support{display:none}
  body.jungle-home #seismique-jungle-reveal .menu-toggle:focus-visible,body.jungle-home #seismique-jungle-reveal .global-ticketbar .button:focus-visible,body.jungle-home #seismique-jungle-reveal .explore:focus-visible{outline:2px solid #dfc9ff;outline-offset:4px}
- body.jungle-home #seismique-jungle-reveal:has(.led-toggle[aria-pressed="false"]) .explore::before{animation-play-state:paused}
  body.jungle-home #seismique-jungle-reveal .foot{bottom:calc(var(--journey-safe-bottom) + 68px)}
  body.jungle-home .journey-cue{bottom:calc(var(--journey-safe-bottom) + 19px)}
 }
