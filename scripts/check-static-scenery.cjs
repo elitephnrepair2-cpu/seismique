@@ -21,3 +21,11 @@ const split=batchStaticScenery(T,vegetation);while(!split.next().done){}
 assert.equal(vegetation.children.length,2);assert.equal(vegetation.children.reduce((n,m)=>n+m.count,0),100);
 for(const cluster of vegetation.children){assert(cluster.geometry===geometry);assert(cluster.material===material);assert(cluster.geometry.boundingSphere||cluster.boundingSphere);assert(cluster.instanceColor);}
 console.log('PASS: local foliage bounds preserve every instance and color while allowing independent frustum culling.');
+
+// Some sculpted trunks encode their location in vertices, with a zero object origin.
+const located=new T.Group();
+for(const z of [-4,-5,-28,-29]){const g=geometry.clone().translate(0,0,z);located.add(new T.Mesh(g,material));}
+const localBatch=batchStaticScenery(T,located);while(!localBatch.next().done){}
+assert.equal(located.children.length,2,'Geometry-space locations must remain in separate spatial batches');
+assert(located.children.every(m=>m.geometry.boundingBox.max.z-m.geometry.boundingBox.min.z<5));
+console.log('PASS: world-coordinate trunk geometry groups by actual location, preserving local culling.');

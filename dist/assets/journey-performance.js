@@ -3,8 +3,8 @@
   'use strict';
   function createJourneyPerformance({compact=false,cores=8,memory=8,pixelRatio=1}={}){
     const constrained=compact||cores<=4||memory<=4;
-    const ceiling=Math.min(pixelRatio,constrained?1.15:1.8),floor=Math.min(ceiling,.9);
-    let ratio=ceiling,elapsed=0,frames=0,slow=0,fast=0,cooldown=0;
+    const ceiling=Math.min(pixelRatio,constrained?1.75:1.8),floor=Math.min(ceiling,constrained?1.25:.9);
+    let ratio=Math.min(ceiling,constrained?1.5:ceiling),elapsed=0,frames=0,slow=0,fast=0,cooldown=0;
     const budget={compact:constrained,ratio,density:constrained?.65:1,arcs:constrained?2:3,mistRange:constrained?28:40};
     function reset(){elapsed=frames=slow=fast=0;cooldown=2;}
     return {budget,reset,sample(seconds){

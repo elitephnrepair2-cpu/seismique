@@ -2,17 +2,17 @@ const assert=require('node:assert/strict');
 const {createJourneyPerformance,createJourneyLoop}=require('../dist/assets/journey-performance.js');
 const mobile=createJourneyPerformance({compact:true,cores:6,memory:8,pixelRatio:3});
 const desktop=createJourneyPerformance({pixelRatio:2});
-assert.equal(mobile.budget.ratio,1.15);assert.equal(desktop.budget.ratio,1.8);
+assert.equal(mobile.budget.ratio,1.5);assert.equal(desktop.budget.ratio,1.8);
 assert(mobile.budget.density<desktop.budget.density);
 function sample(controller,seconds,dt){for(let i=0;i<seconds/dt;i++)controller.sample(dt);}
-sample(mobile,20,1/60);assert.equal(mobile.budget.ratio,1.15,'Healthy phones retain their initial quality');
-mobile.sample(.8);assert.equal(mobile.budget.ratio,1.15,'A tab-resume gap must not lower quality');
-sample(mobile,8,1/25);assert(mobile.budget.ratio<1.15,'Sustained slow rendering lowers GPU work');
+sample(mobile,20,1/60);assert(mobile.budget.ratio>=1.5&&mobile.budget.ratio<=1.75,'Healthy phones retain or improve crispness');
+const healthy=mobile.budget.ratio;mobile.sample(.8);assert.equal(mobile.budget.ratio,healthy,'A tab-resume gap must not lower quality');
+sample(mobile,8,1/25);assert(mobile.budget.ratio<healthy,'Sustained slow rendering lowers GPU work');
 const lower=mobile.budget.ratio;sample(mobile,4,1/60);assert.equal(mobile.budget.ratio,lower,'Recovery must not oscillate on a few good frames');
-sample(mobile,80,1/60);assert.equal(mobile.budget.ratio,1.15,'Sustained recovery restores bounded quality');
-sample(mobile,100,1/20);assert(mobile.budget.ratio>=.9,'Quality has a legibility floor');
+sample(mobile,80,1/60);assert.equal(mobile.budget.ratio,1.75,'Sustained recovery restores bounded quality');
+sample(mobile,100,1/20);assert(mobile.budget.ratio>=1.25,'Quality has a legibility floor');
 const struggling=createJourneyPerformance({compact:true,pixelRatio:3});
-sample(struggling,8,.2);assert(struggling.budget.ratio<1.15,'A phone rendering at five FPS must still reduce GPU work');
+sample(struggling,8,.2);assert(struggling.budget.ratio<1.5,'A phone rendering at five FPS must still reduce GPU work');
 const beforeGap=struggling.budget.ratio;struggling.sample(90);assert.equal(struggling.budget.ratio,beforeGap,'Suspending a tab does not change quality');
 let id=0,now=0,animate=true,calls=0,lastDt=-1;const callbacks=new Map();
 const loop=createJourneyLoop({request(fn){callbacks.set(++id,fn);return id;},cancel(key){callbacks.delete(key);},render(dt){calls++;lastDt=dt;return animate;}});
@@ -28,7 +28,7 @@ console.log('PASS: bounded mobile budgets, sustained-pressure scaling, slow reco
 
 // Exercise the production resize callbacks without requiring a GPU.
 const fs=require('node:fs'),vm=require('node:vm');
-const html=fs.readFileSync(require('node:path').join(__dirname,'../dist/index.html'),'utf8');
+const html=require('./read-journey-source.cjs')();
 const resizeSource=html.slice(html.indexOf('    let pendingViewport='),html.indexOf('    const sceneResize='));
 let bufferChanges=0,wakes=0;
 const ctx={stage:{clientWidth:390,clientHeight:844},root:{wakeJourney(){wakes++;}},renderer:{setSize(){bufferChanges++;}},camera:{aspect:1,fov:76,updateProjectionMatrix(){}},fitEntranceWordmark(){},destinationGrass:{resize(){}},viewportWidth:0,viewportHeight:0};

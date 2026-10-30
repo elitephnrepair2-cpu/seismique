@@ -52,8 +52,37 @@ window.createJungleSky=({THREE:T,scene,reducedMotion,pixelRatio=Math.min(deviceP
     vertexShader:`uniform vec2 uHead,uDirection;uniform float uLength;varying vec2 vUv;void main(){vUv=uv;vec2 side=vec2(-uDirection.y,uDirection.x);vec2 angle=uHead-uDirection*(1.-uv.x)*uLength+side*(uv.y-.5)*.0034*(.25+.75*uv.x);vec3 d=vec3(sin(angle.x)*cos(angle.y),sin(angle.y),-cos(angle.x)*cos(angle.y));gl_Position=projectionMatrix*viewMatrix*vec4(d*79.+cameraPosition,1.);}`,
     fragmentShader:`varying vec2 vUv;uniform float uOpacity;void main(){float core=pow(1.-abs(vUv.y*2.-1.),1.6),tail=pow(vUv.x,1.8);vec3 color=mix(vec3(.30,.45,.80),vec3(.88,.96,1.),pow(vUv.x,5.));gl_FragColor=vec4(color,core*tail*uOpacity);}`});
   const meteor=new T.Mesh(new T.PlaneGeometry(1,1,20,1),meteorMaterial);meteor.frustumCulled=false;meteor.renderOrder=2;meteor.visible=false;group.add(meteor);
+  let cachedTargets=null;
+  async function prepare(renderer){
+    if(cachedTargets)return;
+    const previous=renderer.getRenderTarget(),targets=[];
+    const bakeScene=new T.Scene(),bakeCamera=new T.OrthographicCamera(-1,1,1,-1,0,1);
+    const bakeUniforms={uTime:{value:0},uFade:{value:1},uEnding:{value:0}};
+    const fragment=skyMaterial.fragmentShader.replace('varying vec3 vDirection;', 'varying vec2 vBakeUv;').replace('vec3 d=normalize(vDirection);','float longitude=(vBakeUv.x-.5)*6.283185307;float latitude=(vBakeUv.y-.5)*3.141592654;vec3 d=vec3(sin(longitude)*cos(latitude),sin(latitude),cos(longitude)*cos(latitude));');
+    const bakeMaterial=new T.ShaderMaterial({uniforms:bakeUniforms,depthTest:false,depthWrite:false,vertexShader:'varying vec2 vBakeUv;void main(){vBakeUv=uv;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:fragment});
+    const quad=new T.Mesh(new T.PlaneGeometry(2,2),bakeMaterial);bakeScene.add(quad);
+    try{
+      for(let ending=0;ending<2;ending++){
+        await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:200}):setTimeout(resolve,16));
+        const target=new T.WebGLRenderTarget(1024,512,{depthBuffer:false,stencilBuffer:false});
+        // Store sRGB so faint dark nebula gradients retain precision.
+        target.texture.colorSpace=T.SRGBColorSpace;target.texture.wrapS=T.RepeatWrapping;
+        targets.push(target);bakeUniforms.uEnding.value=ending;renderer.setRenderTarget(target);renderer.render(bakeScene,bakeCamera);renderer.setRenderTarget(previous);
+      }
+      const cachedMaterial=new T.ShaderMaterial({uniforms:{...uniforms,uCanopy:{value:targets[0].texture},uHorizon:{value:targets[1].texture}},side:T.BackSide,depthWrite:false,fog:false,vertexShader:skyMaterial.vertexShader,fragmentShader:`
+        varying vec3 vDirection;uniform sampler2D uCanopy,uHorizon;uniform float uTime,uFade,uEnding;
+        void main(){vec3 d=normalize(vDirection);vec2 uv=vec2(atan(d.x,d.z)/6.283185307+.5,asin(clamp(d.y,-1.,1.))/3.141592654+.5);
+          vec3 color=mix(texture2D(uCanopy,uv).rgb,texture2D(uHorizon,uv).rgb,uEnding);
+          gl_FragColor=vec4(mix(vec3(.001,.002,.005),color,uFade),1.);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`});
+      dome.material=cachedMaterial;skyMaterial.dispose();cachedTargets=targets;
+    }catch(error){targets.forEach(target=>target.dispose());throw error;}
+    finally{renderer.setRenderTarget(previous);quad.geometry.dispose();bakeMaterial.dispose();}
+  }
   let lastTime=null,skyTime=0,nextMeteor=3.5,event=0,flight=null;
-  return {setPixelRatio(value){uniforms.uPixelRatio.value=value;},update(progress,time){
+  return {prepare,setPixelRatio(value){uniforms.uPixelRatio.value=value;},update(progress,time){
     const dt=lastTime===null?0:Math.max(0,Math.min(.08,time-lastTime));lastTime=time;
     const fade=T.MathUtils.smoothstep(progress,.43,.60);group.visible=fade>.001;if(!group.visible)return;
     if(!reducedMotion&&progress>.55)skyTime+=dt;

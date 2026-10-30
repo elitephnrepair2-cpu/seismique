@@ -21,7 +21,7 @@ run(g,.25);assert(g.state().motionVeil>0);assert.equal(g.state().progress,stops[
 g=make({initialProgress:.78});g.tick(0);assert.equal(g.state().index,2);run(g,30);assert.equal(g.state().index,2,'Returning visitors must not restart intro');
 const points=[];for(const hz of [30,60,120]){g=make();for(let i=0;i<hz*5;i++)g.tick(1/hz);points.push(g.state().progress);}assert(Math.max(...points)-Math.min(...points)<.00001);
 // Exercise the real browser gesture handlers with the same controller as Next.
-const html=fs.readFileSync(require('path').join(__dirname,'../dist/index.html'),'utf8');
+const html=require('./read-journey-source.cjs')();
 const handlers=html.slice(html.indexOf('    // The complete viewport owns travel gestures.'),html.indexOf('    function skipIntro()'));
 function harness(){
  const guide=make({initialProgress:stops[0]});guide.tick(0);const events={},keys={};let now=1000,opened=0;

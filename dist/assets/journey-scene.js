@@ -1,0 +1,1632 @@
+  document.addEventListener('DOMContentLoaded',()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  (()=>{
+    const root=document.getElementById('seismique-jungle-reveal');
+    const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
+    if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
+    const T=window.THREE;
+    const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
+    const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const performanceBudget=window.createJourneyPerformance({compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
+    const quality=performanceBudget.budget;
+    let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
+    let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
+    root.dataset.antialias=String(renderer.getContext().getContextAttributes().antialias);
+    renderer.setPixelRatio(quality.ratio);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(0x080c16);stage.prepend(renderer.domElement);
+    const scene=new T.Scene();scene.fog=new T.Fog(0x171328,24,70);
+    const camera=new T.PerspectiveCamera(76,1,.08,110);
+    const ambientLight=new T.HemisphereLight(0xf3fbff,0x48445a,.82);scene.add(ambientLight);
+    const sun=new T.DirectionalLight(0xfff5e6,1.2);sun.position.set(-6,12,10);scene.add(sun);
+    const white=new T.MeshStandardMaterial({color:0xf8f4ea,roughness:.65});
+    const dark=new T.MeshStandardMaterial({color:0x12141c,roughness:.48});
+    const purple=new T.MeshStandardMaterial({color:0x832bda,roughness:.55});
+    const neon=(color)=>new T.MeshBasicMaterial({color});
+    const cyan=neon(0x05e8f5),pink=neon(0xff3ce8),lime=neon(0x5af691);
+    function mesh(geo,mat,x,y,z,parent=scene){const m=new T.Mesh(geo,mat);m.position.set(x,y,z);parent.add(m);return m;}
+    function box(w,h,d,mat,x,y,z,parent=scene,edges=false){const m=mesh(new T.BoxGeometry(w,h,d),mat,x,y,z,parent);if(edges){const e=new T.LineSegments(new T.EdgesGeometry(m.geometry),new T.LineBasicMaterial({color:0x18181e}));m.add(e);}return m;}
+    function tube(points,r,mat,parent=scene){const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const m=new T.Mesh(new T.TubeGeometry(curve,32,r,7,false),mat);parent.add(m);return m;}
+    // Illustrated museum flooring: long edges follow world X, across the visitor's path.
+    // A seamless 6m tile contains staggered 3m x .5m planks; perspective comes from the camera.
+    const floorCanvas=document.createElement('canvas');floorCanvas.width=floorCanvas.height=1536;
+    const floorCtx=floorCanvas.getContext('2d'),plankLength=768,plankWidth=128;
+    function plankRandom(n){const v=Math.sin(n*93.71+17.3)*43758.5453;return v-Math.floor(v);}
+    floorCtx.fillStyle='#555359';floorCtx.fillRect(0,0,1536,1536);
+    const plankOffsets=[0,.37,.72,.18,.56,.86,.28,.64,.08,.44,.79,.23];
+    for(let row=0;row<12;row++)for(let col=-1;col<3;col++){
+      const x=(col+plankOffsets[row])*plankLength,y=row*plankWidth;
+      const seed=row*179+((col%2+2)%2)*67+11,rand=n=>plankRandom(seed+n*7.13);
+      floorCtx.save();floorCtx.beginPath();floorCtx.rect(x+2,y+2,plankLength-4,plankWidth-4);floorCtx.clip();
+      const tone=234+Math.floor(rand(2)*11);
+      floorCtx.fillStyle=`rgb(${tone},${tone-1},${tone-3})`;floorCtx.fillRect(x,y,plankLength,plankWidth);
+      const knotX=plankLength*(.2+rand(3)*.6),knotY=plankWidth*(.3+rand(4)*.4),hasKnot=rand(5)>.32;
+      // Open pale areas separate the tapered ink strokes, preserving a drawn
+      // grain without overlapping bands becoming solid black foreground.
+      for(let band=0;band<14;band++){
+        const baseline=8+band*8.5+(rand(10+band)-.5)*3.3;
+        const from=rand(50+band)>.55?-12:rand(80+band)*plankLength*.65;
+        const length=plankLength*(.27+rand(110+band)*.88),to=Math.min(plankLength+12,from+length);
+        const phase=rand(140+band)*Math.PI*2,width=1.15+rand(170+band)*2.45+(band%5===0?.65:0),top=[],bottom=[];
+        for(let k=0;k<=90;k++){
+          const t=k/90,u=from+(to-from)*t;
+          let v=baseline+1.9*Math.sin(u*.026+phase)+1.1*Math.sin(u*.065+phase*.7)+.6*Math.sin(u*.14+phase);
+          if(hasKnot){const dy=baseline-knotY;v+=Math.sign(dy||1)*15*Math.exp(-Math.pow((u-knotX)/80,2))*Math.exp(-Math.abs(dy)/28);}
+          const taper=Math.pow(Math.sin(Math.PI*t),.4),half=width*taper*(.8+.2*Math.sin(u*.041+phase));
+          top.push([x+u,y+v-half]);bottom.push([x+u,y+v+half]);
+        }
+        floorCtx.fillStyle=band%5===0?'#353238':'#17151b';floorCtx.beginPath();
+        top.forEach(([a,b],i)=>i?floorCtx.lineTo(a,b):floorCtx.moveTo(a,b));bottom.reverse().forEach(([a,b])=>floorCtx.lineTo(a,b));floorCtx.closePath();floorCtx.fill();
+      }
+      if(hasKnot){
+        // Narrow almond-shaped knots follow the horizontal grain.
+        floorCtx.save();floorCtx.translate(x+knotX,y+knotY);floorCtx.rotate((rand(211)-.5)*.08);
+        for(let ring=3;ring>=1;ring--){const rx=ring*10,ry=ring*3.2;floorCtx.beginPath();floorCtx.moveTo(-rx,0);floorCtx.bezierCurveTo(-rx*.35,-ry,rx*.35,-ry,rx,0);floorCtx.bezierCurveTo(rx*.35,ry,-rx*.35,ry,-rx,0);floorCtx.strokeStyle='#0c0a0f';floorCtx.lineWidth=2.8;floorCtx.stroke();}
+        floorCtx.fillStyle='#08070b';floorCtx.beginPath();floorCtx.ellipse(0,0,5,1.8,0,0,Math.PI*2);floorCtx.fill();floorCtx.restore();
+      }
+      floorCtx.restore();
+      // Fine dark joints and a restrained edge highlight keep boards flat and tightly fitted.
+      floorCtx.strokeStyle='#343138';floorCtx.lineWidth=2.4;floorCtx.strokeRect(x+1.5,y+1.5,plankLength-3,plankWidth-3);
+      floorCtx.strokeStyle='#f4f0e7';floorCtx.lineWidth=1;floorCtx.beginPath();floorCtx.moveTo(x+4,y+4);floorCtx.lineTo(x+plankLength-4,y+4);floorCtx.stroke();
+    }
+    const floorTex=new T.CanvasTexture(floorCanvas);floorTex.wrapS=floorTex.wrapT=T.RepeatWrapping;floorTex.repeat.set(56/6,100/6);floorTex.colorSpace=T.SRGBColorSpace;floorTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+    // Neutral printed surface; the existing portal lights supply the shifting color and sheen.
+    const floor=mesh(new T.PlaneGeometry(56,100),new T.MeshPhysicalMaterial({map:floorTex,emissiveMap:floorTex,emissive:0xe9e6e2,emissiveIntensity:.045,roughness:.46,metalness:0,clearcoat:.20,clearcoatRoughness:.40}),0,-.006,-16);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.renderOrder=-3;window.fadeEndingFloor(floor.material,'museum');
+    const entranceFloorUniforms={uFloorPortalPower:{value:0},uFloorPortalTime:{value:0},uFloorDischarge:{value:0},uFloorStrike:{value:0}};
+    function addEntranceFloorSpill(){
+      const previous=floor.material.onBeforeCompile.bind(floor.material),previousKey=floor.material.customProgramCacheKey();
+      floor.material.onBeforeCompile=shader=>{
+        previous(shader);Object.assign(shader.uniforms,entranceFloorUniforms);
+        shader.fragmentShader='uniform float uFloorPortalPower,uFloorPortalTime,uFloorDischarge,uFloorStrike;\n'+shader.fragmentShader;
+        shader.fragmentShader=shader.fragmentShader.replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
+          // Broad, low reflected light follows the plank material. The existing
+          // physical bounce light supplies the brighter contact directly below.
+          vec2 fp=vEndingWorld.xz;
+          float nearSill=exp(-pow(fp.x/3.6,2.)-pow((fp.y-1.1)/2.8,2.));
+          float cyanSpill=exp(-pow((fp.x-1.35)/3.5,2.)-pow((fp.y-3.7)/4.8,2.));
+          float pinkSpill=exp(-pow((fp.x+1.65)/3.2,2.)-pow((fp.y-2.8)/4.1,2.));
+          float reflectionBreath=.95+.05*sin(uFloorPortalTime*.23);
+          vec3 portalReflection=vec3(.16,.055,.28)*nearSill
+            +vec3(.025,.145,.205)*cyanSpill+vec3(.16,.025,.10)*pinkSpill;
+          float strikePool=exp(-pow((fp.x-uFloorStrike*.38)/3.3,2.)-pow((fp.y-2.6)/4.8,2.));
+          vec3 dischargeReflection=(vec3(.09,.26,.37)*strikePool+vec3(.24,.035,.21)*pinkSpill*.6)*uFloorDischarge;
+          totalEmissiveRadiance+=(portalReflection*uFloorPortalPower*reflectionBreath+dischargeReflection)*(.045+diffuseColor.rgb*.82);
+        `);
+      };
+      floor.material.customProgramCacheKey=()=>previousKey+'-entrance-spill-52';
+    }
+
+    const ledRings=[],tunnelMat=new T.MeshStandardMaterial({color:0x092534,emissive:0x053349,emissiveIntensity:.32,metalness:.46,roughness:.40,side:T.DoubleSide});
+    const glow=new T.PointLight(0x00dfff,2,15);glow.position.set(0,3,-4);scene.add(glow);
+    const revealWorld=new T.Group();revealWorld.visible=false;scene.add(revealWorld);
+    // Keep the shader light count stable through every reveal. Darkness uses intensity,
+    // never light visibility; toggling nested lights would rebuild every lit program.
+    const jungleLightPool=Array.from({length:11},()=>{const light=new T.PointLight(0xffffff,0,1,2);scene.add(light);return light;});
+    let nextJungleLight=0;
+    function jungleLight(color,intensity,distance){const light=jungleLightPool[nextJungleLight++];light.color.set(color);light.intensity=intensity;light.distance=distance;return light;}
+    const hangingPods=[],revealLights=[],revealPools=[],revealPlants=[];
+    let revealReady=false,revealMotes,revealTime=0,revealTrees=0,destinationGrass,jungleLighting;
+    const revealMoteCount=70,revealMotePositions=new Float32Array(revealMoteCount*3);
+    // Increase distances between destinations without stretching trees or textures.
+    const jungleStretch=1.44,endingZ=-60.8;
+    function jungleZ(z){return z>=-25?z:-25+(z+25)*jungleStretch;}
+    function jungleSourceZ(z){return z>=-25?z:-25+(z+25)/jungleStretch;}
+    function junglePathX(z){const depth=-jungleSourceZ(z);return .82*Math.sin((depth-23)*.29)*T.MathUtils.smoothstep(depth,22,27);}
+    const jungleSidePaths=[
+      {id:'exhibits',side:1,z:-25,color:0x61dce3},
+      {id:'mini-golf',side:-1,z:-30.2,color:0xbba3ff},
+      {id:'parties',side:1,z:-35.4,color:0xee8ab9},
+      {id:'whats-happening',side:-1,z:-40.6,color:0xb69ae2}
+    ].map(stop=>{
+      const z=jungleZ(stop.z),x=junglePathX(z),side=stop.side;
+      const curve=new T.CatmullRomCurve3([
+        new T.Vector3(junglePathX(z+1.2)+side*1.7,.038,z+1.2),
+        new T.Vector3(x+side*2.9,.038,z+.9),
+        new T.Vector3(x+side*4.1,.038,z+.35),
+        new T.Vector3(x+side*5.15,.038,z+.05)
+      ]);
+      return {...stop,z,curve,samples:Array.from({length:25},(_,i)=>curve.getPointAt(i/24))};
+    });
+    function sidePathOpening(z,side){return jungleSidePaths.some(stop=>stop.side===side&&Math.abs(z-(stop.z+.9))<1.45);}
+    function inSidePath(x,z,margin=0){return jungleSidePaths.some(stop=>stop.samples.some(v=>Math.hypot(x-v.x,z-v.z)<.96+margin));}
+    function revealRandom(n){const v=Math.sin(n*127.13+53.7)*43758.5453;return v-Math.floor(v);}
+    function organicBranch(points,r0,r1,material,segments=36,parent=revealWorld){
+      const curve=new T.CatmullRomCurve3(points.map(v=>new T.Vector3(...v))),sculpted=!!material.userData.bark;
+      // Phone-size silhouettes retain carved channels with fewer hidden triangles.
+      if(quality.compact)segments=Math.max(12,Math.round(segments*.75));
+      const radial=sculpted?(r0>.65?(quality.compact?48:64):r0>.28?(quality.compact?32:48):24):9,geometry=new T.TubeGeometry(curve,segments,1,radial,false),positions=geometry.attributes.position;
+      const seed=points[0][0]*.7+points[0][2]*.21;
+      const barkUV=geometry.attributes.uv,barkLength=curve.getLength()/3.5;
+      // Broad channels are carved into the mesh; the color texture adds no lines.
+      const channels=Array.from({length:6},(_,k)=>({
+        angle:k/6*Math.PI*2+(revealRandom(k+seed*17)-.5)*.30,
+        width:.18+revealRandom(k+seed*23+32)*.075,
+        depth:.30+revealRandom(k+seed*31+61)*.10,
+        phase:revealRandom(k+seed*13+83)*Math.PI*2
+      }));
+      for(let i=0;i<=segments;i++){
+        const u=i/segments,center=curve.getPointAt(u),knot=sculpted?1+.21*Math.exp(-Math.pow((u-.27)/.085,2))+.12*Math.exp(-Math.pow((u-.64)/.07,2)):1;
+        const radius=T.MathUtils.lerp(r0,r1,Math.pow(u,.84))*knot*(1+.04*Math.sin(u*28+seed));
+        for(let j=0;j<=radial;j++){
+          const index=i*(radial+1)+j,a=j/radial*Math.PI*2;
+          if(sculpted)barkUV.setXY(index,u*barkLength+seed*.13,j/radial);
+          let ridges=1;
+          if(sculpted){
+            let recess=0;
+            for(const channel of channels){
+              const angle=channel.angle+.12*Math.sin(u*4.3+channel.phase)+.045*Math.sin(u*9+channel.phase),d=Math.atan2(Math.sin(a-angle),Math.cos(a-angle));
+              recess+=channel.depth*Math.exp(-.5*(d/channel.width)**2);
+            }
+            const relief=T.MathUtils.smoothstep(radius,.035,.22);
+            ridges=1+relief*(.045+.030*Math.sin(a*3+u*1.8+seed)-recess);
+          }
+          positions.setXYZ(index,center.x+(positions.getX(index)-center.x)*radius*ridges,center.y+(positions.getY(index)-center.y)*radius*ridges,center.z+(positions.getZ(index)-center.z)*radius*ridges);
+        }
+      }
+      smoothBranchNormals(geometry);const branch=mesh(geometry,material,0,0,0,parent);return{branch,curve};
+    }
+    function smoothBranchNormals(geometry){
+      geometry.computeVertexNormals();
+      const {radialSegments:radial,tubularSegments:segments}=geometry.parameters,n=geometry.attributes.normal;
+      for(let i=0;i<=segments;i++){
+        const a=i*(radial+1),b=a+radial,x=n.getX(a)+n.getX(b),y=n.getY(a)+n.getY(b),z=n.getZ(a)+n.getZ(b),length=Math.hypot(x,y,z)||1;
+        n.setXYZ(a,x/length,y/length,z/length);n.setXYZ(b,x/length,y/length,z/length);
+      }
+      n.needsUpdate=true;
+    }
+    // Seamless value noise for subdued, non-directional surface texture.
+    function surfaceNoise(x,y,cells,seed=0){
+      const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
+      const sample=(a,b)=>revealRandom(((a%cells+cells)%cells)+((b%cells+cells)%cells)*cells+seed);
+      return T.MathUtils.lerp(T.MathUtils.lerp(sample(ix,iy),sample(ix+1,iy),ux),T.MathUtils.lerp(sample(ix,iy+1),sample(ix+1,iy+1),ux),uy);
+    }
+    function pathRibbon(from,to,width,material,height=.03){
+      const positions=[],uv=[],indices=[],steps=150;
+      for(let i=0;i<=steps;i++){const z=T.MathUtils.lerp(from,to,i/steps),x=junglePathX(z);positions.push(x-width,height,z,x+width,height,z);uv.push(0,(from-z)/4,1,(from-z)/4);if(i<steps){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}}
+      const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.setIndex(indices);geometry.computeVertexNormals();return mesh(geometry,material,0,0,0,revealWorld);
+    }
+    function* buildRevealWorld(){
+      if(revealReady)return;
+      // Subtle granular surface only; broad groove relief lives in the geometry.
+      const barkSize=256,barkCanvas=document.createElement('canvas'),barkColorCanvas=document.createElement('canvas');
+      barkCanvas.width=barkCanvas.height=barkColorCanvas.width=barkColorCanvas.height=barkSize;
+      const bc=barkCanvas.getContext('2d'),cc=barkColorCanvas.getContext('2d'),bp=bc.createImageData(barkSize,barkSize),cp=cc.createImageData(barkSize,barkSize);
+      for(let y=0;y<barkSize;y++){if(y%16===0)yield;for(let x=0;x<barkSize;x++){
+        const pores=surfaceNoise(x/4,y/4,64,407),rough=surfaceNoise(x/16,y/16,16,211),mottle=surfaceNoise(x/64,y/64,4,819),k=(x+y*barkSize)*4;
+        const height=.43+rough*.19+pores*.10,shade=.94+mottle*.06;
+        bp.data[k]=bp.data[k+1]=bp.data[k+2]=height*255;bp.data[k+3]=255;
+        cp.data[k]=cp.data[k+1]=cp.data[k+2]=shade*255;cp.data[k+3]=255;
+      }
+      }
+      bc.putImageData(bp,0,0);cc.putImageData(cp,0,0);
+      const barkMap=new T.CanvasTexture(barkCanvas),barkColorMap=new T.CanvasTexture(barkColorCanvas);
+      for(const map of [barkMap,barkColorMap]){map.wrapS=map.wrapT=T.RepeatWrapping;map.anisotropy=4;}
+      barkColorMap.colorSpace=T.SRGBColorSpace;
+      const barkMaterials=[0x754470,0x865377,0x60365f,0x794b70].map(color=>{
+        const mat=new T.MeshStandardMaterial({color,map:barkColorMap,roughness:.77,metalness:0,bumpMap:barkMap,bumpScale:.065});mat.userData.bark=true;return mat;
+      });
+      const stemMaterial=new T.MeshStandardMaterial({color:0xb13a74,emissive:0x3d0926,emissiveIntensity:.35,roughness:.43});
+      const stoneCanvas=document.createElement('canvas');stoneCanvas.width=stoneCanvas.height=128;
+      const stoneContext=stoneCanvas.getContext('2d'),stonePixels=stoneContext.createImageData(128,128);
+      for(let y=0;y<128;y++){if(y%16===0)yield;for(let x=0;x<128;x++){
+        const grain=.58*surfaceNoise(x/8,y/8,16,170)+.27*surfaceNoise(x/2,y/2,64,361)+.15*surfaceNoise(x/32,y/32,4,542),k=(y*128+x)*4;
+        stonePixels.data[k]=stonePixels.data[k+1]=stonePixels.data[k+2]=grain*255;stonePixels.data[k+3]=255;
+      }
+      }
+      stoneContext.putImageData(stonePixels,0,0);const stoneBump=new T.CanvasTexture(stoneCanvas);stoneBump.wrapS=stoneBump.wrapT=T.RepeatWrapping;
+      const stoneMaterial=new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.93,metalness:0,bumpMap:stoneBump,bumpScale:.035});
+      yield;
+      // A flared arch lets the electrical tunnel dissolve into the canopy.
+      for(let k=0;k<3;k++){
+        const z=mouthZ-portalDepth-.09-k*1.65,r=4.35+k*.26,points=[];
+        for(let j=0;j<=56;j++){const a=-.22+(Math.PI+.44)*j/56;points.push([Math.cos(a)*r,3.55+Math.sin(a)*r,z]);}
+        organicBranch(points,.065,.065,tunnelMat,56);
+        const light=tube(points,.012,new T.MeshBasicMaterial({color:0x18bddd,transparent:true,opacity:.38-k*.10}),revealWorld);ledRings.push(light);
+      }
+      const groundUniforms={uTime:{value:0}};
+      const groundMaterial=new T.ShaderMaterial({uniforms:groundUniforms,transparent:true,depthWrite:false,side:T.DoubleSide,
+        vertexShader:`varying vec3 vWorld;void main(){vec4 w=modelMatrix*vec4(position,1.);vWorld=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+        fragmentShader:`varying vec3 vWorld;uniform float uTime;void main(){float d=-vWorld.z;float n=.5+.5*sin(vWorld.x*.81+sin(vWorld.z*.53))*sin(vWorld.z*.44);vec3 c=mix(vec3(.012,.018,.029),vec3(.025,.047,.063),n*.6);float fade=1.-smoothstep(${(-endingZ-7.24).toFixed(2)},${(-endingZ+.76).toFixed(2)},d);if(fade<.015)discard;gl_FragColor=vec4(c*mix(1.,.16,smoothstep(5.,15.,abs(vWorld.x))),smoothstep(2.4,4.2,d)*fade*(1.-smoothstep(15.,22.,abs(vWorld.x))));
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`});
+      const ground=mesh(new T.PlaneGeometry(45,76),groundMaterial,0,.011,-38.7,revealWorld);ground.rotation.x=-Math.PI/2;
+      // Mottled teal floor, like the painted surface in the supplied Eden video.
+      const floorCanvas=document.createElement('canvas');floorCanvas.width=floorCanvas.height=256;
+      const fc=floorCanvas.getContext('2d'),pixels=fc.createImageData(256,256);
+      for(let y=0;y<256;y++){if(y%16===0)yield;for(let x=0;x<256;x++){
+        const n=.52*surfaceNoise(x/64,y/64,4,8)+.27*surfaceNoise(x/16,y/16,16,72)+.15*surfaceNoise(x/4,y/4,64,201)+.06*revealRandom(x+y*256),k=(y*256+x)*4;
+        pixels.data[k]=20+n*15;pixels.data[k+1]=56+n*27;pixels.data[k+2]=59+n*25;pixels.data[k+3]=255;
+      }
+      }
+      fc.putImageData(pixels,0,0);const floorMap=new T.CanvasTexture(floorCanvas);floorMap.colorSpace=T.SRGBColorSpace;floorMap.wrapS=floorMap.wrapT=T.RepeatWrapping;floorMap.repeat.set(1,1);
+      const pathMaterial=new T.MeshStandardMaterial({map:floorMap,color:0x9ac7c2,roughness:.74,metalness:0,side:T.DoubleSide});
+      pathRibbon(-2.6,endingZ-.8,2.05,pathMaterial,.027);window.fadeEndingFloor(pathMaterial,'path',endingZ);
+      yield;
+      // Each floating page box has its own opening off the uninterrupted main trail.
+      const sidePathMaterial=pathMaterial.clone();sidePathMaterial.color.setHex(0xb4d5d2);sidePathMaterial.emissive.setHex(0x103039);sidePathMaterial.emissiveIntensity=.25;
+      jungleSidePaths.forEach(stop=>{
+        const vertices=[],uv=[],indices=[],steps=32;
+        for(let i=0;i<=steps;i++){
+          const u=i/steps,point=stop.curve.getPointAt(u),tangent=stop.curve.getTangentAt(u),normal=new T.Vector3(-tangent.z,0,tangent.x),width=1.06-.12*Math.sin(u*Math.PI);
+          for(const side of [-1,1]){const v=point.clone().addScaledVector(normal,side*width);vertices.push(v.x,v.y,v.z);uv.push(v.x/4,v.z/4);}
+          if(i<steps){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}
+        }
+        const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.setIndex(indices);geometry.computeVertexNormals();mesh(geometry,sidePathMaterial,0,0,0,revealWorld);
+        const end=stop.curve.getPointAt(1),landing=mesh(new T.CircleGeometry(1.06,32),sidePathMaterial,end.x,.035,end.z,revealWorld);landing.rotation.x=-Math.PI/2;
+      });
+      yield;
+      // Separate raised islands create the irregular red-stone beds in the reference.
+      const soil=new T.MeshStandardMaterial({color:0x201320,roughness:1,side:T.DoubleSide});
+      const bedSpecs=[[-1,-12.9,4.15,1.30,2.0],[1,-15,4.65,1.65,2.5],[-1,-19.6,4.25,1.45,2.5],[1,-20.5,4.7,1.6,2.2],[-1,-24,4.5,1.5,2.0],[1,-28.5,4.65,1.55,1.8],[-1,-33,4.45,1.5,1.8],[1,-47.3,4.8,1.65,2.0],[-1,-51,4.25,1.4,2.0],[1,-53.2,4.5,1.5,1.8]];
+      const plantingIslands=bedSpecs.map(([side,z,offset,rx,rz],i)=>{
+        z=jungleZ(z);if(i>=8)offset+=1.2;
+        let x=junglePathX(z)+side*offset;
+        const height=.94+revealRandom(i+174)*.30;
+        const outline=(a)=>{const lobe=1+.065*Math.sin(a*3+i)+.035*Math.sin(a*5-i);return {x:x+Math.cos(a)*rx*lobe,z:z+Math.sin(a)*rz*lobe};};
+        // Test the complete perimeter with room for the largest projecting stones.
+        for(let pass=0;pass<6;pass++){
+          const blocked=Array.from({length:64},(_,j)=>outline(j/64*Math.PI*2)).some(v=>Math.abs(v.x-junglePathX(v.z))<2.65||inSidePath(v.x,v.z,.75));
+          if(!blocked)break;x+=side*.30;rz*=.92;
+        }
+        return {side,x,z,rx,rz,height,outline};
+      });
+      function plantingTop(x,z){let y=.10;for(const bed of plantingIslands){const q=((x-bed.x)/bed.rx)**2+((z-bed.z)/bed.rz)**2;if(q<.9)y=Math.max(y,bed.height+.05);}return y;}
+      plantingIslands.forEach(bed=>{
+        const positions=[bed.x,bed.height,bed.z],indices=[],n=64;
+        for(let i=0;i<=n;i++){const p=bed.outline(i/n*Math.PI*2);positions.push(p.x,bed.height,p.z,p.x,.04,p.z);}
+        for(let i=0;i<n;i++){const a=1+i*2,b=a+2;indices.push(0,b,a,a,b,a+1,b,b+1,a+1);}
+        const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();mesh(g,soil,0,0,0,revealWorld);
+      });
+      yield;
+      // Three worn slab forms have broad faces, bevels and distinct chipped contours.
+      const stoneGeometries=Array.from({length:3},(_,variant)=>{
+        const g=new T.BoxGeometry(2,2,2,4,3,8),p=g.attributes.position,colors=[];
+        for(let i=0;i<p.count;i++){
+          const x=p.getX(i),y=p.getY(i),z=p.getZ(i),bevel=.16+variant*.025,core=1-bevel;
+          const cx=T.MathUtils.clamp(x,-core,core),cy=T.MathUtils.clamp(y,-core,core),cz=T.MathUtils.clamp(z,-core,core),dx=x-cx,dy=y-cy,dz=z-cz,length=Math.hypot(dx,dy,dz)||1;
+          const chip=.035*Math.sin(x*7+z*9+variant*2)*Math.sin(y*5-z*4),swell=.025*Math.sin(x*3+z*5+variant);
+          p.setXYZ(i,cx+dx/length*(bevel+chip)+swell,cy+dy/length*(bevel+chip)+.038*Math.sin(z*3+variant)*Math.cos(x*2),cz+dz/length*(bevel+chip));
+          const edge=Math.max(0,Math.abs(y)-.7),shade=.87+.055*y-.07*edge+.03*Math.sin(x*4+z*3+variant);
+          colors.push(shade,shade,shade);
+        }
+        g.setAttribute('color',new T.Float32BufferAttribute(colors,3));g.computeVertexNormals();g.computeBoundingBox();return g;
+      });
+      const stoneMeshes=stoneGeometries.map(g=>new T.InstancedMesh(g,stoneMaterial,512)),stoneCounts=[0,0,0];
+      const edgeMeshes=stoneGeometries.map(g=>new T.InstancedMesh(g,stoneMaterial,256)),edgeCounts=[0,0,0];
+      const dummy=new T.Object3D(),color=new T.Color(),checkPoint=new T.Vector3();let ri=0;
+      // Validate rotated corners and edge midpoints, including a small clearance buffer.
+      function stoneFits(geometry,matrix,sideBorder){
+        const box=geometry.boundingBox;
+        for(const x of [box.min.x,0,box.max.x])for(const z of [box.min.z,0,box.max.z]){
+          checkPoint.set(x,0,z).applyMatrix4(matrix);
+          if(Math.abs(checkPoint.x-junglePathX(checkPoint.z))<2.24||inSidePath(checkPoint.x,checkPoint.z,sideBorder?.14:.09))return false;
+        }
+        return true;
+      }
+      function setStone(batches,counts,variant,seed){
+        const batch=batches[variant],index=counts[variant]++;
+        batch.setMatrixAt(index,dummy.matrix);
+        color.setHSL(.022+revealRandom(seed+5)*.032,.59+revealRandom(seed+17)*.12,.24+revealRandom(seed+4)*.10);batch.setColorAt(index,color);
+      }
+      for(const [bi,bed] of plantingIslands.entries()){yield;
+        const outline=new T.CatmullRomCurve3(Array.from({length:64},(_,j)=>{const p=bed.outline(j/64*Math.PI*2);return new T.Vector3(p.x,0,p.z);}),true),perimeter=outline.getLength();
+        const bands=[0,.22,.48,.73,1.035];
+        for(let row=0;row<4;row++){
+          const widths=[];let total=0;
+          while(total<perimeter){const width=.48+revealRandom(bi*301+row*71+widths.length*11)*.64;widths.push(width);total+=width;}
+          const normalization=perimeter/total,offset=(row*.37+bi*.13)%perimeter;let distance=offset;
+          widths.forEach((raw,j)=>{
+            const span=raw*normalization,seed=bi*301+row*71+j*11,u=((distance+span*.5)%perimeter)/perimeter,p=outline.getPointAt(u),t=outline.getTangentAt(u),normal=new T.Vector3(t.z,0,-t.x),variant=(j+row+bi)%3;
+            const thickness=bed.height*(bands[row+1]-bands[row])-.028,depth=.205+revealRandom(seed+2)*.065,projection=(revealRandom(seed+12)-.5)*.10+(row===3?.018:0);
+            dummy.position.set(p.x+normal.x*projection,bed.height*(bands[row]+bands[row+1])*.5+(revealRandom(seed+7)-.5)*.022,p.z+normal.z*projection);
+            dummy.rotation.set((revealRandom(seed+9)-.5)*.06,Math.atan2(t.x,t.z),(revealRandom(seed+10)-.5)*.045);
+            dummy.scale.set(depth,thickness*.5,(span-.045)*.5);dummy.updateMatrix();
+            if(stoneFits(stoneGeometries[variant],dummy.matrix,false)){setStone(stoneMeshes,stoneCounts,variant,seed);ri++;}
+            distance+=span;
+          });
+        }
+      }
+      stoneMeshes.forEach((stones,i)=>{stones.count=stoneCounts[i];stones.computeBoundingSphere();revealWorld.add(stones);});
+      yield;
+      // Smaller slabs edge side paths with their long faces following the curve.
+      jungleSidePaths.forEach((stop,si)=>{
+        const length=stop.curve.getLength();
+        for(const edge of [-1,1])for(let row=0;row<2;row++){
+          const count=Math.ceil(length*.86/.55),span=length*.86/count;
+          for(let j=0;j<count;j++){
+            const u=.14+(j+.5)/count*.86,p=stop.curve.getPointAt(u),t=stop.curve.getTangentAt(u),seed=si*137+j*7+row*37+(edge+1)*71,variant=(j+row+si)%3;
+            dummy.position.set(p.x-t.z*edge*1.34,.105+row*.205,p.z+t.x*edge*1.34);dummy.rotation.set(.015,Math.atan2(t.x,t.z),.02*(revealRandom(seed)-.5));
+            dummy.scale.set(.15+revealRandom(seed+2)*.025,.095,(span-.03)*.5);dummy.updateMatrix();
+            if(stoneFits(stoneGeometries[variant],dummy.matrix,true))setStone(edgeMeshes,edgeCounts,variant,seed);
+          }
+        }
+      });
+      edgeMeshes.forEach((stones,i)=>{stones.count=edgeCounts[i];stones.computeBoundingSphere();revealWorld.add(stones);});
+
+      yield;
+      // Thin, curved leaves with several transverse segments instead of folded plates.
+      const leafPositions=[],leafColors=[],leafIndices=[],leafSegments=12,leafAcross=4;
+      for(let i=0;i<=leafSegments;i++){
+        const u=i/leafSegments,width=Math.pow(Math.sin(Math.PI*u),.78)*.22*(1+.06*Math.sin(u*42));
+        for(let j=0;j<=leafAcross;j++){
+          const side=j/leafAcross*2-1,vein=1-Math.abs(side),shade=.70+vein*.22;
+          leafPositions.push(side*width+Math.sin(u*4)*.025,u*1.2,Math.pow(u,1.8)*.80+Math.sin(Math.PI*u)*(.06*side*side-.035*vein));leafColors.push(shade,shade,shade);
+          if(i<leafSegments&&j<leafAcross){const n=i*(leafAcross+1)+j;leafIndices.push(n,n+leafAcross+1,n+1,n+1,n+leafAcross+1,n+leafAcross+2);}
+        }
+      }
+      const leafGeometry=new T.BufferGeometry();leafGeometry.setAttribute('position',new T.Float32BufferAttribute(leafPositions,3));leafGeometry.setAttribute('color',new T.Float32BufferAttribute(leafColors,3));leafGeometry.setIndex(leafIndices);leafGeometry.computeVertexNormals();
+      const leafMaterial=new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.70,metalness:0,side:T.DoubleSide,emissive:0x09281e,emissiveIntensity:.08});
+      yield;
+      // Broad lobed leaves have a cupped face and a raised central vein.
+      const broadPositions=[],broadColors=[],broadIndices=[],broadRows=16,broadCols=6;
+      for(let i=0;i<=broadRows;i++){
+        const u=i/broadRows,width=.46*Math.pow(Math.sin(Math.PI*u),.65)*(.82+.18*Math.cos(u*Math.PI*8));
+        for(let j=0;j<=broadCols;j++){
+          const v=j/broadCols*2-1,vein=1-Math.abs(v),shade=.68+vein*.22;
+          broadPositions.push(v*width,u*1.22,.52*u*u+.15*Math.sin(Math.PI*u)*v*v-.035*vein);broadColors.push(shade,shade,shade);
+          if(i<broadRows&&j<broadCols){const n=i*(broadCols+1)+j;broadIndices.push(n,n+broadCols+1,n+1,n+1,n+broadCols+1,n+broadCols+2);}
+        }
+      }
+      const broadGeometry=new T.BufferGeometry();broadGeometry.setAttribute('position',new T.Float32BufferAttribute(broadPositions,3));broadGeometry.setAttribute('color',new T.Float32BufferAttribute(broadColors,3));broadGeometry.setIndex(broadIndices);broadGeometry.computeVertexNormals();
+      yield;
+      // A complete fern: curved central rachis and attached pairs of tapered leaflets.
+      const fernPositions=[],fernColors=[],fernIndices=[];
+      function fernStrip(points,width,shade){
+        const base=fernPositions.length/3;
+        points.forEach((p,i)=>{const u=i/(points.length-1),w=width*(.12+.88*Math.sin(Math.PI*u));for(const side of [-1,1]){fernPositions.push(p[0],p[1]+side*w,p[2]+Math.abs(side)*w*.22);fernColors.push(shade,shade,shade);}});
+        for(let i=0;i<points.length-1;i++){const n=base+i*2;fernIndices.push(n,n+2,n+1,n+1,n+2,n+3);}
+      }
+      const rib=[];for(let i=0;i<=16;i++){const u=i/16;rib.push([0,1.48*u,.74*u*u]);}
+      // The rib is a narrow ribbon across x, so its width is visible along the stem.
+      for(let i=0;i<=16;i++){for(const side of [-1,1]){fernPositions.push(side*.013,rib[i][1],rib[i][2]);fernColors.push(.88,.88,.88);}if(i<16){const n=i*2;fernIndices.push(n,n+2,n+1,n+1,n+2,n+3);}}
+      for(let pair=1;pair<=11;pair++){
+        const u=pair/12,y=1.48*u,z=.74*u*u,span=.39*Math.pow(Math.sin(Math.PI*u),.72);
+        for(const side of [-1,1]){
+          const points=[];for(let i=0;i<=5;i++){const v=i/5;points.push([side*span*v,y+.16*v,z+.085*Math.sin(Math.PI*v)+.04*v]);}
+          fernStrip(points,.039*(1-u*.45),.75+.13*u);
+        }
+      }
+      const fernGeometry=new T.BufferGeometry();fernGeometry.setAttribute('position',new T.Float32BufferAttribute(fernPositions,3));fernGeometry.setAttribute('color',new T.Float32BufferAttribute(fernColors,3));fernGeometry.setIndex(fernIndices);fernGeometry.computeVertexNormals();
+      const leaves=new T.InstancedMesh(leafGeometry,leafMaterial,2400),broadLeaves=new T.InstancedMesh(broadGeometry,leafMaterial,1000),ferns=new T.InstancedMesh(fernGeometry,leafMaterial,400),trailingLeaves=new T.InstancedMesh(leafGeometry,leafMaterial,350);
+      let li=0,broadIndex=0,fernIndex=0,trailingIndex=0;
+      const foliageProbe=new T.Vector3();
+      function foliageFits(geometry,matrix){
+        if(!geometry.boundingBox)geometry.computeBoundingBox();const b=geometry.boundingBox;
+        for(const x of [b.min.x,0,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z]){
+          foliageProbe.set(x,y,z).applyMatrix4(matrix);
+          if(foliageProbe.y<3.6&&(Math.abs(foliageProbe.x-junglePathX(foliageProbe.z))<2.2||inSidePath(foliageProbe.x,foliageProbe.z,.16)))return false;
+        }
+        return true;
+      }
+      for(let i=0;i<240;i++){yield;
+        const side=i%2?1:-1,z=jungleZ(-11-Math.floor(i/2)*.36+(revealRandom(i+42)-.5)*.65),x=junglePathX(z)+side*(2.95+revealRandom(i+25)*3.4),size=.32+Math.pow(revealRandom(i+30),2)*.72;
+        if(inSidePath(x,z,.85)||revealRandom(i+510)<.12)continue;
+        const broad=i%3===0,geometry=broad?broadGeometry:leafGeometry,count=broad?5:5+Math.floor(revealRandom(i+48)*5);
+        for(let j=0;j<count;j++){
+          const a=j*Math.PI*2/count+revealRandom(i)*6,stretch=.75+revealRandom(i*17+j)*.55;
+          dummy.position.set(x+Math.cos(a)*.08,plantingTop(x,z)+.035,z+Math.sin(a)*.08);dummy.rotation.set(.12+revealRandom(i+j*31)*.55,a,.12*Math.sin(i+j));dummy.scale.set(size*(broad?1:.58+revealRandom(li)*.52),size*stretch,size);dummy.updateMatrix();
+          if(!foliageFits(geometry,dummy.matrix))continue;
+          color.setHSL(broad?.34+revealRandom(i)*.085:(i%7===0?.035+revealRandom(i+81)*.035:.33+revealRandom(i+81)*.13),broad?.80:.76,broad?.30+revealRandom(j+i)*.11:(i%7===0?.43:.33));
+          const batch=broad?broadLeaves:leaves,index=broad?broadIndex++:li++;batch.setMatrixAt(index,dummy.matrix);batch.setColorAt(index,color);
+        }
+        revealPlants.push({x,z});
+      }
+      yield;
+      // Emerald and turquoise fern fans retain occasional warm coral accents in the planting.
+      plantingIslands.forEach((bed,bi)=>{
+        for(let cluster=0;cluster<3;cluster++){
+          const a=(bed.side<0?0:Math.PI)+(cluster-1)*.70,x=bed.x+Math.cos(a)*bed.rx*.47,z=bed.z+Math.sin(a)*bed.rz*.57;
+          if(inSidePath(x,z,1.05))continue;
+          for(let frond=0;frond<7;frond++){
+            const angle=frond*2.399+bi,scale=.66+revealRandom(bi*71+frond+cluster)*.35;
+            dummy.position.set(x,bed.height+.04,z);dummy.rotation.set(.10+revealRandom(frond+bi)*.50,angle,.12*Math.sin(angle));dummy.scale.set(scale,scale,scale);dummy.updateMatrix();
+            if(!foliageFits(fernGeometry,dummy.matrix))continue;
+            ferns.setMatrixAt(fernIndex,dummy.matrix);color.setHSL(cluster===0&&bi%3===0?.025+revealRandom(fernIndex)*.025:.33+revealRandom(bi+cluster)*.11,.79,cluster===0&&bi%3===0?.44:.33+revealRandom(fernIndex+6)*.08);ferns.setColorAt(fernIndex,color);fernIndex++;
+          }
+          revealPlants.push({x,z});
+        }
+        for(let leaf=0;leaf<5;leaf++){
+          const angle=leaf*2.399+bi;dummy.position.set(bed.x+bed.side*.35,bed.height+.04,bed.z);dummy.rotation.set(.32,angle,.10*Math.sin(angle));dummy.scale.set(.85,.82,.85);dummy.updateMatrix();
+          if(!foliageFits(broadGeometry,dummy.matrix))continue;
+          broadLeaves.setMatrixAt(broadIndex,dummy.matrix);color.setHSL(.34+revealRandom(bi)*.085,.78,.33+revealRandom(leaf)*.09);broadLeaves.setColorAt(broadIndex,color);broadIndex++;
+        }
+      });
+      const vineMaterial=new T.MeshStandardMaterial({color:0x216448,roughness:.84});
+      function hangingGreenery(anchor,seed,length){
+        const curve=new T.CatmullRomCurve3([new T.Vector3(...anchor),new T.Vector3(anchor[0]+.12,anchor[1]-length*.35,anchor[2]+.08),new T.Vector3(anchor[0]-.08,anchor[1]-length*.72,anchor[2]+.16),new T.Vector3(anchor[0]+.02,anchor[1]-length,anchor[2]+.13)]);
+        mesh(new T.TubeGeometry(curve,18,.012,5,false),vineMaterial,0,0,0,revealWorld);
+        for(let leaf=1;leaf<=10;leaf++){
+          const point=curve.getPointAt(leaf/11),a=leaf*2.399+seed;dummy.position.copy(point);dummy.rotation.set(2.25,a,.15*Math.sin(a));dummy.scale.set(.22,.26,.22);dummy.updateMatrix();
+          if(!foliageFits(leafGeometry,dummy.matrix))continue;
+          trailingLeaves.setMatrixAt(trailingIndex,dummy.matrix);color.setHSL(.34+revealRandom(seed+leaf)*.12,.70,.32+revealRandom(leaf)*.10);trailingLeaves.setColorAt(trailingIndex,color);trailingIndex++;
+        }
+      }
+      plantingIslands.forEach((bed,i)=>{if(i%2===0){const p=bed.outline(bed.side<0?Math.PI:0);if(!inSidePath(p.x,p.z,.65))hangingGreenery([p.x,bed.height+.12,p.z],i,.72);}});
+
+      yield;
+      // Broad rooted trunks with attached, tapering branch hierarchies.
+      const treeLocations=[[-4.1,-11.5,7.3],[4.8,-14,7.7],[-4.5,-19,7.5],[4.7,-21,7.4],[-4.5,-24.2,7.8],[4.1,-27,6.6],[-3.65,-27.5,7.4],[5,-36,7.8],[-4.7,-36,6.9],[3.8,-39.5,7.4],[-4.6,-43,7.6],[4.8,-46,6.9],[-5.6,-55,7.4],[5.8,-55.5,7.2],[-7.8,-27.5,7.8],[7.9,-36,8],[-7.5,-44,7.7],[7.6,-50,7.9]];
+      const crownLeaves=new T.InstancedMesh(leafGeometry,leafMaterial,treeLocations.length*3*2*12);let crownIndex=0;
+      const treePodAnchors=[];let crossingBoughs=0,drapedRoots=0;
+      for(const [i,location] of treeLocations.entries()){
+        yield;let [baseX,z,h]=location;
+        z=jungleZ(z);
+        const side=baseX<0?-1:1,originalX=baseX+junglePathX(z),x=inSidePath(originalX,z,1.7)?side*8.2:originalX,mat=barkMaterials[i%4];
+        const lean=-side*(.55+revealRandom(i+5)*.65),width=1.06+revealRandom(i+41)*.30;
+        const spine=[[x,.12,z],[x+side*.10,.70,z+.10],[x+lean*.28,h*.28,z-.12],[x+lean*.55,h*.47,z+.17],[x+lean,h*.67,z-.13],[x+lean*1.35,h*.87,z+.25],[x+lean*1.55,h,z+.40]];
+        const trunk=organicBranch(spine,width,.035,mat,56);revealTrees++;
+        // Buttress roots enter the trunk below its surface, then flatten into the bed.
+        for(let k=0;k<6;k++){
+          const a=k/6*Math.PI*2+i*.73,length=1.25+revealRandom(i*19+k)*.85;
+          const endX=x+Math.cos(a)*length,endZ=z+Math.sin(a)*length;
+          const safeX=side<0?Math.min(endX,junglePathX(endZ)-2.65):Math.max(endX,junglePathX(endZ)+2.65);
+          const root=organicBranch([[x+lean*.05,1.3,z],[x+(safeX-x)*.28,.66,z+(endZ-z)*.28],[x+(safeX-x)*.67,.22,z+(endZ-z)*.67],[safeX,.055,endZ]],width*.43,.025,mat,22);
+          const rp=root.branch.geometry.attributes.position;
+          for(let n=0;n<rp.count;n++)rp.setY(n,Math.max(.035,rp.getY(n)));
+          smoothBranchNormals(root.branch.geometry);
+        }
+        // Roots descend visibly over the closest raised stone face.
+        const bed=plantingIslands.filter(b=>b.side===side).sort((a,b)=>Math.hypot(x-a.x,z-a.z)-Math.hypot(x-b.x,z-b.z))[0];
+        if(bed&&Math.hypot(x-bed.x,z-bed.z)<2.4){
+          for(let root=0;root<2;root++){
+            const a=(side<0?0:Math.PI)+(root===0?-.34:.38),edge=bed.outline(a),endX=edge.x-side*.15,endZ=edge.z+.18;
+            if(inSidePath(endX,endZ,.45)||Math.abs(endX-junglePathX(endZ))<2.5)continue;
+            organicBranch([[x,1.85,z],[x+(edge.x-x)*.55,bed.height+.25,z+(edge.z-z)*.55],[edge.x,bed.height+.08,edge.z],[endX,.58,endZ],[endX-side*.10,.07,endZ+.16]],.29,.025,mat,28);drapedRoots++;
+          }
+        }
+        // Staggered, attached boughs interlock at a lower overhead height.
+        if([0,1,2,4,7,10].includes(i)){
+          const base=trunk.curve.getPointAt(.56),path=junglePathX(z),ceiling=5.35+revealRandom(i+712)*.70+(i===13?1.35:0),drift=(i%2?1:-1)*1.1;
+          const arch=organicBranch([base.toArray(),[path+side*2.35,ceiling-.15,z+.25],[path+side*.45,ceiling+.30,z+drift*.50],[path-side*1.55,ceiling+.08,z+drift],[path-side*3.15,ceiling-.24,z+drift*1.15]],.43,.065,mat,48);crossingBoughs++;
+          if(i%2===0)hangingGreenery(arch.curve.getPointAt(.14).toArray(),i+31,.72);
+          for(let fork=0;fork<2;fork++){
+            const start=arch.curve.getPointAt(.43+fork*.27),sign=fork?1:-1;
+            organicBranch([start.toArray(),[start.x-side*.45,start.y+.20,start.z+sign*.75],[start.x-side*1.10,start.y+.32,start.z+sign*1.65],[start.x-side*1.55,start.y+.59,start.z+sign*1.72]],.15,.016,mat,24);
+          }
+        }
+        // Unequal forks grow out of the trunk and carry smaller lateral branches.
+        for(let limb=0;limb<3;limb++){
+          const startU=.43+limb*.125,base=trunk.curve.getPointAt(startU);
+          const direction=limb===0?(side<0?0:Math.PI):i*.83+limb*2.35;
+          const reach=(limb===0?3.4+revealRandom(i+8)*.7:2+revealRandom(i+limb*9)*1.2)*(i===13?.67:1);
+          const dx=Math.cos(direction),dz=Math.sin(direction),top=Math.min(h+.12,base.y+2.25+revealRandom(i+limb)*.6);
+          const points=[[base.x,base.y,base.z],[base.x+dx*reach*.23,base.y+.7,base.z+dz*reach*.19],[base.x+dx*reach*.64,top-.27,base.z+dz*reach*.64],[base.x+dx*reach,top,base.z+dz*reach]];
+          const bough=organicBranch(points,width*(.39-limb*.065),.022,mat,32);
+          if(limb===0){const anchor=bough.curve.getPointAt(.79);treePodAnchors.push(anchor.toArray());if(i<12)makeHangingPod(anchor.toArray(),i,stemMaterial);}
+          for(let fork=0;fork<2;fork++){
+            const start=bough.curve.getPointAt(.48+fork*.23),angle=direction+(fork===0?-.8:.72),spread=.95+revealRandom(i*11+limb*3+fork)*.75;
+            const tip=[start.x+Math.cos(angle)*spread,Math.min(h-.35,start.y+.8+revealRandom(i+fork)*.4),start.z+Math.sin(angle)*spread];
+            organicBranch([start.toArray(),[start.x+Math.cos(angle)*spread*.43,start.y+.46,start.z+Math.sin(angle)*spread*.42],tip],.13-fork*.035,.008,mat,18);
+            // Sparse foliage at twig tips keeps the sculptural branch silhouette visible.
+            for(let leaf=0;leaf<12;leaf++){
+              const a=leaf*2.399+i+limb,scale=.38+revealRandom(crownIndex+51)*.34;
+              dummy.position.set(tip[0]+Math.cos(a)*.30,tip[1]-.08,tip[2]+Math.sin(a)*.30);dummy.rotation.set(.65+revealRandom(crownIndex)*.7,a,.25*Math.sin(a));dummy.scale.set(scale,scale,scale);dummy.updateMatrix();crownLeaves.setMatrixAt(crownIndex,dummy.matrix);
+              color.setHSL(i%7===0?.07:.35+revealRandom(i)*.10,.66,.21+revealRandom(crownIndex)*.12);crownLeaves.setColorAt(crownIndex,color);crownIndex++;
+            }
+          }
+        }
+      }
+      crownLeaves.count=crownIndex;revealWorld.add(crownLeaves);
+      yield;
+      // Layered understory and high foliage hide the enclosure while keeping every path open.
+      const backgroundLeaves=new T.InstancedMesh(broadGeometry,leafMaterial,1100);let backgroundCount=0;
+      for(let cluster=0;cluster<120;cluster++){yield;
+        const side=cluster%2?1:-1,z=jungleZ(-19-revealRandom(cluster+1800)*37);
+        const x=junglePathX(z)+side*(5.2+revealRandom(cluster+1801)*7.2);
+        const high=cluster%3===0,y=high?3.4+revealRandom(cluster+1802)*3.2:.15;
+        for(let leaf=0;leaf<8;leaf++){
+          const a=leaf*2.399+cluster,scale=high?.65+revealRandom(cluster+leaf)*.65:.85+revealRandom(cluster+leaf)*.95;
+          dummy.position.set(x+Math.cos(a)*.45,y,z+Math.sin(a)*.45);dummy.rotation.set(high?1.1:.12+revealRandom(cluster+leaf)*.5,a,.18*Math.sin(a));dummy.scale.set(scale,scale*1.35,scale);dummy.updateMatrix();
+          if(!foliageFits(broadGeometry,dummy.matrix))continue;
+          backgroundLeaves.setMatrixAt(backgroundCount,dummy.matrix);color.setHSL(.36+revealRandom(cluster+1810)*.07,.46,.12+revealRandom(cluster+1811)*.08);backgroundLeaves.setColorAt(backgroundCount++,color);
+        }
+      }
+      // Back-row trunks create depth behind the foreground trees instead of a black void.
+      for(let i=0;i<10;i++){yield;
+        const side=i%2?1:-1,z=jungleZ(-29-Math.floor(i/2)*6.3),x=side*(8.6+revealRandom(i+1900));
+        if(inSidePath(x,z,1.4))continue;
+        const mat=barkMaterials[(i+2)%4],h=6.1+revealRandom(i+1901)*1.2;
+        const trunk=organicBranch([[x,.1,z],[x-side*.25,2,z+.2],[x-side*.7,4.1,z-.3],[x-side*1.1,h,z+.3]],.67,.07,mat,30);
+        for(let k=0;k<2;k++){const base=trunk.curve.getPointAt(.55+k*.18);organicBranch([base.toArray(),[base.x-side*1.1,base.y+.8,z+(k?1:-1)],[base.x-side*2.3,base.y+1.3,z+(k?2:-2)]],.26,.035,mat,22);}
+      }
+      yield;
+      // Residual portal light settles into an open, conclusive jungle clearing.
+      const endZ=endingZ,endX=junglePathX(endZ);
+      endingAfterglow=window.createEndingAfterglow({THREE:T,parent:revealWorld,x:endX,z:endZ,reducedMotion,light:jungleLight(0x9275c9,0,8)});
+      for(let i=0;i<4;i++){
+        const z=endZ+7-i*1.9,pool=mesh(new T.PlaneGeometry(2.8-i*.24,2.5),new T.MeshBasicMaterial({map:softMap,color:i%2?0x9f73ed:0x6ecfd1,transparent:true,opacity:.08-i*.012,depthWrite:false,blending:T.AdditiveBlending}),junglePathX(z),.045,z,revealWorld);pool.rotation.x=-Math.PI/2;
+      }
+      yield;
+      // Dark understory stays at the outer tree bases, away from the final invitation.
+      for(let cluster=0;cluster<12;cluster++){
+        const side=cluster%2?1:-1,level=Math.floor(cluster/2);
+        const x=endX+side*(6.6+level*.62),z=endZ+2.0-revealRandom(cluster+2100)*1.5;
+        for(let leaf=0;leaf<7;leaf++){
+          const angle=leaf*2.399+cluster,scale=.68+revealRandom(cluster*9+leaf+2100)*.45;
+          dummy.position.set(x,.09,z);dummy.rotation.set(.12,angle,side*.12);dummy.scale.set(scale,scale*1.3,scale);dummy.updateMatrix();
+          backgroundLeaves.setMatrixAt(backgroundCount,dummy.matrix);color.setHSL(.38,.62,.16+revealRandom(cluster+leaf)*.08);backgroundLeaves.setColorAt(backgroundCount++,color);
+        }
+      }
+      backgroundLeaves.count=backgroundCount;backgroundLeaves.computeBoundingSphere();revealWorld.add(backgroundLeaves);
+
+      for(const [batch,count] of [[leaves,li],[broadLeaves,broadIndex],[ferns,fernIndex],[trailingLeaves,trailingIndex]]){batch.count=count;batch.computeBoundingSphere();revealWorld.add(batch);}
+      yield;
+      // Lanterns hang from actual boughs, keeping the canopy rooted in the trees.
+      treePodAnchors.forEach((anchor,i)=>{if(i%3===0&&i!==12)makeHangingPod([anchor[0]+.12,anchor[1]-.14,anchor[2]+.08],i+60,stemMaterial);});
+      // Lower lantern-like pods sit above the colorful planting beds.
+      for(let i=0;i<16;i++){
+        const z=jungleZ(-18-i*2.25);
+        const side=i%2?1:-1,x=junglePathX(z)+side*((i>=14?4.5:2.9)+revealRandom(i+33)*.5);if(inSidePath(x,z,.6))continue;
+        makeHangingPod([x,2.7+revealRandom(i+46)*.5,z],i+90,stemMaterial);
+      }
+      yield;
+      // Numbered destination cards provide all wayfinding along the jungle walkway.
+      // Low side washes graze the sculpted grooves and leave darker gaps behind trunks.
+      const keys=[
+        [junglePathX(-13.7)-2.7,2.0,-13.7,0x9b68c7,30,12],
+        [junglePathX(-25)+2.9,2.2,-25,0x36d6b3,44,14],
+        [junglePathX(jungleZ(-39))-2.9,2.1,-39,0x9670c5,32,13],
+        [junglePathX(jungleZ(-51))+5.2,2.1,-51,0x38c8be,28,13],
+        [0,4.2,-7.5,0x36c5df,32,15]
+      ];
+      keys.forEach(([x,y,z,c,intensity,range])=>{const light=jungleLight(c,intensity,range);light.position.set(x,y,jungleZ(z));scene.add(light);revealLights.push({light,intensity});});
+      const moteGeo=new T.BufferGeometry();moteGeo.setAttribute('position',new T.BufferAttribute(revealMotePositions,3).setUsage(T.DynamicDrawUsage));revealMotes=new T.Points(moteGeo,new T.PointsMaterial({color:0x86dce3,map:softMap,size:.055,transparent:true,opacity:.20,depthWrite:false,blending:T.AdditiveBlending}));revealMotes.frustumCulled=false;revealWorld.add(revealMotes);
+      jungleLighting=window.createJungleLighting({THREE:T,foliage:leafMaterial,bark:barkMaterials,path:pathMaterial,sidePath:sidePathMaterial,beds:[stoneMaterial,soil],reducedMotion});
+      destinationGrass=window.createDestinationGrass({THREE:T,parent:revealWorld,stops:jungleSidePaths,root,groundAt:plantingTop,pathX:junglePathX,softMap,reducedMotion,light:jungleLight(0x9cb3d8,0,3.6),compact:viewportWidth<700});
+      root.revealState=()=>({trees:revealTrees,plantClusters:revealPlants.length,hangingPods:hangingPods.length,rocks:ri,broadLeaves:broadIndex,fernFronds:fernIndex,trailingLeaves:trailingIndex,plantingIslands:plantingIslands.length,crossingBoughs,drapedRoots,sidePaths:jungleSidePaths.length,signs:0,ready:revealReady,time:revealTime,camera:camera.position.toArray(),fogFar:scene.fog.far});
+    }
+    function makeHangingPod(anchor,i,stemMaterial){
+      const pivot=new T.Group();pivot.position.set(...anchor);revealWorld.add(pivot);
+      const drop=i>=90?.22:.30+revealRandom(i+3)*1.0,scale=(.38+revealRandom(i+10)*.46)*(i===40||i===41?1.16:1);
+      const podColor=[0xff47cf,0xffca35,0x66f246,0x40deff,0xff7934,0xb480ff][i%6];
+      organicBranch([[0,0,0],[.15,-.28,0],[.13,-drop+.1,.03],[-.12,-drop-.11,.06]],.031,.022,stemMaterial,24,pivot);
+      const profile=[[.015,0],[.19,.06],[.31,.24],[.33,.47],[.25,.74],[.11,.93],[.022,1.05]];
+      const geo=new T.LatheGeometry(profile.map(([r,y])=>new T.Vector2(r,y)),24);
+      const mat=new T.ShaderMaterial({uniforms:{uColor:{value:new T.Color(podColor)},uTime:{value:0},uPhase:{value:i},uBloom:{value:1}},
+        vertexShader:`varying vec2 vUv;varying vec3 vNormal;void main(){vUv=uv;vNormal=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+        fragmentShader:`uniform vec3 uColor;uniform float uTime;uniform float uPhase;uniform float uBloom;varying vec2 vUv;varying vec3 vNormal;void main(){float wave=sin(vUv.y*34.+sin(vUv.x*37.)*2.);float meshwork=pow(abs(sin(vUv.x*53.+vUv.y*19.)*sin(vUv.y*57.-vUv.x*23.)),3.);float pulse=.89+.11*sin(uTime*.7+uPhase);float side=.35+.65*abs(vNormal.z);vec3 companion=mix(uColor,uColor.gbr,.22+.08*sin(vUv.y*5.+uPhase));vec3 c=mix(uColor,companion,smoothstep(.25,.85,vUv.y))*(.52+meshwork*.82+pow(abs(wave),15.)*.22)*side*pulse*uBloom;gl_FragColor=vec4(c,1.);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`});
+      const pod=mesh(geo,mat,-.12,-drop-1.05*scale,.06,pivot);pod.scale.set(scale*(.84+revealRandom(i+17)*.25),scale,scale);
+      const halo=new T.Sprite(new T.SpriteMaterial({map:softMap,color:podColor,transparent:true,opacity:.19,depthWrite:false,blending:T.AdditiveBlending}));halo.position.set(-.12,-drop-.45*scale,.06);halo.scale.set(1.35,1.8,1);pivot.add(halo);
+      // Share each bulb's changing color with its glow and nearby surfaces.
+      let bulbLight=null;
+      if([0,5,10].includes(i)){
+        const intensity=18;bulbLight=jungleLight(podColor,intensity,6.5);
+        bulbLight.position.set(anchor[0]-.12,anchor[1]-drop-.45*scale,anchor[2]+.06);scene.add(bulbLight);revealLights.push({light:bulbLight,intensity});
+      }
+      const pool=mesh(new T.PlaneGeometry(2.0,3.3),new T.MeshBasicMaterial({map:softMap,color:podColor,transparent:true,opacity:.16,depthWrite:false,blending:T.AdditiveBlending}),anchor[0]-.12,.038,anchor[2],revealWorld);pool.rotation.x=-Math.PI/2;revealPools.push(pool);
+      const hsl=mat.uniforms.uColor.value.getHSL({h:0,s:0,l:0});
+      hangingPods.push({pivot,pod,halo,pool,light:bulbLight,phase:i,colorOffset:hsl.h,colorPeriod:14+revealRandom(i+812)*6});
+    }
+    function updateReveal(){
+      if(!revealReady)return;revealTime=energyTime;
+      const arrival=T.MathUtils.smoothstep(p,.37,.55),richness=T.MathUtils.smoothstep(p,.56,.94);
+      jungleLighting?.update(p,revealTime);
+      ambientLight.intensity=T.MathUtils.lerp(.82,.39,arrival);sun.intensity=T.MathUtils.lerp(1.2,.10,arrival);
+      scene.fog.color.setRGB(T.MathUtils.lerp(.008,.003,arrival),T.MathUtils.lerp(.006,.008,arrival),T.MathUtils.lerp(.021,.020,arrival));scene.fog.near=T.MathUtils.lerp(24,20,arrival*richness);scene.fog.far=T.MathUtils.lerp(70,49,arrival);
+      revealLights.forEach(({light,intensity})=>{const depth=T.MathUtils.smoothstep(-light.position.z,16,65);light.intensity=intensity*(.85+.15*arrival)*(1+richness*(.10+.20*depth));});
+      hangingPods.forEach(({pivot,pod,halo,pool,light,phase,colorOffset,colorPeriod})=>{
+        const distance=camera.position.z-pivot.position.z;
+        if(distance < -7 || distance > (quality.compact?25:38))return;
+        pivot.rotation.z=Math.sin(revealTime*.42+phase)*.021;pivot.rotation.x=Math.sin(revealTime*.31+phase*.7)*.017;
+        const color=pod.material.uniforms.uColor.value;
+        // A continuous hue loop has no abrupt reset and respects the shared effects clock.
+        color.setHSL((colorOffset+revealTime/colorPeriod)%1,.86,.55);
+        halo.material.color.copy(color);pool.material.color.copy(color);if(light)light.color.copy(color);
+        const localDepth=T.MathUtils.smoothstep(-pivot.position.z,17,51),bloom=1+arrival*.12+richness*(.08+.16*localDepth);
+        pod.material.uniforms.uTime.value=revealTime;pod.material.uniforms.uBloom.value=bloom;
+        halo.material.opacity=(.10+.008*Math.sin(revealTime*.7+phase))*bloom;pool.material.opacity=.08+arrival*.02+richness*.025;
+      });
+      for(let i=0;i<Math.ceil(revealMoteCount*quality.density);i++){const z=jungleZ(-17-revealRandom(i+8)*38);revealMotePositions[i*3]=(revealRandom(i+41)-.5)*13;revealMotePositions[i*3+1]=.8+revealRandom(i+82)*6+Math.sin(revealTime*.3+i)*.14;revealMotePositions[i*3+2]=z+Math.sin(revealTime*.16+i)*.15;}
+      revealMotes.geometry.attributes.position.needsUpdate=true;
+    }
+
+    // The reference is separated into thick mechanical parts, not a facade photo.
+    const artWidth=940,artHeight=1673,worldScale=.016,groundPixel=1175;
+    const entranceCameraY=(groundPixel-artHeight/2)*worldScale;
+    const entranceCameraZ=artHeight*worldScale*.5/Math.tan(37*Math.PI/180);
+    const arrivalCameraZ=entranceCameraZ/1.20;
+    const machineLift=.60,apertureY=(groundPixel-980)*worldScale+machineLift;
+    let machineTime=0,machineRunning=!reducedMotion,portalReady=false,formation=0;
+    // Power-up has its own clock. It never advances the visitor's camera.
+    const portalEnergy=window.createPortalEnergyTimeline({reducedMotion});
+    const powerUpDuration=portalEnergy.duration;
+    let portalClock=reducedMotion?powerUpDuration:0,powerUpTime=portalClock;
+    const machine=new T.Group();scene.add(machine);
+    const ink=new T.MeshStandardMaterial({color:0x131416,roughness:.6});
+    const cream=new T.MeshStandardMaterial({color:0xf3efdf,roughness:.61,metalness:.10});
+    const edgeMat=new T.LineBasicMaterial({color:0x101114});
+    const movingParts=[],activeHeads=[],hoses=[];
+    let arrivalEyeY=5.0;
+    let rotor,portalSurface,portalUniforms,coreHalo,machineGlow,washMat,journeyAtmosphere,jungleSky,endingAfterglow,entranceMural,entranceWordmark;
+    function fitEntranceWordmark(){
+      if(!entranceWordmark)return;
+      const height=stage.clientHeight,width=stage.clientWidth;
+      const worldHeight=2*(arrivalCameraZ+.09)*Math.tan(37*Math.PI/180);
+      const mobile=width<=700||height<=500;
+      // Fit the arrival projection, retaining the logo on its physical nameplate.
+      arrivalEyeY=mobile?5.35:5;
+      let scale=Math.min(1,worldHeight*camera.aspect*.90/12.1);
+      let logoY=13.47+machineLift-Math.min(.60,(1-scale)*2.6);
+      if(mobile){
+        const stageTop=stage.getBoundingClientRect().top;
+        const headerBottom=Math.max(root.querySelector('.site-header').getBoundingClientRect().bottom,root.querySelector('.global-ticketbar').getBoundingClientRect().bottom)-stageTop;
+        const clearTop=headerBottom+16;
+        scale=Math.min(scale,Math.max(42,Math.min(82,height*.115))*worldHeight/height/3);
+        arrivalEyeY=Math.max(arrivalEyeY,logoY+1.5*scale-worldHeight*(.5-clearTop/height));
+      }
+      entranceWordmark.scale.setScalar(scale);
+      entranceWordmark.position.y=logoY;
+      renderer.shadowMap.needsUpdate=true;
+    }
+    const entranceWallMaterials=[];
+    const initialProjection=new T.PerspectiveCamera(74,artWidth/artHeight,.08,110);
+    initialProjection.position.set(0,entranceCameraY,entranceCameraZ);initialProjection.lookAt(0,entranceCameraY,-30);initialProjection.updateMatrixWorld();
+    function photoPoint(px,py,z){
+      const ratio=(entranceCameraZ-z)/entranceCameraZ;
+      return new T.Vector3((px-470)*worldScale*ratio,entranceCameraY+(artHeight*.5-py)*worldScale*ratio,z);
+    }
+    function colorTexture(c){const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;}
+    const softCanvas=document.createElement('canvas');softCanvas.width=softCanvas.height=96;
+    const sg=softCanvas.getContext('2d'),grad=sg.createRadialGradient(48,48,0,48,48,48);
+    grad.addColorStop(0,'rgba(255,255,255,.85)');grad.addColorStop(.15,'rgba(255,255,255,.35)');grad.addColorStop(.5,'rgba(255,255,255,.08)');grad.addColorStop(1,'rgba(255,255,255,0)');sg.fillStyle=grad;sg.fillRect(0,0,96,96);
+    const softMap=colorTexture(softCanvas);
+    const outlineMat=new T.MeshBasicMaterial({color:0x151619,side:T.BackSide});
+    const gunmetal=new T.MeshStandardMaterial({color:0x262b30,roughness:.48,metalness:.35});
+    const silver=new T.MeshStandardMaterial({color:0xabb9bc,roughness:.29,metalness:.7});
+    const fixtureNodes=[],outerModules=[];
+    function solid(geometry,material,x,y,z,parent=machine,outlined=false){
+      const m=mesh(geometry,material,x,y,z,parent);m.castShadow=true;m.receiveShadow=true;
+      if(outlined){const line=new T.Mesh(geometry,outlineMat);line.scale.setScalar(1.018);m.add(line);}
+      return m;
+    }
+    function roundedGeometry(w,h,d,r){
+      const geo=new T.BoxGeometry(w,h,d,10,10,10),a=geo.attributes.position,n=geo.attributes.normal;
+      const inner=new T.Vector3(w/2-r,h/2-r,d/2-r),v=new T.Vector3(),q=new T.Vector3(),normal=new T.Vector3();
+      for(let i=0;i<a.count;i++){
+        v.fromBufferAttribute(a,i);q.set(T.MathUtils.clamp(v.x,-inner.x,inner.x),T.MathUtils.clamp(v.y,-inner.y,inner.y),T.MathUtils.clamp(v.z,-inner.z,inner.z));normal.copy(v).sub(q).normalize();v.copy(q).addScaledVector(normal,r);a.setXYZ(i,v.x,v.y,v.z);n.setXYZ(i,normal.x,normal.y,normal.z);
+      }
+      return geo;
+    }
+    function rounded(w,h,d,r,mat,x,y,z,parent=machine,outlined=true){return solid(roundedGeometry(w,h,d,r),mat,x,y,z,parent,outlined);}
+    function cyl(r1,r2,h,mat,x,y,z,parent=machine,outlined=false){return solid(new T.CylinderGeometry(r1,r2,h,28),mat,x,y,z,parent,outlined);}
+    function bolt(x,y,z,parent=machine,r=.054){
+      const b=cyl(r,r,.045,gunmetal,x,y,z,parent);b.rotation.x=Math.PI/2;
+      const slot=box(r*1.05,.017,.011,silver,x,y,z+.026,parent);return b;
+    }
+    function ring(r,tubeSize,mat,x,y,z,parent=machine){return solid(new T.TorusGeometry(r,tubeSize,8,64),mat,x,y,z,parent);}
+    function radialGroup(a,r,z){const g=new T.Group();g.position.set(Math.cos(a)*r,apertureY+Math.sin(a)*r,z);g.rotation.z=a-Math.PI/2;machine.add(g);return g;}
+    function annularArch(outer,inner,depth,z,mat,bevel){
+      const path=new T.Shape(),low=-38*Math.PI/180,span=256*Math.PI/180;
+      for(let i=0;i<=100;i++){const a=low+span*i/100,x=outer*Math.cos(a),y=outer*Math.sin(a);i?path.lineTo(x,y):path.moveTo(x,y);}
+      for(let i=100;i>=0;i--){const a=low+span*i/100;path.lineTo(inner*Math.cos(a),inner*Math.sin(a));}path.closePath();
+      const g=new T.ExtrudeGeometry(path,{depth,bevelEnabled:bevel>0,bevelSize:bevel,bevelThickness:bevel,bevelSegments:4,curveSegments:32});
+      return solid(g,mat,0,apertureY,z,machine);
+    }
+    function buildConstruction(){
+      // A continuous load-bearing arch, layered with a gasket and bolted face plate.
+      const frame=annularArch(4.42,3.46,.95,-.58,gunmetal,.055);
+      annularArch(4.36,3.51,.80,-.48,cream,.07);
+      annularArch(4.39,3.48,.11,.40,ink,.025);
+      annularArch(4.29,3.59,.105,.515,cream,.045);
+      fixtureNodes.push(frame);
+      for(let i=0;i<=16;i++){
+        const a=(-36+i*252/16)*Math.PI/180;
+        bolt(4.06*Math.cos(a),apertureY+4.06*Math.sin(a),.681,machine,.07);
+      }
+      // Each foot has a broad contact patch, a bolted shoe, and a vertical support.
+      for(const side of [-1,1]){
+        const x=side*3.86;
+        const foot=new T.Group();foot.position.set(x,0,1.0);machine.add(foot);
+        rounded(1.92,.22,2.65,.095,ink,0,.11,0,foot,false);
+        rounded(1.72,.85,2.38,.25,cream,0,.615,0,foot);
+        rounded(1.22,.48,1.29,.17,cream,0,1.03,-.47,foot);
+        for(const xx of [-.64,.64])for(const zz of [-.90,.90]){const b=cyl(.075,.075,.07,gunmetal,xx,.23,zz,foot);}
+        // Arch heel sits inside the rear shoe rather than hanging above the ground.
+        rounded(.87,.83+machineLift,.90,.12,gunmetal,-side*.20,.72+machineLift/2,-.83,foot);
+        rounded(.72,.74+machineLift,.96,.12,cream,-side*.20,.83+machineLift/2,-.80,foot);
+        for(const xx of [-.25,.25])bolt(xx-side*.2,.96+machineLift,-.30,foot,.06);
+        // Front piston is fixed to the foot and tied back to the arch shoulder.
+        const postX=side*.24,postZ=.44;
+        cyl(.39,.47,.33,ink,postX,1.16,postZ,foot);
+        cyl(.29,.31,1.82+machineLift,cream,postX,2.16+machineLift/2,postZ,foot,true);
+        cyl(.34,.34,.12,gunmetal,postX,1.41,postZ,foot);
+        cyl(.22,.22,.35,silver,postX,3.18+machineLift,postZ,foot);
+        cyl(.39,.39,.17,cream,postX,3.31+machineLift,postZ,foot,true);
+        solid(new T.SphereGeometry(.385,20,12,0,Math.PI*2,0,Math.PI/2),ink,postX,3.37+machineLift,postZ,foot);
+        rounded(.60,.33,1.60,.09,gunmetal,postX,3.20+machineLift,-.18,foot);
+        rounded(.63,.46,.20,.06,cream,postX,3.20+machineLift,-.92,foot);
+        for(const xx of [-.17,.17])bolt(postX+xx,3.20+machineLift,.65,foot,.045);
+        fixtureNodes.push(foot);
+        const cabinet=new T.Group();cabinet.position.set(side*5.42,0,-.13);machine.add(cabinet);
+        rounded(1.54,.17,1.39,.05,ink,0,.085,0,cabinet,false);
+        rounded(1.35,2.07,1.16,.15,cream,0,1.2,0,cabinet);
+        rounded(1.08,1.68,.075,.036,ink,0,1.18,.603,cabinet,false);
+        rounded(1.005,1.60,.07,.034,cream,0,1.18,.65,cabinet,false);
+        for(const xx of [-.42,.42])for(const yy of [.52,1.87])bolt(xx,yy,.701,cabinet,.046);
+        ring(.28,.065,ink,0,1.54,.73,cabinet);
+        const gauge=solid(new T.CircleGeometry(.225,32),cream,0,1.54,.736,cabinet);
+        const needle=box(.023,.19,.015,ink,.04,1.57,.753,cabinet);needle.rotation.z=-.45;
+        rounded(.40,.13,.06,.028,ink,0,.87,.737,cabinet,false);
+        cyl(.17,.20,.30,gunmetal,0,2.32,0,cabinet);
+        rounded(1.1,.22,.42,.06,gunmetal,-side*.99,.41,0,cabinet);
+        fixtureNodes.push(cabinet);
+      }
+      // Five large motor housings clamp onto the arch with a continuous seating joint.
+      [90,122,155,58,25].forEach((degrees,i)=>{
+        const a=degrees*Math.PI/180,seat=radialGroup(a,4.29,.05);
+        rounded(1.15,.46,1.35,.11,gunmetal,0,.02,.03,seat);
+        rounded(.99,.24,1.20,.08,cream,0,.22,.04,seat);
+        for(const xx of [-.39,.39])bolt(xx,.07,.738,seat,.064);
+        const mount=radialGroup(a,5.26,.05),profile=[
+          [.25,-.94],[.39,-.91],[.51,-.80],[.60,-.58],[.63,-.19],[.60,.26],[.54,.48],[.40,.61],[.26,.66]
+        ];
+        const shell=solid(new T.LatheGeometry(profile.map(([r,y])=>new T.Vector2(r,y)),40),cream,0,0,0,mount,true);
+        const lower=cyl(.39,.39,.15,gunmetal,0,-.88,0,mount);
+        const collar=ring(.59,.027,ink,0,-.44,0,mount);collar.rotation.x=Math.PI/2;
+        const upper=cyl(.267,.29,.19,ink,0,.72,0,mount);
+        cyl(.26,.26,.12,silver,0,.85,0,mount);
+        rounded(.56,.73,.10,.047,ink,0,-.08,.616,mount,false);
+        rounded(.505,.675,.092,.042,cream,0,-.08,.671,mount,false);
+        for(const xx of [-.17,.17])for(const yy of [-.31,.16])bolt(xx,yy,.735,mount,.043);
+        for(const yy of [-.48,-.13,.22])for(const xx of [-.45,.45])bolt(xx,yy,.415,mount,.043);
+        fixtureNodes.push(mount);outerModules.push({mount,seat,port:new T.Vector3(0,.96,0)});
+      });
+      buildRoomConnections();
+      // Inward-facing emitters pass through bolted flanges on the inner rim.
+      [90,120,150,180,210,60,30,0,-30].forEach((a,i)=>buildSolidEmitter(a*Math.PI/180,i));
+      rotor=new T.Group();rotor.position.set(0,apertureY,.28);machine.add(rotor);
+      ring(3.47,.045,gunmetal,0,0,0,rotor);
+      for(let i=0;i<42;i++){const a=i/42*Math.PI*2,t=box(.07,.115,.055,cream,3.43*Math.cos(a),3.43*Math.sin(a),.07,rotor);t.rotation.z=a;}
+      // A recessed barrel and staggered bevels expose the thickness when crossing.
+      const throatMaterial=new T.MeshStandardMaterial({color:0x35434b,roughness:.42,metalness:.52,side:T.BackSide});
+      const throat=solid(new T.CylinderGeometry(3.49,3.49,1.15,96,1,true),throatMaterial,0,apertureY,-.50,machine);
+      throat.rotation.x=Math.PI/2;
+      ring(3.51,.075,silver,0,apertureY,.10,machine);
+      ring(3.51,.048,gunmetal,0,apertureY,-1.04,machine);
+      buildGroundedThreshold();
+      // Shadows come from the same geometry that carries the machine.
+      renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+      sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-12;sun.shadow.camera.right=12;sun.shadow.camera.top=14;sun.shadow.camera.bottom=-8;sun.shadow.camera.near=.5;sun.shadow.camera.far=45;sun.shadow.normalBias=.045;sun.shadow.bias=-.0001;
+      floor.receiveShadow=true;floor.renderOrder=-3;window.fadeEndingFloor(floor.material,'museum');
+      addEntranceFloorSpill();
+      renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;
+    }
+    function buildGroundedThreshold(){
+      // A real lower cradle completes the circle above the floor.
+      function lowerBand(outer,inner,depth,z,material,bevel){
+        const shape=new T.Shape(),a0=218*Math.PI/180,a1=322*Math.PI/180;
+        for(let i=0;i<=64;i++){const a=a0+(a1-a0)*i/64,x=outer*Math.cos(a),y=outer*Math.sin(a);i?shape.lineTo(x,y):shape.moveTo(x,y);}
+        for(let i=64;i>=0;i--){const a=a0+(a1-a0)*i/64;shape.lineTo(inner*Math.cos(a),inner*Math.sin(a));}shape.closePath();
+        return solid(new T.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelSize:bevel,bevelThickness:bevel,bevelSegments:3}),material,0,apertureY,z,machine);
+      }
+      lowerBand(3.66,3.455,.62,-.26,gunmetal,.018);
+      lowerBand(3.625,3.50,.09,.38,cream,.015);
+      for(const degrees of [225,241,258,282,299,315]){const a=degrees*Math.PI/180;bolt(3.565*Math.cos(a),apertureY+3.565*Math.sin(a),.50,machine,.037);}
+      const support=rounded(1.54,.11,.83,.035,gunmetal,0,.055,.055,machine,false);fixtureNodes.push(support);
+      // Short beveled entry plate gives the raised sill a believable connection to the ground.
+      const positions=[-1.05,.008,1.60,1.05,.008,1.60,-1.05,.17,.36,1.05,.17,.36];
+      const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setIndex([0,2,1,1,2,3]);geometry.computeVertexNormals();
+      const plate=mesh(geometry,new T.MeshStandardMaterial({color:0xb9c0bd,roughness:.7,metalness:.22,side:T.DoubleSide}),0,0,0,machine);plate.receiveShadow=true;
+      for(let i=0;i<5;i++){const z=.48+i*.20,y=.17-(z-.36)/1.24*.162+.007;const tread=box(1.77,.008,.021,gunmetal,0,y,z,machine);tread.rotation.x=.13;}
+      // Broad, soft contact shadows keep the feet seated on the illustrated plank floor.
+      const contactMaterial=new T.MeshBasicMaterial({map:softMap,color:0x11151a,transparent:true,opacity:.48,depthWrite:false});
+      for(const side of [-1,1]){const contact=mesh(new T.PlaneGeometry(2.75,3.42),contactMaterial,side*3.86,.001,1.02);contact.rotation.x=-Math.PI/2;}
+      root.groundingState=()=>({centerY:apertureY,fieldBottom:apertureY-fieldRadius,rotorBottom:apertureY-3.515,cradleBottom:apertureY-3.678,floorY:floor.position.y,floorSource:'horizontal illustrated wood planks',cradle:true});
+    }
+
+    function buildSolidEmitter(a,i){
+      const origin=new T.Vector3(Math.cos(a)*3.86,apertureY+Math.sin(a)*3.86,.42);
+      const direction=new T.Vector3(-Math.cos(a),-Math.sin(a),.46).normalize();
+      // The flange stays bolted down; the barrel turns on a spherical joint.
+      const flange=new T.Group();flange.position.copy(origin);flange.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),direction);machine.add(flange);
+      cyl(.47,.47,.15,ink,0,-.06,0,flange);
+      cyl(.41,.41,.11,cream,0,.035,0,flange,true);
+      solid(new T.SphereGeometry(.29,18,12),gunmetal,0,.10,0,flange);
+      const mount=new T.Group();mount.position.copy(origin);mount.quaternion.copy(flange.quaternion);machine.add(mount);
+      const profile=[[.26,.08],[.36,.13],[.405,.23],[.42,.38],[.38,.61],[.30,.77],[.26,.82]];
+      const body=solid(new T.LatheGeometry(profile.map(([r,y])=>new T.Vector2(r,y)),32),cream,0,0,0,mount,true);
+      cyl(.31,.31,.105,gunmetal,0,.785,0,mount);
+      const stripe=ring(.393,.022,ink,0,.38,0,mount);stripe.rotation.x=Math.PI/2;
+      for(const yy of [.23,.55])for(let k=0;k<6;k++){
+        const theta=k*Math.PI/3,r=yy<.3?.391:.379;
+        solid(new T.SphereGeometry(.043,7,5),gunmetal,Math.cos(theta)*r,yy,Math.sin(theta)*r,mount);
+      }
+      const cap=new T.Group();cap.position.set(0,.90,0);cap.rotation.x=-Math.PI/2;mount.add(cap);
+      ring(.25,.04,cream,0,0,0,cap);
+      // Match the reference's fixed dark nozzle mouths and cream outer collars.
+      const spinner=new T.Group();cap.add(spinner);
+      const tipMat=new T.MeshBasicMaterial({color:0x42e7ff});
+      ring(.216,.027,gunmetal,0,0,.028,cap);
+      solid(new T.CircleGeometry(.198,32),ink,0,0,.006,cap);
+      ring(.192,.009,tipMat,0,0,.016,cap);
+      const flare=new T.Sprite(new T.SpriteMaterial({map:softMap,color:0x49eaff,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.7}));flare.scale.set(.62,.62,1);scene.add(flare);
+      const impact=new T.Sprite(new T.SpriteMaterial({map:softMap,color:0xb8efff,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.6}));scene.add(impact);
+      const arc=makeElectricalArc(25,.18),branches=[makeElectricalArc(11,.105),makeElectricalArc(9,.08)];
+      activeHeads.push({i,a,body,mount,anchor:origin,cap,spinner,tipMat,flare,impact,arc,branches,aim:new T.Vector3(),start:new T.Vector3(),end:new T.Vector3(),power:0});
+      fixtureNodes.push(flange);
+    }
+
+    const wallFixtures=[],cableClamps=[];
+    let wallWash,thresholdLight,portalDust,portalFloorLight;
+    const dustCount=28,dustPositions=new Float32Array(dustCount*3);
+    function buildRoomConnections(){
+      const wallCream=new T.MeshStandardMaterial({color:0xf4eddd,emissive:0xf4eddd,emissiveIntensity:.10,roughness:.9});
+      const paper=new T.MeshStandardMaterial({color:0xfff7e7,emissive:0xfff7e7,emissiveIntensity:.22,roughness:1});
+      entranceWallMaterials.push(paper);
+      // Extend the illustrated wall beyond the original crop while retaining the open doorway.
+      for(const side of [-1,1]){
+        const extension=mesh(new T.PlaneGeometry(42,36),paper,side*25,18,-.72,scene);extension.receiveShadow=true;
+      }
+      const lintel=mesh(new T.PlaneGeometry(8,30),paper,0,22.12+machineLift,-.72,scene);lintel.receiveShadow=true;
+      for(const side of [-1,1]){
+        // Shallow service panels sit against the wall and continue into the floor trim.
+        const panel=rounded(1.50,5.55,.15,.05,wallCream,side*6.52,2.82,-.55,machine,false);
+        wallFixtures.push(panel);
+        for(const xx of [-.60,.60])for(const yy of [.28,5.28])bolt(side*6.52+xx,yy,-.45,machine,.047);
+        // Keep the lobby wall flat and open; no projecting side partitions.
+        box(3.0,.19,.13,ink,side*5.94,.13,-.49);
+        // The distribution box accepts the floor cabinet below and the cable bus above.
+        const boxX=side*6.625,boxY=3.0,portZ=-.22;
+        rounded(.86,1.10,.39,.09,cream,boxX,boxY,-.43,machine);
+        rounded(.66,.82,.065,.035,gunmetal,boxX,boxY,-.196,machine,false);
+        rounded(.60,.76,.045,.025,cream,boxX,boxY,-.141,machine,false);
+        for(const xx of [-.22,.22])for(const yy of [-.26,.26])bolt(boxX+xx,boxY+yy,-.106,machine,.035);
+        for(const yy of [-.18,-.04,.10])rounded(.29,.031,.02,.008,ink,boxX,boxY+yy,-.105,machine,false);
+        for(const sign of [-1,1])cyl(.16,.16,.16,gunmetal,boxX,boxY+sign*.57,portZ,machine);
+        const start=new T.Vector3(side*5.42,2.48,-.13),end=new T.Vector3(boxX,2.41,portZ);
+        ribbedCable(new T.CubicBezierCurve3(start,new T.Vector3(side*5.42,3.03,-.12),new T.Vector3(boxX,1.92,portZ),end),.116);
+      }
+      // A single smooth supply cable follows the arch, held to the wall by eight saddles.
+      const arc=[];
+      for(let i=0;i<=44;i++){
+        const a=(176-172*i/44)*Math.PI/180;
+        arc.push(new T.Vector3(6.64*Math.cos(a),apertureY+6.64*Math.sin(a),-.22));
+      }
+      const bus=new T.CatmullRomCurve3(arc,false,'centripetal');ribbedCable(bus,.122);
+      for(const degrees of [167,145,121,98,78,55,31,12]){
+        const a=degrees*Math.PI/180,pt=new T.Vector3(6.64*Math.cos(a),apertureY+6.64*Math.sin(a),-.22);
+        const clamp=new T.Group();clamp.position.set(pt.x,pt.y,-.56);clamp.rotation.z=a;machine.add(clamp);
+        rounded(.68,.47,.13,.04,cream,0,0,0,clamp,false);
+        rounded(.21,.19,.29,.035,gunmetal,0,0,.18,clamp,false);
+        for(const xx of [-.24,.24])bolt(xx,0,.10,clamp,.047);
+        const strap=cyl(.174,.174,.17,silver,0,0,.34,clamp);strap.rotation.z=0;
+        cableClamps.push(clamp);
+      }
+      machine.updateMatrixWorld(true);
+      // Each motor gets its own short lead, with a gentle bend and a real strain relief.
+      outerModules.forEach(({mount,port},i)=>{
+        const start=mount.localToWorld(port.clone()),radial=new T.Vector3(start.x,start.y-apertureY,0).normalize();
+        const a=Math.atan2(radial.y,radial.x)+(i%2?-.075:.075);
+        const end=new T.Vector3(6.64*Math.cos(a),apertureY+6.64*Math.sin(a),-.22);
+        const c1=start.clone().addScaledVector(radial,.44),c2=end.clone().addScaledVector(radial,.13);c1.z=.075;c2.z=-.17;
+        ribbedCable(new T.CubicBezierCurve3(start,c1,c2,end),.119);
+        const socket=cyl(.163,.163,.23,gunmetal,0,0,0,machine);
+        socket.position.copy(start).addScaledVector(radial,.095);socket.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),radial);
+      });
+    }
+    function ribbedCable(curve,radius){
+      const length=curve.getLength(),segments=Math.max(18,Math.ceil(length*13));
+      const hose=solid(new T.TubeGeometry(curve,segments,radius,8,false),ink,0,0,0,machine);
+      const count=Math.ceil(length/.12),rings=new T.InstancedMesh(new T.TorusGeometry(radius+.006,.017,5,12),gunmetal,count),dummy=new T.Object3D();
+      for(let i=0;i<count;i++){
+        const u=(i+.5)/count;dummy.position.copy(curve.getPointAt(u));dummy.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),curve.getTangentAt(u));dummy.updateMatrix();rings.setMatrixAt(i,dummy.matrix);
+      }
+      rings.castShadow=true;machine.add(rings);hoses.push({hose,curve});
+    }
+
+    const enclosureFans=[],headerCables=[],enclosurePanels=[],illuminatedLetters=[];
+    const logoNeutral=new T.Color(0xfff4dc);
+    function buildMachineWall(){
+      const shellMat=new T.MeshStandardMaterial({color:0xf7edda,emissive:0xf7edda,emissiveIntensity:.12,roughness:.75,metalness:.08});
+      const faceMat=new T.MeshStandardMaterial({color:0xfff5e3,emissive:0xfff5e3,emissiveIntensity:.15,roughness:.7,metalness:.07});
+      const insetMat=new T.MeshStandardMaterial({color:0xc7c7bd,emissive:0xc7c7bd,emissiveIntensity:.06,roughness:.72,metalness:.22});
+      function enclosureShape(width,top,opening){
+        const shape=new T.Shape();shape.moveTo(-width/2,0);shape.lineTo(-width/2,top);shape.lineTo(width/2,top);shape.lineTo(width/2,0);shape.closePath();
+        const hole=new T.Path();hole.absarc(0,apertureY,opening,0,Math.PI*2,false);shape.holes.push(hole);return shape;
+      }
+      // The entire wall is a deep, open-bottom machine casing, with a continuous black gasket.
+      const casing=solid(new T.ExtrudeGeometry(enclosureShape(14.86,22,3.55),{depth:.36,bevelEnabled:true,bevelSize:.055,bevelThickness:.045,bevelSegments:3}),gunmetal,0,0,-.89,machine);
+      solid(new T.ExtrudeGeometry(enclosureShape(14.65,21.92,3.62),{depth:.31,bevelEnabled:true,bevelSize:.035,bevelThickness:.03,bevelSegments:3}),shellMat,0,.03,-.82,machine);
+      enclosurePanels.push(casing);
+      function plate(w,h,x,y,z=-.32,mat=faceMat){
+        const g=new T.Group();g.position.set(x,y+(y>8?machineLift:0),z);machine.add(g);
+        rounded(w,h,.16,.07,gunmetal,0,0,-.08,g,false);
+        rounded(w-.09,h-.09,.11,.050,mat,0,0,.015,g,false);
+        for(const xx of [-w/2+.19,w/2-.19])for(const yy of [-h/2+.19,h/2-.19])bolt(xx,yy,.106,g,.043);
+        enclosurePanels.push(g);return g;
+      }
+      // A quiet upper panel supports the headline; the logo gets a separate physical nameplate.
+      plate(14.35,6.35,0,18.66,-.37,faceMat);
+      const nameplate=plate(13.74,3.65,0,13.47,-.25,faceMat);
+      const logoData={"width":1210,"height":300,"bodies":[{"outer":[[694.5,17.0],[709.0,16.5],[710.0,17.5],[715.0,17.5],[716.0,18.5],[719.0,18.5],[720.0,19.5],[723.0,19.5],[724.0,20.5],[729.0,21.5],[734.0,24.5],[736.5,29.0],[736.0,52.5],[754.0,42.5],[756.0,42.5],[760.0,40.5],[763.0,40.5],[764.0,39.5],[767.0,39.5],[768.0,38.5],[788.0,37.5],[789.0,36.5],[802.0,36.5],[803.0,37.5],[810.0,37.5],[811.0,38.5],[820.0,39.5],[821.0,40.5],[832.0,43.5],[839.0,47.5],[841.0,47.5],[843.0,49.5],[854.0,54.5],[856.0,56.5],[862.0,59.5],[874.0,70.5],[874.5,64.0],[873.5,63.0],[873.5,41.0],[877.0,37.5],[880.0,37.5],[881.0,36.5],[884.0,36.5],[889.0,34.5],[893.0,34.5],[894.0,33.5],[908.0,32.5],[909.0,31.5],[937.0,31.5],[940.5,35.0],[942.5,45.0],[944.5,49.0],[944.5,53.0],[946.5,58.0],[947.5,66.0],[948.5,67.0],[948.5,71.0],[949.5,72.0],[949.5,76.0],[950.5,77.0],[952.5,91.0],[954.5,96.0],[956.5,110.0],[958.5,115.0],[958.5,119.0],[959.5,120.0],[960.5,128.0],[962.5,132.0],[962.5,135.0],[968.5,147.0],[974.0,151.5],[976.0,151.5],[978.5,149.0],[978.5,144.0],[979.5,143.0],[979.5,104.0],[978.5,103.0],[978.5,93.0],[977.5,92.0],[977.5,84.0],[976.5,83.0],[975.5,68.0],[974.5,67.0],[974.5,61.0],[973.5,60.0],[973.5,54.0],[972.5,53.0],[972.5,46.0],[971.5,45.0],[971.5,36.0],[977.0,31.5],[988.0,30.5],[989.0,29.5],[995.0,29.5],[996.0,28.5],[1004.0,28.5],[1005.0,27.5],[1023.0,27.5],[1024.0,28.5],[1033.0,28.5],[1034.0,29.5],[1044.0,30.5],[1046.5,33.0],[1047.5,40.0],[1048.5,41.0],[1048.5,46.0],[1049.5,47.0],[1050.5,63.0],[1051.5,64.0],[1051.5,78.0],[1052.5,79.0],[1053.0,88.5],[1054.5,88.0],[1069.5,58.0],[1077.5,47.0],[1082.0,42.5],[1086.0,40.5],[1093.0,40.5],[1094.0,41.5],[1099.0,42.5],[1102.0,44.5],[1113.0,47.5],[1116.0,49.5],[1124.0,51.5],[1127.0,53.5],[1129.0,53.5],[1130.0,54.5],[1132.0,54.5],[1133.0,55.5],[1135.0,55.5],[1136.0,56.5],[1138.0,56.5],[1139.0,57.5],[1174.0,68.5],[1175.0,69.5],[1177.0,69.5],[1180.0,71.5],[1185.0,72.5],[1201.0,80.5],[1209.5,86.0],[1209.5,98.0],[1207.5,101.0],[1206.5,106.0],[1197.5,125.0],[1190.5,135.0],[1187.5,141.0],[1184.0,143.5],[1179.0,142.5],[1169.0,137.5],[1167.0,135.5],[1143.0,124.5],[1141.0,124.5],[1137.0,122.5],[1132.5,126.0],[1132.5,128.0],[1131.5,129.0],[1132.0,132.5],[1134.0,132.5],[1143.0,137.5],[1145.0,137.5],[1154.0,142.5],[1156.0,142.5],[1163.0,146.5],[1165.0,146.5],[1177.0,152.5],[1180.5,157.0],[1180.5,161.0],[1179.5,162.0],[1178.5,167.0],[1173.5,176.0],[1173.5,178.0],[1160.5,204.0],[1157.0,207.5],[1155.0,208.5],[1151.0,208.5],[1150.0,207.5],[1145.0,206.5],[1140.0,203.5],[1138.0,203.5],[1133.0,200.5],[1131.0,200.5],[1126.0,197.5],[1124.0,197.5],[1105.0,188.5],[1100.0,188.5],[1098.5,191.0],[1098.5,195.0],[1104.0,199.5],[1119.0,207.5],[1121.0,207.5],[1126.0,210.5],[1128.0,210.5],[1131.0,212.5],[1138.0,214.5],[1148.0,219.5],[1151.5,224.0],[1150.5,231.0],[1145.5,241.0],[1133.5,258.0],[1130.5,265.0],[1125.0,269.5],[1115.0,269.5],[1114.0,268.5],[1111.0,268.5],[1110.0,267.5],[1095.0,264.5],[1088.0,261.5],[1085.0,261.5],[1073.0,255.5],[1071.0,255.5],[1068.0,253.5],[1066.0,253.5],[1053.0,247.5],[1048.0,246.5],[1045.0,244.5],[1043.0,244.5],[1040.0,242.5],[1038.0,242.5],[1035.0,240.5],[1033.0,240.5],[1030.0,238.5],[1028.0,238.5],[1017.0,233.5],[1012.0,233.5],[1011.0,234.5],[1009.0,234.5],[1007.0,236.5],[999.0,240.5],[997.0,240.5],[987.0,244.5],[983.0,244.5],[982.0,245.5],[976.0,245.5],[975.0,246.5],[964.0,246.5],[963.0,245.5],[956.0,244.5],[941.0,237.5],[932.0,231.5],[918.0,218.5],[917.0,218.5],[909.5,210.0],[904.5,201.0],[897.0,190.5],[895.5,192.0],[891.5,206.0],[916.5,234.0],[918.5,238.0],[918.5,241.0],[911.5,252.0],[903.0,261.5],[902.0,261.5],[896.0,267.5],[890.0,270.5],[881.0,277.5],[874.0,280.5],[871.0,280.5],[867.0,278.5],[841.0,251.5],[839.0,251.5],[834.0,254.5],[832.0,254.5],[827.0,257.5],[825.0,257.5],[817.0,261.5],[807.0,263.5],[806.0,264.5],[802.0,264.5],[801.0,265.5],[794.0,265.5],[793.0,266.5],[777.0,266.5],[776.0,265.5],[769.0,265.5],[768.0,264.5],[759.0,263.5],[758.0,262.5],[747.0,259.5],[727.0,249.5],[715.0,241.5],[707.5,234.0],[705.5,230.0],[703.0,227.5],[699.0,227.5],[698.0,228.5],[694.0,228.5],[693.0,229.5],[688.0,229.5],[687.0,230.5],[665.0,230.5],[664.0,229.5],[661.0,229.5],[660.0,228.5],[655.0,227.5],[653.5,236.0],[652.5,237.0],[652.5,242.0],[648.0,247.5],[635.0,247.5],[634.0,246.5],[626.0,246.5],[625.0,245.5],[618.0,245.5],[617.0,244.5],[597.0,242.5],[596.0,241.5],[591.0,241.5],[590.0,240.5],[582.0,239.5],[581.0,238.5],[576.0,237.5],[574.5,236.0],[574.5,230.0],[575.5,229.0],[577.5,219.0],[580.5,212.0],[580.5,209.0],[583.5,202.0],[583.5,199.0],[586.5,192.0],[586.0,188.5],[561.0,205.5],[557.0,207.5],[552.0,207.5],[547.5,203.0],[543.5,196.0],[540.5,193.0],[536.5,186.0],[527.0,173.5],[525.5,174.0],[525.5,176.0],[524.5,177.0],[522.5,187.0],[518.5,197.0],[518.5,200.0],[513.5,213.0],[513.5,216.0],[512.5,217.0],[508.5,231.0],[503.0,237.5],[501.0,238.5],[492.0,238.5],[491.0,237.5],[478.0,237.5],[477.0,236.5],[456.0,235.5],[447.0,240.5],[445.0,242.5],[439.0,245.5],[437.0,245.5],[432.0,248.5],[430.0,248.5],[417.0,253.5],[413.0,253.5],[412.0,254.5],[408.0,254.5],[407.0,255.5],[403.0,255.5],[402.0,256.5],[394.0,256.5],[393.0,257.5],[378.0,257.5],[377.0,256.5],[373.0,256.5],[367.0,253.5],[363.5,250.0],[361.5,246.0],[361.5,244.0],[359.5,241.0],[359.5,239.0],[352.5,220.0],[351.5,213.0],[349.5,209.0],[348.5,195.0],[347.5,194.0],[347.0,190.5],[344.5,196.0],[344.5,199.0],[342.5,203.0],[342.5,206.0],[340.5,210.0],[340.5,213.0],[337.5,220.0],[337.5,223.0],[336.5,224.0],[334.5,232.0],[331.5,238.0],[326.0,242.5],[322.0,242.5],[321.0,241.5],[308.0,241.5],[307.0,240.5],[290.0,240.5],[289.0,239.5],[286.0,239.5],[280.0,246.5],[278.0,246.5],[274.0,248.5],[270.0,248.5],[265.0,250.5],[261.0,250.5],[257.0,252.5],[253.0,252.5],[252.0,253.5],[249.0,253.5],[248.0,254.5],[233.0,257.5],[229.0,259.5],[226.0,259.5],[221.0,261.5],[217.0,261.5],[216.0,262.5],[206.0,264.5],[205.0,265.5],[197.0,266.5],[196.0,267.5],[189.0,267.5],[188.0,268.5],[172.0,268.5],[168.5,266.0],[161.5,252.0],[155.5,232.0],[154.0,230.5],[144.0,240.5],[132.0,249.5],[117.0,256.5],[115.0,256.5],[114.0,257.5],[112.0,257.5],[111.0,258.5],[109.0,258.5],[108.0,259.5],[100.0,261.5],[97.0,263.5],[94.0,263.5],[84.0,267.5],[81.0,267.5],[80.0,268.5],[73.0,268.5],[72.0,269.5],[53.0,269.5],[52.0,268.5],[44.0,268.5],[43.0,267.5],[38.0,267.5],[37.0,266.5],[34.0,266.5],[33.0,265.5],[25.0,263.5],[21.0,261.5],[19.5,259.0],[19.5,256.0],[17.5,251.0],[17.5,246.0],[16.5,245.0],[16.5,240.0],[15.5,239.0],[15.5,233.0],[14.5,232.0],[14.5,207.0],[15.5,206.0],[15.5,199.0],[16.5,198.0],[17.5,186.0],[19.5,182.0],[23.0,179.5],[33.0,179.5],[34.0,180.5],[40.0,180.5],[41.0,181.5],[47.0,181.5],[48.0,182.5],[56.0,182.5],[57.0,183.5],[84.0,183.5],[85.0,182.5],[87.0,182.5],[87.5,181.0],[84.0,179.5],[81.0,179.5],[80.0,178.5],[77.0,178.5],[76.0,177.5],[73.0,177.5],[72.0,176.5],[69.0,176.5],[68.0,175.5],[65.0,175.5],[64.0,174.5],[60.0,174.5],[59.0,173.5],[51.0,172.5],[50.0,171.5],[42.0,169.5],[39.0,167.5],[34.0,166.5],[28.0,163.5],[13.0,152.5],[5.5,143.0],[0.5,131.0],[0.5,126.0],[-0.5,125.0],[-0.5,114.0],[0.5,113.0],[0.5,107.0],[1.5,106.0],[1.5,103.0],[2.5,102.0],[2.5,99.0],[3.5,98.0],[4.5,93.0],[9.5,83.0],[16.5,73.0],[27.0,62.5],[33.0,59.5],[35.0,57.5],[40.0,55.5],[42.0,53.5],[50.0,49.5],[52.0,49.5],[57.0,46.5],[59.0,46.5],[66.0,42.5],[68.0,42.5],[72.0,40.5],[76.0,40.5],[77.0,39.5],[136.0,39.5],[137.0,40.5],[144.0,40.5],[152.0,43.5],[155.5,47.0],[157.5,51.0],[157.5,56.0],[158.5,57.0],[159.0,60.5],[165.0,59.5],[169.0,57.5],[172.0,57.5],[176.0,55.5],[183.0,54.5],[184.0,53.5],[194.0,52.5],[195.0,51.5],[201.0,51.5],[202.0,50.5],[208.0,50.5],[209.0,49.5],[224.0,48.5],[225.0,47.5],[229.0,47.5],[230.0,46.5],[238.0,45.5],[239.0,44.5],[243.0,44.5],[244.0,43.5],[251.0,43.5],[252.0,44.5],[259.0,45.5],[262.5,49.0],[263.5,55.0],[264.5,56.0],[264.5,61.0],[265.5,62.0],[265.5,67.0],[266.5,68.0],[266.5,74.0],[267.5,75.0],[267.5,81.0],[268.5,82.0],[268.5,98.0],[264.0,102.5],[258.0,105.5],[250.0,106.5],[249.0,107.5],[245.0,107.5],[244.0,108.5],[239.0,108.5],[234.0,110.5],[230.0,110.5],[229.0,111.5],[225.0,111.5],[224.0,112.5],[220.0,112.5],[219.0,113.5],[211.0,114.5],[210.5,118.0],[213.0,120.5],[216.0,120.5],[217.0,119.5],[220.0,119.5],[225.0,117.5],[229.0,117.5],[234.0,115.5],[248.0,113.5],[253.0,111.5],[263.0,110.5],[267.0,112.5],[268.5,111.0],[268.5,108.0],[269.5,107.0],[269.5,104.0],[270.5,103.0],[270.5,100.0],[271.5,99.0],[271.5,96.0],[273.5,91.0],[273.5,88.0],[275.5,84.0],[275.5,81.0],[276.5,80.0],[276.5,77.0],[277.5,76.0],[277.5,73.0],[278.5,72.0],[278.5,69.0],[280.5,64.0],[280.5,61.0],[281.5,60.0],[282.5,50.0],[284.5,46.0],[288.0,42.5],[290.0,42.5],[291.0,41.5],[299.0,40.5],[300.0,41.5],[309.0,41.5],[310.0,42.5],[322.0,43.5],[323.0,44.5],[328.0,44.5],[329.0,45.5],[333.0,45.5],[334.0,46.5],[349.0,49.5],[357.0,52.5],[370.0,42.5],[380.0,37.5],[382.0,37.5],[385.0,35.5],[387.0,35.5],[391.0,33.5],[394.0,33.5],[398.0,31.5],[402.0,31.5],[403.0,30.5],[407.0,30.5],[408.0,29.5],[412.0,29.5],[413.0,28.5],[418.0,28.5],[419.0,27.5],[427.0,27.5],[428.0,26.5],[431.0,26.5],[432.0,27.5],[440.0,27.5],[441.0,28.5],[445.0,28.5],[446.0,29.5],[457.0,31.5],[464.0,34.5],[467.0,34.5],[472.0,36.5],[474.5,39.0],[475.5,41.0],[475.5,47.0],[476.5,48.0],[477.5,69.0],[479.0,72.5],[490.5,35.0],[497.0,27.5],[500.0,27.5],[501.0,26.5],[508.0,29.5],[522.0,42.5],[523.0,42.5],[535.0,54.5],[536.0,54.5],[577.0,96.5],[591.0,86.5],[600.0,82.5],[602.0,80.5],[604.0,80.5],[612.0,76.5],[614.0,74.5],[623.0,70.5],[625.0,68.5],[632.0,65.5],[634.0,63.5],[639.0,62.5],[642.5,60.0],[644.5,56.0],[644.5,49.0],[645.5,48.0],[645.5,40.0],[646.5,39.0],[647.5,28.0],[648.5,27.0],[649.5,22.0],[652.0,19.5],[654.0,18.5],[668.0,18.5],[669.0,17.5]],"holes":[[[785.0,139.5],[776.5,145.0],[776.5,146.0],[773.5,149.0],[772.5,156.0],[775.5,162.0],[780.0,166.5],[787.0,170.5],[794.0,170.5],[802.5,163.0],[804.5,159.0],[804.5,155.0],[805.5,154.0],[804.5,153.0],[804.5,150.0],[797.0,141.5],[793.0,139.5]],[[354.0,166.5],[352.5,168.0],[352.5,171.0],[351.5,172.0],[351.5,175.0],[350.5,176.0],[350.5,179.0],[348.5,184.0],[349.0,185.5],[352.0,183.5],[355.0,183.5],[356.0,182.5],[360.0,182.5],[361.0,183.5],[373.0,183.5],[374.0,184.5],[387.0,184.5],[388.0,183.5],[395.0,183.5],[396.0,182.5],[400.0,182.5],[401.0,181.5],[406.0,181.5],[415.5,177.0],[415.5,176.0],[412.0,173.5],[402.0,173.5],[401.0,172.5],[378.0,172.5],[377.0,171.5],[366.0,170.5],[365.0,169.5],[362.0,169.5],[356.0,166.5]],[[469.0,104.5],[468.0,105.5],[446.0,105.5],[445.0,106.5],[432.0,106.5],[408.0,116.5],[404.5,121.0],[406.0,122.5],[408.0,121.5],[422.0,121.5],[423.0,120.5],[429.0,120.5],[430.0,119.5],[436.0,119.5],[437.0,118.5],[443.0,118.5],[444.0,117.5],[450.0,117.5],[451.0,116.5],[462.0,116.5],[463.0,117.5],[469.0,117.5],[469.5,111.0],[470.5,110.0],[470.5,105.0]],[[250.0,175.5],[249.0,176.5],[245.0,176.5],[244.0,177.5],[241.0,177.5],[236.0,179.5],[232.0,179.5],[231.0,180.5],[228.0,180.5],[224.5,182.0],[226.5,187.0],[228.0,188.5],[235.0,188.5],[236.0,187.5],[239.0,187.5],[244.0,185.5],[248.0,185.5],[252.5,183.0],[252.5,176.0]],[[100.0,124.5],[100.0,125.5],[111.0,127.5],[112.0,128.5],[115.0,128.5],[116.0,129.5],[119.0,129.5],[120.0,130.5],[123.0,130.5],[128.0,132.5],[131.0,132.5],[132.0,133.5],[134.5,133.0],[133.0,125.5],[128.0,125.5],[127.0,124.5]]]}],"faces":[{"outer":[[792.5,44.0],[810.0,43.5],[811.0,44.5],[819.0,45.5],[825.0,48.5],[835.0,51.5],[840.0,54.5],[842.0,54.5],[859.0,64.5],[873.5,78.0],[873.5,79.0],[880.5,87.0],[886.5,96.0],[887.5,99.0],[889.5,101.0],[897.5,118.0],[899.5,128.0],[900.5,129.0],[900.5,138.0],[901.5,139.0],[901.5,142.0],[900.5,143.0],[900.5,152.0],[899.5,153.0],[899.5,158.0],[897.5,163.0],[897.5,167.0],[896.5,168.0],[893.5,183.0],[892.5,184.0],[890.5,192.0],[888.5,195.0],[888.5,197.0],[886.5,200.0],[885.5,205.0],[888.5,208.0],[888.5,210.0],[890.5,214.0],[910.5,237.0],[910.5,243.0],[904.5,252.0],[899.0,257.5],[876.0,273.5],[871.0,273.5],[844.0,245.5],[840.0,245.5],[825.0,252.5],[817.0,254.5],[814.0,256.5],[811.0,256.5],[807.0,258.5],[803.0,258.5],[802.0,259.5],[770.0,259.5],[769.0,258.5],[765.0,258.5],[764.0,257.5],[761.0,257.5],[760.0,256.5],[749.0,253.5],[744.0,250.5],[742.0,250.5],[738.0,248.5],[736.0,246.5],[731.0,244.5],[729.0,242.5],[723.0,239.5],[719.0,235.5],[718.0,235.5],[710.5,227.0],[713.0,225.5],[717.0,225.5],[718.0,224.5],[732.0,222.5],[736.5,219.0],[736.5,204.0],[735.5,203.0],[735.5,71.0],[736.5,70.0],[736.5,64.0],[737.5,63.0],[737.5,61.0],[740.0,57.5],[749.0,51.5],[764.0,45.5],[770.0,45.5],[771.0,44.5]],"holes":[[[791.0,132.5],[790.0,133.5],[784.0,133.5],[777.0,136.5],[772.5,140.0],[772.5,141.0],[769.5,144.0],[767.5,149.0],[767.5,159.0],[770.5,166.0],[775.0,171.5],[784.0,176.5],[795.0,176.5],[799.0,174.5],[808.5,164.0],[810.5,159.0],[810.5,156.0],[811.5,155.0],[811.5,151.0],[807.5,143.0],[799.0,135.5]]]},{"outer":[[498.5,34.0],[503.0,33.5],[515.0,44.5],[516.0,44.5],[531.0,59.5],[532.0,59.5],[532.5,61.0],[534.0,61.5],[535.5,64.0],[537.0,64.5],[537.5,66.0],[567.0,95.5],[568.0,95.5],[576.0,103.5],[580.0,102.5],[587.0,96.5],[596.0,91.5],[598.0,89.5],[603.0,87.5],[605.0,85.5],[639.0,68.5],[641.0,68.5],[643.0,66.5],[645.0,66.5],[652.0,62.5],[657.0,61.5],[660.0,59.5],[662.0,59.5],[669.0,56.5],[675.0,56.5],[676.5,58.0],[678.5,63.0],[678.5,67.0],[679.5,68.0],[679.5,88.0],[678.5,89.0],[678.5,94.0],[677.5,95.0],[674.5,110.0],[672.5,114.0],[669.5,129.0],[668.5,130.0],[668.5,133.0],[667.5,134.0],[667.5,137.0],[665.5,142.0],[665.5,147.0],[664.5,148.0],[664.5,152.0],[663.5,153.0],[663.5,159.0],[662.5,160.0],[661.5,171.0],[660.5,172.0],[660.5,176.0],[658.5,181.0],[658.5,185.0],[657.5,186.0],[657.5,189.0],[655.5,194.0],[654.5,203.0],[653.5,204.0],[653.5,207.0],[651.5,212.0],[651.5,216.0],[650.5,217.0],[650.5,221.0],[648.5,226.0],[647.5,236.0],[646.5,237.0],[646.5,239.0],[644.0,241.5],[635.0,241.5],[634.0,240.5],[625.0,240.5],[624.0,239.5],[608.0,238.5],[607.0,237.5],[598.0,236.5],[597.0,235.5],[594.0,235.5],[590.0,233.5],[584.0,232.5],[581.5,230.0],[581.5,225.0],[582.5,224.0],[582.5,220.0],[583.5,219.0],[583.5,217.0],[584.5,216.0],[584.5,214.0],[585.5,213.0],[585.5,211.0],[593.5,189.0],[594.5,179.0],[592.0,178.5],[591.0,179.5],[588.0,179.5],[561.0,197.5],[558.0,200.5],[554.0,200.5],[531.5,167.0],[526.0,162.5],[522.5,165.0],[520.5,169.0],[520.5,171.0],[517.5,178.0],[517.5,181.0],[514.5,188.0],[514.5,191.0],[511.5,198.0],[511.5,201.0],[509.5,205.0],[509.5,208.0],[506.5,215.0],[506.5,218.0],[503.5,225.0],[503.5,228.0],[499.0,232.5],[476.0,232.5],[475.0,231.5],[464.5,231.0],[464.5,230.0],[478.5,215.0],[478.5,214.0],[487.5,203.0],[493.5,194.0],[498.5,184.0],[499.5,178.0],[500.5,177.0],[501.5,162.0],[500.5,161.0],[500.5,156.0],[499.5,155.0],[498.5,150.0],[494.5,144.0],[492.5,139.0],[483.5,128.0],[483.5,127.0],[477.0,120.5],[473.5,119.0],[474.5,114.0],[475.5,113.0],[475.5,110.0],[476.5,109.0],[476.5,105.0],[477.5,104.0],[478.5,97.0],[479.5,96.0],[479.5,92.0],[480.5,91.0],[480.5,88.0],[481.5,87.0],[481.5,84.0],[483.5,79.0],[483.5,76.0],[487.5,65.0],[487.5,62.0],[488.5,61.0],[495.5,38.0]],"holes":[]},{"outer":[[93.5,45.0],[131.0,44.5],[132.0,45.5],[140.0,45.5],[141.0,46.5],[147.0,47.5],[151.5,52.0],[151.5,54.0],[152.5,55.0],[152.5,61.0],[153.5,62.0],[153.5,89.0],[152.5,90.0],[152.5,99.0],[151.5,100.0],[151.5,106.0],[150.5,107.0],[150.5,112.0],[149.5,113.0],[148.5,119.0],[120.0,119.5],[119.0,118.5],[93.0,118.5],[86.5,124.0],[92.0,129.5],[94.0,129.5],[95.0,130.5],[98.0,130.5],[103.0,132.5],[107.0,132.5],[112.0,134.5],[116.0,134.5],[117.0,135.5],[121.0,135.5],[122.0,136.5],[129.0,137.5],[130.0,138.5],[133.0,138.5],[136.0,140.5],[138.0,140.5],[147.0,145.5],[157.5,156.0],[163.5,167.0],[163.5,170.0],[164.5,171.0],[164.5,190.0],[163.5,191.0],[163.5,196.0],[162.5,197.0],[160.5,208.0],[157.5,214.0],[157.5,216.0],[153.5,223.0],[143.0,233.5],[142.0,233.5],[132.0,242.5],[117.0,250.5],[115.0,250.5],[108.0,253.5],[105.0,253.5],[104.0,254.5],[99.0,255.5],[86.0,260.5],[83.0,260.5],[79.0,262.5],[75.0,262.5],[74.0,263.5],[50.0,263.5],[49.0,262.5],[45.0,262.5],[44.0,261.5],[40.0,261.5],[39.0,260.5],[32.0,259.5],[27.0,257.5],[24.5,254.0],[24.5,252.0],[23.5,251.0],[23.5,245.0],[22.5,244.0],[22.5,240.0],[21.5,239.0],[21.5,233.0],[20.5,232.0],[20.5,222.0],[19.5,221.0],[19.5,217.0],[20.5,216.0],[20.5,199.0],[21.5,198.0],[22.5,190.0],[24.5,186.0],[29.0,185.5],[34.0,187.5],[44.0,188.5],[45.0,189.5],[80.0,190.5],[81.0,189.5],[85.0,189.5],[86.0,188.5],[91.0,187.5],[95.5,183.0],[96.5,180.0],[95.5,178.0],[92.0,175.5],[86.0,174.5],[85.0,173.5],[81.0,173.5],[80.0,172.5],[77.0,172.5],[76.0,171.5],[73.0,171.5],[72.0,170.5],[69.0,170.5],[64.0,168.5],[61.0,168.5],[57.0,166.5],[54.0,166.5],[53.0,165.5],[39.0,161.5],[36.0,159.5],[34.0,159.5],[24.0,153.5],[11.5,141.0],[6.5,131.0],[6.5,128.0],[5.5,127.0],[5.5,114.0],[6.5,113.0],[7.5,104.0],[8.5,103.0],[11.5,92.0],[15.5,84.0],[21.5,76.0],[33.0,65.5],[42.0,59.5],[65.0,48.5],[75.0,46.5],[76.0,45.5]],"holes":[]},{"outer":[[1003.5,34.0],[1029.0,33.5],[1030.0,34.5],[1038.0,35.5],[1040.5,37.0],[1042.5,47.0],[1043.5,48.0],[1043.5,53.0],[1044.5,54.0],[1044.5,62.0],[1045.5,63.0],[1045.5,79.0],[1046.5,80.0],[1046.5,93.0],[1047.5,94.0],[1047.5,102.0],[1048.5,103.0],[1049.5,135.0],[1048.5,136.0],[1048.5,149.0],[1047.5,150.0],[1047.5,155.0],[1046.5,156.0],[1044.5,170.0],[1043.5,171.0],[1041.5,182.0],[1038.5,189.0],[1038.5,192.0],[1033.5,203.0],[1027.5,212.0],[1017.0,222.5],[1009.0,228.5],[996.0,235.5],[990.0,236.5],[982.0,239.5],[966.0,240.5],[965.0,239.5],[961.0,239.5],[960.0,238.5],[955.0,237.5],[941.0,230.5],[930.0,222.5],[913.5,205.0],[901.5,185.0],[901.5,183.0],[900.5,182.0],[900.5,173.0],[901.5,172.0],[901.5,168.0],[902.5,167.0],[902.5,163.0],[903.5,162.0],[903.5,158.0],[904.5,157.0],[904.5,152.0],[905.5,151.0],[905.5,145.0],[906.5,144.0],[906.5,132.0],[905.5,131.0],[905.5,126.0],[904.5,125.0],[903.5,117.0],[901.5,114.0],[900.5,109.0],[893.5,96.0],[883.5,82.0],[883.5,80.0],[881.5,76.0],[880.5,58.0],[879.5,57.0],[879.5,48.0],[878.5,46.0],[881.0,42.5],[891.0,41.5],[892.0,40.5],[896.0,40.5],[897.0,39.5],[901.0,39.5],[902.0,38.5],[907.0,38.5],[908.0,37.5],[918.0,37.5],[919.0,36.5],[924.0,36.5],[925.0,37.5],[932.0,37.5],[934.5,39.0],[937.5,46.0],[938.5,54.0],[939.5,55.0],[939.5,58.0],[941.5,63.0],[941.5,67.0],[942.5,68.0],[942.5,72.0],[943.5,73.0],[943.5,77.0],[944.5,78.0],[944.5,82.0],[945.5,83.0],[945.5,88.0],[946.5,89.0],[946.5,93.0],[947.5,94.0],[949.5,108.0],[950.5,109.0],[952.5,120.0],[954.5,124.0],[954.5,127.0],[955.5,128.0],[961.5,148.0],[963.5,151.0],[970.0,156.5],[977.0,157.5],[983.5,152.0],[985.5,147.0],[985.5,144.0],[986.5,143.0],[985.5,112.0],[984.5,111.0],[984.5,101.0],[983.5,100.0],[982.5,79.0],[981.5,78.0],[980.5,61.0],[979.5,60.0],[979.5,51.0],[978.5,50.0],[978.5,43.0],[977.5,42.0],[977.5,39.0],[981.0,37.5],[990.0,36.5],[991.0,35.5]],"holes":[]},{"outer":[[1085.5,48.0],[1093.0,47.5],[1094.0,48.5],[1120.0,56.5],[1123.0,58.5],[1129.0,59.5],[1132.0,61.5],[1135.0,61.5],[1142.0,64.5],[1145.0,64.5],[1146.0,65.5],[1181.0,76.5],[1187.0,79.5],[1189.0,81.5],[1198.0,85.5],[1204.5,90.0],[1204.5,94.0],[1203.5,95.0],[1202.5,100.0],[1200.5,103.0],[1200.5,105.0],[1196.5,111.0],[1194.5,116.0],[1192.5,118.0],[1190.5,123.0],[1188.5,125.0],[1185.5,132.0],[1182.0,136.5],[1178.0,135.5],[1176.0,133.5],[1169.0,130.5],[1167.0,128.5],[1159.0,124.5],[1157.0,124.5],[1150.0,120.5],[1148.0,120.5],[1140.0,116.5],[1134.0,116.5],[1132.0,117.5],[1126.5,124.0],[1122.5,132.0],[1124.0,134.5],[1138.0,141.5],[1140.0,141.5],[1149.0,146.5],[1151.0,146.5],[1160.0,151.5],[1162.0,151.5],[1173.5,158.0],[1173.5,163.0],[1166.5,176.0],[1166.5,178.0],[1159.5,191.0],[1159.5,193.0],[1154.0,202.5],[1147.0,201.5],[1142.0,198.5],[1140.0,198.5],[1133.0,194.5],[1131.0,194.5],[1124.0,190.5],[1122.0,190.5],[1113.0,185.5],[1111.0,185.5],[1101.0,180.5],[1094.5,186.0],[1091.5,191.0],[1091.5,195.0],[1092.5,197.0],[1102.0,204.5],[1117.0,212.5],[1119.0,212.5],[1122.0,214.5],[1132.0,217.5],[1145.5,225.0],[1145.5,228.0],[1143.5,232.0],[1141.5,234.0],[1134.5,247.0],[1130.5,252.0],[1128.5,257.0],[1123.0,263.5],[1113.0,263.5],[1112.0,262.5],[1108.0,262.5],[1107.0,261.5],[1100.0,260.5],[1099.0,259.5],[1088.0,256.5],[1085.0,254.5],[1078.0,252.5],[1073.0,249.5],[1071.0,249.5],[1068.0,247.5],[1066.0,247.5],[1063.0,245.5],[1053.0,242.5],[1050.0,240.5],[1043.0,238.5],[1038.0,235.5],[1036.0,235.5],[1033.0,233.5],[1026.0,231.5],[1020.5,228.0],[1020.5,227.0],[1034.5,211.0],[1038.5,205.0],[1042.5,197.0],[1042.5,195.0],[1046.5,185.0],[1046.5,181.0],[1048.5,177.0],[1048.5,173.0],[1049.5,172.0],[1049.5,169.0],[1050.5,168.0],[1050.5,165.0],[1052.5,160.0],[1053.5,150.0],[1054.5,149.0],[1054.5,144.0],[1055.5,143.0],[1055.5,116.0],[1054.5,115.0],[1054.5,110.0],[1053.5,109.0],[1053.5,102.0],[1074.5,60.0],[1080.5,53.0],[1080.5,52.0]],"holes":[]},{"outer":[[416.5,34.0],[434.0,33.5],[435.0,34.5],[441.0,34.5],[442.0,35.5],[446.0,35.5],[447.0,36.5],[454.0,37.5],[458.0,39.5],[461.0,39.5],[462.0,40.5],[467.0,41.5],[468.5,43.0],[471.5,50.0],[471.5,66.0],[472.5,67.0],[472.5,77.0],[471.5,78.0],[471.5,90.0],[470.5,91.0],[470.5,96.0],[469.0,99.5],[435.0,100.5],[434.0,101.5],[429.0,101.5],[428.0,102.5],[425.0,102.5],[424.0,103.5],[419.0,104.5],[404.0,112.5],[401.5,115.0],[398.5,121.0],[398.5,124.0],[401.0,126.5],[407.0,128.5],[408.0,127.5],[417.0,127.5],[418.0,126.5],[426.0,126.5],[427.0,125.5],[437.0,125.5],[438.0,124.5],[444.0,124.5],[445.0,123.5],[450.0,123.5],[451.0,122.5],[462.0,122.5],[463.0,123.5],[466.0,123.5],[476.0,127.5],[483.5,135.0],[484.5,138.0],[492.5,150.0],[492.5,152.0],[494.5,155.0],[494.5,158.0],[495.5,159.0],[495.5,173.0],[494.5,174.0],[494.5,177.0],[493.5,178.0],[492.5,183.0],[486.5,195.0],[478.5,207.0],[475.5,210.0],[475.5,211.0],[457.0,228.5],[439.0,239.5],[437.0,239.5],[432.0,242.5],[430.0,242.5],[420.0,246.5],[416.0,246.5],[415.0,247.5],[411.0,247.5],[410.0,248.5],[405.0,248.5],[404.0,249.5],[398.0,249.5],[397.0,250.5],[380.0,251.5],[379.0,250.5],[375.0,250.5],[373.0,249.5],[367.5,244.0],[364.5,238.0],[364.5,236.0],[362.5,232.0],[362.5,229.0],[359.5,222.0],[357.5,210.0],[356.5,209.0],[355.5,198.0],[354.5,197.0],[354.5,190.0],[356.0,188.5],[363.0,188.5],[364.0,189.5],[395.0,189.5],[396.0,188.5],[402.0,188.5],[403.0,187.5],[406.0,187.5],[407.0,186.5],[412.0,185.5],[415.0,183.5],[419.5,179.0],[420.5,174.0],[417.0,169.5],[412.0,168.5],[411.0,167.5],[371.0,165.5],[370.0,164.5],[367.0,164.5],[364.0,162.5],[359.0,161.5],[355.5,159.0],[355.5,155.0],[356.5,154.0],[357.5,148.0],[359.5,144.0],[359.5,141.0],[361.5,137.0],[362.5,130.0],[365.5,123.0],[365.5,120.0],[366.5,119.0],[371.5,102.0],[373.5,99.0],[373.5,97.0],[376.5,90.0],[376.5,87.0],[378.5,82.0],[378.5,77.0],[379.5,76.0],[379.5,64.0],[378.5,62.0],[372.0,56.5],[367.0,55.5],[365.0,54.5],[364.5,53.0],[366.0,51.5],[384.0,42.5],[389.0,41.5],[392.0,39.5],[394.0,39.5],[398.0,37.5],[401.0,37.5],[405.0,35.5]],"holes":[]},{"outer":[[238.5,51.0],[253.0,50.5],[257.5,53.0],[258.5,58.0],[259.5,59.0],[259.5,65.0],[260.5,66.0],[260.5,72.0],[261.5,73.0],[261.5,80.0],[262.5,81.0],[262.5,96.0],[259.0,99.5],[250.0,100.5],[249.0,101.5],[245.0,101.5],[244.0,102.5],[240.0,102.5],[239.0,103.5],[234.0,103.5],[233.0,104.5],[229.0,104.5],[228.0,105.5],[220.0,106.5],[219.0,107.5],[209.0,109.5],[204.5,112.0],[204.5,114.0],[203.5,115.0],[204.5,116.0],[204.5,120.0],[209.0,125.5],[211.0,125.5],[212.0,126.5],[222.0,125.5],[223.0,124.5],[226.0,124.5],[231.0,122.5],[240.0,121.5],[241.0,120.5],[249.0,119.5],[250.0,118.5],[254.0,118.5],[255.0,117.5],[259.0,117.5],[260.0,116.5],[261.0,116.5],[264.5,120.0],[264.5,124.0],[265.5,125.0],[267.5,139.0],[268.5,140.0],[268.5,145.0],[269.5,146.0],[269.5,162.0],[270.5,163.0],[269.5,164.0],[269.5,166.0],[268.0,167.5],[265.0,167.5],[264.0,168.5],[258.0,168.5],[257.0,169.5],[252.0,169.5],[251.0,170.5],[245.0,170.5],[244.0,171.5],[235.0,172.5],[231.0,174.5],[225.0,175.5],[221.0,177.5],[219.5,180.0],[219.5,187.0],[223.0,193.5],[225.0,194.5],[234.0,194.5],[235.0,193.5],[239.0,193.5],[240.0,192.5],[247.0,191.5],[251.0,189.5],[254.0,189.5],[255.0,188.5],[265.0,186.5],[266.0,185.5],[270.0,185.5],[271.0,184.5],[272.0,185.5],[274.0,185.5],[276.5,188.0],[276.5,191.0],[277.5,192.0],[278.5,218.0],[279.5,219.0],[279.5,237.0],[276.0,241.5],[274.0,241.5],[273.0,242.5],[270.0,242.5],[269.0,243.5],[266.0,243.5],[265.0,244.5],[262.0,244.5],[257.0,246.5],[253.0,246.5],[245.0,249.5],[237.0,250.5],[236.0,251.5],[226.0,253.5],[225.0,254.5],[221.0,254.5],[217.0,256.5],[213.0,256.5],[212.0,257.5],[209.0,257.5],[204.0,259.5],[199.0,259.5],[198.0,260.5],[191.0,260.5],[190.0,261.5],[180.0,261.5],[179.0,262.5],[176.0,262.5],[172.5,259.0],[169.5,253.0],[169.5,251.0],[166.5,246.0],[166.5,244.0],[164.5,241.0],[164.5,239.0],[162.5,236.0],[162.5,233.0],[160.5,229.0],[160.5,222.0],[163.5,217.0],[163.5,215.0],[166.5,209.0],[166.5,206.0],[168.5,201.0],[168.5,196.0],[169.5,195.0],[169.5,190.0],[170.5,189.0],[170.5,181.0],[171.5,180.0],[171.5,177.0],[170.5,176.0],[169.5,166.0],[166.5,159.0],[161.5,152.0],[152.0,142.5],[148.0,140.5],[140.5,133.0],[139.5,131.0],[139.5,126.0],[148.0,125.5],[150.0,126.5],[152.5,125.0],[152.5,123.0],[153.5,122.0],[153.5,119.0],[154.5,118.0],[154.5,115.0],[156.5,110.0],[156.5,106.0],[157.5,105.0],[159.0,66.5],[164.0,65.5],[165.0,64.5],[168.0,64.5],[169.0,63.5],[172.0,63.5],[176.0,61.5],[191.0,58.5],[192.0,57.5],[197.0,57.5],[198.0,56.5],[202.0,56.5],[203.0,55.5],[211.0,55.5],[212.0,54.5],[223.0,54.5],[224.0,53.5],[228.0,53.5],[229.0,52.5],[233.0,52.5],[234.0,51.5]],"holes":[]},{"outer":[[294.5,47.0],[298.0,46.5],[299.0,47.5],[307.0,47.5],[308.0,48.5],[315.0,48.5],[316.0,49.5],[321.0,49.5],[322.0,50.5],[331.0,51.5],[332.0,52.5],[335.0,52.5],[336.0,53.5],[339.0,53.5],[340.0,54.5],[343.0,54.5],[344.0,55.5],[347.0,55.5],[348.0,56.5],[351.0,56.5],[355.0,58.5],[358.0,58.5],[359.0,59.5],[362.0,59.5],[363.0,60.5],[368.0,61.5],[373.5,66.0],[373.5,79.0],[372.5,80.0],[371.5,89.0],[370.5,90.0],[370.5,92.0],[369.5,93.0],[369.5,95.0],[361.5,117.0],[361.5,120.0],[357.5,130.0],[357.5,133.0],[353.5,143.0],[353.5,146.0],[349.5,157.0],[349.5,160.0],[348.5,161.0],[347.5,168.0],[345.5,172.0],[345.5,175.0],[344.5,176.0],[343.5,183.0],[341.5,187.0],[341.5,190.0],[339.5,194.0],[339.5,197.0],[338.5,198.0],[335.5,209.0],[333.5,212.0],[333.5,214.0],[328.5,227.0],[327.5,233.0],[325.0,235.5],[302.0,234.5],[301.0,233.5],[290.0,233.5],[289.0,232.5],[287.0,232.5],[286.5,228.0],[285.5,227.0],[285.5,219.0],[284.5,218.0],[284.5,210.0],[283.5,209.0],[282.5,192.0],[281.5,191.0],[281.5,188.0],[280.5,187.0],[279.5,182.0],[277.0,179.5],[267.0,179.5],[266.0,180.5],[258.5,180.0],[259.0,174.5],[270.0,172.5],[272.0,171.5],[275.5,167.0],[275.5,158.0],[274.5,157.0],[274.5,149.0],[273.5,148.0],[273.5,140.0],[272.5,139.0],[272.5,130.0],[271.5,129.0],[271.5,119.0],[272.5,118.0],[272.5,115.0],[273.5,114.0],[273.5,111.0],[274.5,110.0],[274.5,107.0],[276.5,102.0],[276.5,99.0],[277.5,98.0],[277.5,95.0],[278.5,94.0],[278.5,91.0],[279.5,90.0],[279.5,87.0],[280.5,86.0],[280.5,83.0],[281.5,82.0],[281.5,79.0],[282.5,78.0],[282.5,75.0],[284.5,70.0],[284.5,67.0],[285.5,66.0],[285.5,63.0],[287.5,59.0],[287.5,55.0],[289.5,50.0],[292.0,47.5]],"holes":[]},{"outer":[[668.5,24.0],[714.0,23.5],[715.0,24.5],[719.0,24.5],[720.0,25.5],[726.0,26.5],[730.5,31.0],[730.5,33.0],[731.5,34.0],[731.5,55.0],[730.5,56.0],[730.5,215.0],[728.0,217.5],[716.0,218.5],[715.0,219.5],[709.0,219.5],[708.0,220.5],[703.0,220.5],[702.0,221.5],[688.0,222.5],[687.0,223.5],[680.0,223.5],[679.0,224.5],[668.0,224.5],[667.0,223.5],[664.0,223.5],[656.5,219.0],[656.5,216.0],[658.5,211.0],[658.5,207.0],[659.5,206.0],[659.5,202.0],[660.5,201.0],[661.5,193.0],[662.5,192.0],[663.5,182.0],[665.5,177.0],[666.5,167.0],[667.5,166.0],[668.5,158.0],[669.5,157.0],[669.5,153.0],[670.5,152.0],[670.5,148.0],[671.5,147.0],[671.5,143.0],[672.5,142.0],[673.5,135.0],[675.5,131.0],[675.5,128.0],[676.5,127.0],[676.5,124.0],[677.5,123.0],[677.5,120.0],[678.5,119.0],[678.5,116.0],[680.5,111.0],[680.5,107.0],[682.5,102.0],[682.5,97.0],[683.5,96.0],[683.5,91.0],[684.5,90.0],[684.5,81.0],[685.5,80.0],[684.5,62.0],[683.5,61.0],[683.5,58.0],[680.0,52.5],[676.0,50.5],[668.0,50.5],[667.0,51.5],[661.0,52.5],[653.0,56.5],[649.5,56.0],[651.5,36.0],[652.5,35.0],[652.5,31.0],[654.5,27.0],[658.0,24.5]],"holes":[]}]};
+      const logoGroup=new T.Group();logoGroup.position.set(0,13.47+machineLift,-.09);machine.add(logoGroup);
+      entranceWordmark=logoGroup;fitEntranceWordmark();
+      const logoScale=12.10/logoData.width;
+      // Color samples from the official seismique.com logo, in reading order.
+      const logoPalette=[0x600dff,0xff4d67,0xf9d003];
+      const faceBounds=part=>{const xs=part.outer.map(p=>p[0]),ys=part.outer.map(p=>p[1]);return {x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)};};
+      const orderedFaces=[...logoData.faces].sort((a,b)=>{const aa=faceBounds(a),bb=faceBounds(b);return aa.x0+aa.x1-bb.x0-bb.x1;});
+      function logoPath(points,hole=false){
+        const path=hole?new T.Path():new T.Shape();
+        points.forEach(([x,y],i)=>{const xx=(x-logoData.width*.5)*logoScale,yy=(logoData.height*.5-y)*logoScale;i?path.lineTo(xx,yy):path.moveTo(xx,yy);});path.closePath();return path;
+      }
+      function logoShape(part){const shape=logoPath(part.outer);part.holes.forEach(h=>shape.holes.push(logoPath(h,true)));return shape;}
+      for(const part of logoData.bodies){
+        const geometry=new T.ExtrudeGeometry(logoShape(part),{depth:.10,bevelEnabled:true,bevelSize:.006,bevelThickness:.007,bevelSegments:2});
+        solid(geometry,ink,0,0,0,logoGroup);
+      }
+      orderedFaces.forEach((part,index)=>{
+        const color=new T.Color(logoPalette[index%3]);
+        const material=new T.MeshStandardMaterial({color:logoNeutral.clone(),emissive:color.clone(),emissiveIntensity:0,roughness:.47,metalness:.06});
+        const geometry=new T.ExtrudeGeometry(logoShape(part),{depth:.018,bevelEnabled:true,bevelSize:.007,bevelThickness:.008,bevelSegments:2});
+        solid(geometry,material,0,0,.108,logoGroup);
+        const bounds=faceBounds(part);
+        // Gentle reflected color on the nameplate, behind the existing black outline.
+        const halo=mesh(new T.PlaneGeometry((bounds.x1-bounds.x0)*logoScale+.8,(bounds.y1-bounds.y0)*logoScale+.65),new T.MeshBasicMaterial({map:softMap,color:color.clone(),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}),((bounds.x0+bounds.x1)/2-logoData.width/2)*logoScale,(logoData.height/2-(bounds.y0+bounds.y1)/2)*logoScale,.025,logoGroup);
+        illuminatedLetters.push({index,color,material,halo,lit:0});
+      });
+      for(const x of [-4.7,0,4.7]){
+        const stud=cyl(.04,.04,.14,silver,x,13.44+machineLift,-.145,machine);stud.rotation.x=Math.PI/2;
+      }
+      root.logoMetrics=()=>({letterFaces:logoData.faces.length,bodyShapes:logoData.bodies.length,sourceAspect:logoData.width/logoData.height,width:12.10,height:logoData.height*logoScale,solid:true});
+
+      // Broad panel divisions and radial plates make the doorway part of the wall's mechanism.
+      for(const side of [-1,1]){
+        plate(2.68,7.55+machineLift,side*5.91,3.97+machineLift/2,-.31,shellMat);
+        plate(7.05,2.27,side*3.60,8.89,-.30,faceMat);
+        const ventX=side*6.14;
+        rounded(.92,1.60,.09,.07,gunmetal,ventX,6.55,-.13,machine,false);
+        for(let j=0;j<8;j++)rounded(.74,.072,.045,.022,insetMat,ventX,5.94+j*.174,-.058,machine,false);
+        // Grounded edge columns carry the new header feeds all the way to the power boxes.
+        rounded(.33,11.30+machineLift,.25,.07,gunmetal,side*7.21,5.68+machineLift/2,-.41,machine,false);
+        rounded(.23,11.15+machineLift,.20,.05,shellMat,side*7.21,5.68+machineLift/2,-.26,machine,false);
+        for(const yy of [.35,3.3,6.3,9.3,11.06])bolt(side*7.21,yy,-.118,machine,.051);
+        buildFan(side*5.55,8.84);
+      }
+      const sectorEdges=[-28,0,30,60,90,120,150,180,208];
+      for(let j=0;j<sectorEdges.length-1;j++){
+        const shape=new T.Shape(),start=(sectorEdges[j]+.65)*Math.PI/180,end=(sectorEdges[j+1]-.65)*Math.PI/180;
+        for(let i=0;i<=16;i++){const a=start+(end-start)*i/16,x=6.32*Math.cos(a),y=apertureY+6.32*Math.sin(a);i?shape.lineTo(x,y):shape.moveTo(x,y);}
+        for(let i=16;i>=0;i--){const a=start+(end-start)*i/16;shape.lineTo(4.44*Math.cos(a),apertureY+4.44*Math.sin(a));}shape.closePath();
+        const geom=new T.ExtrudeGeometry(shape,{depth:.065,bevelEnabled:true,bevelSize:.026,bevelThickness:.018,bevelSegments:2});
+        const panel=solid(geom,j%2?shellMat:faceMat,0,0,-.195,machine);
+        const lines=new T.LineSegments(new T.EdgesGeometry(geom,28),edgeMat);panel.add(lines);enclosurePanels.push(panel);
+        for(const a of [start+.08,end-.08])bolt(5.98*Math.cos(a),apertureY+5.98*Math.sin(a),-.084,machine,.045);
+      }
+      // The former zigzags are now actual cable runs, seated in a recessed header channel.
+      plate(14.32,1.51,0,10.79,-.33,insetMat);
+      for(const side of [-1,1]){
+        const junction=plate(.64,1.42,side*6.79,10.81,-.04,shellMat);
+        for(const yy of [10.55+machineLift,11.08+machineLift]){
+          const collar=cyl(.136,.136,.20,silver,side*6.40,yy,.075,machine);collar.rotation.z=Math.PI/2;
+        }
+        for(let j=0;j<3;j++)rounded(.25,.035,.025,.009,gunmetal,side*6.79,10.67+machineLift+j*.12,.077,machine,false);
+        const route=[new T.Vector3(side*6.79,10.05+machineLift,.06),new T.Vector3(side*7.10,9.57+machineLift,.06),new T.Vector3(side*7.10,3.39,.06),new T.Vector3(side*7.055,3.0,-.20)];
+        const feed=new T.CatmullRomCurve3(route,false,'centripetal');ribbedCable(feed,.094);
+        const connection=cyl(.14,.14,.22,silver,side*7.06,3.0,-.20,machine);connection.rotation.z=Math.PI/2;
+        for(const yy of [9.05,7.13,5.12,3.75]){
+          rounded(.39,.25,.12,.035,shellMat,side*7.10,yy,-.15,machine,false);
+          const band=cyl(.132,.132,.12,silver,side*7.10,yy,.06,machine);
+          bolt(side*7.10-.13,yy,-.066,machine,.035);bolt(side*7.10+.13,yy,-.066,machine,.035);
+        }
+      }
+      for(let row=0;row<2;row++){
+        const cy=(row===0?11.08:10.55)+machineLift,points=[new T.Vector3(-6.50,cy,.075),new T.Vector3(-6.05,cy,.075)];
+        for(let i=0;i<=10;i++)points.push(new T.Vector3(-5.76+i*1.152,cy+(i%2===0?.205:-.205),.075));
+        points.push(new T.Vector3(6.05,cy,.075),new T.Vector3(6.50,cy,.075));
+        const curve=roundedCablePath(points,.15);ribbedCable(curve,.081);headerCables.push(curve);
+        for(const i of [2,5,8]){
+          const pt=points[i+2],clamp=new T.Group();clamp.position.set(pt.x,pt.y,-.18);machine.add(clamp);
+          rounded(.29,.40,.13,.035,faceMat,0,0,0,clamp,false);
+          const strap=cyl(.115,.115,.13,silver,0,0,.255,clamp);strap.rotation.z=Math.PI/2;
+          for(const yy of [-.13,.13])bolt(0,yy,.091,clamp,.031);
+        }
+      }
+      function buildFan(x,y){
+        const housing=new T.Group();housing.position.set(x,y+machineLift,-.02);machine.add(housing);
+        const rim=cyl(.66,.66,.14,gunmetal,0,0,0,housing);rim.rotation.x=Math.PI/2;
+        ring(.59,.06,silver,0,0,.085,housing);solid(new T.CircleGeometry(.535,36),ink,0,0,.077,housing);
+        const fan=new T.Group();fan.position.z=.105;housing.add(fan);
+        for(let i=0;i<5;i++){
+          const a=i*Math.PI*2/5,blade=rounded(.18,.36,.027,.012,insetMat,Math.cos(a)*.275,Math.sin(a)*.275,0,fan,false);blade.rotation.z=a+.40;
+        }
+        solid(new T.CircleGeometry(.13,18),silver,0,0,.135,housing);
+        for(const yy of [-.34,-.17,0,.17,.34]){
+          const width=2*Math.sqrt(.51*.51-yy*yy);rounded(width,.023,.031,.009,gunmetal,0,yy,.175,housing,false);
+        }
+        enclosureFans.push(fan);
+      }
+    }
+    function roundedCablePath(points,radius){
+      const curve=new T.CurvePath();let last=points[0];
+      for(let i=1;i<points.length-1;i++){
+        const p=points[i],incoming=points[i-1].clone().sub(p),outgoing=points[i+1].clone().sub(p);
+        const distance=Math.min(radius,incoming.length()*.35,outgoing.length()*.35);
+        const enter=p.clone().addScaledVector(incoming.normalize(),distance),leave=p.clone().addScaledVector(outgoing.normalize(),distance);
+        curve.add(new T.LineCurve3(last,enter));curve.add(new T.QuadraticBezierCurve3(enter,p,leave));last=leave;
+      }
+      curve.add(new T.LineCurve3(last,points[points.length-1]));return curve;
+    }
+
+    function buildReference(){
+      // Paper wall and logo are behind the machine; no duplicate machine remains.
+      const bc=document.createElement('canvas');bc.width=artWidth;bc.height=artHeight;const bg=bc.getContext('2d');
+      bg.fillStyle='#fff7e7';bg.fillRect(0,0,artWidth,artHeight);
+      const wallTex=colorTexture(bc);const wallMat=new T.MeshStandardMaterial({map:wallTex,roughness:1,emissiveMap:wallTex,emissive:0xffffff,emissiveIntensity:.22,side:T.DoubleSide});
+      // Split wall around the opening so the passage remains open after crossing.
+      const panelGeo=new T.PlaneGeometry(artWidth*worldScale,artHeight*worldScale);
+      const mask=bc.getContext('2d');mask.clearRect(0,groundPixel,artWidth,artHeight-groundPixel);mask.globalCompositeOperation='destination-out';mask.beginPath();mask.arc(470,groundPixel-apertureY/worldScale,249,0,Math.PI*2);mask.fill();mask.fillRect(250,980,440,340);mask.globalCompositeOperation='source-over';wallMat.transparent=true;wallMat.alphaTest=.02;wallTex.needsUpdate=true;
+      const wall=mesh(panelGeo,wallMat,0,entranceCameraY,-.7,scene);wall.receiveShadow=true;
+      entranceWallMaterials.push(wallMat);
+      buildConstruction();buildMachineWall();buildPortal();
+      entranceMural=window.createEntranceMural({THREE:T,scene,wallMaterials:entranceWallMaterials,apertureY,reducedMotion});
+      portalReady=true;root.dataset.portalReady='true';
+      // Paint the entrance first; construct the next world in bounded idle slices.
+      requestAnimationFrame(()=>requestAnimationFrame(()=>prepareJungle()));
+    }
+    let preparation=null,preparationHandle=null,preparing=false;
+    function queuePreparation(){
+      if(preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true')return;
+      const task=deadline=>{
+        preparationHandle=null;
+        if(document.hidden||root.dataset.visitOpen==='true')return;
+        const start=performance.now();let done=false;
+        do{done=preparation.next().done;}while(!done&&performance.now()-start<5&&(!deadline||deadline.timeRemaining()>2));
+        if(done){preparation=null;finishPreparation();}else queuePreparation();
+      };
+      preparationHandle=window.requestIdleCallback?requestIdleCallback(task,{timeout:100}):setTimeout(()=>task(null),16);
+    }
+    function* prepareResources(){
+      yield* buildRevealWorld();
+      const batching=yield* window.batchStaticScenery(T,revealWorld,new Set([...hangingPods.map(pod=>pod.pivot),revealWorld.getObjectByName('Alien Grass destination accents')]));
+      root.dataset.sceneryDraws=String(batching.after)+'/'+String(batching.before);
+      journeyAtmosphere=window.createJourneyAtmosphere({THREE:T,scene,machine,revealWorld,apertureY,mouthZ,portalDepth,vortexRadius,softMap,reducedMotion,mapJungleZ:jungleZ,light:jungleLight(0x32b9a2,0,11)});yield;
+      jungleSky=window.createJungleSky({THREE:T,scene,reducedMotion,pixelRatio:quality.ratio});yield;
+      // Upload each small procedural map before the first jungle frame needs it.
+      const textures=new Set();scene.traverse(object=>{for(const material of (Array.isArray(object.material)?object.material:[object.material])){
+        if(!material)continue;
+        for(const value of Object.values(material))if(value?.isTexture)textures.add(value);
+        for(const uniform of Object.values(material.uniforms||{}))if(uniform.value?.isTexture)textures.add(uniform.value);
+      }});
+      for(const texture of textures){renderer.initTexture(texture);yield;}
+    }
+    function prepareJungle(){if(preparing)return;preparing=true;root.dataset.scenePreparation='building';preparation=prepareResources();queuePreparation();}
+    async function warmJungleBuffers(){
+      root.dataset.gpuPreparation='warming';
+      const target=new T.WebGLRenderTarget(32,32),probe=camera.clone();
+      const previousTarget=renderer.getRenderTarget(),previousVisibility=revealWorld.visible;
+      try{
+        // A tiny offscreen draw uploads geometry as well as compiling shaders.
+        // The visible camera and canvas are never changed by this preparation.
+        for(const progress of [.58,...stopProgress(),1]){
+          await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:200}):setTimeout(resolve,16));
+          while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'){
+            await new Promise(resolve=>setTimeout(resolve,200));
+          }
+          const view=pose(progress);probe.position.set(...view.pos);probe.lookAt(...view.look);probe.updateMatrixWorld();
+          revealWorld.visible=true;renderer.setRenderTarget(target);
+          renderer.render(scene,probe);
+          renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;
+        }
+      }finally{
+        renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;target.dispose();
+      }
+      root.dataset.gpuPreparation='ready';root.dataset.gpuReadyMs=performance.now().toFixed(0);
+    }
+    async function finishPreparation(){
+      root.dataset.scenePreparation='compiling';
+      // compileAsync uses parallel shader compilation where the GPU supports it.
+      await jungleSky?.prepare(renderer);root.dataset.skyMode='cached';
+      await renderer.compileAsync(scene,camera);
+      await warmJungleBuffers();
+      const dynamicRoots=new Set(hangingPods.map(pod=>pod.pivot));
+      function freezeScenery(node){
+        if(dynamicRoots.has(node)||node.name==='Alien Grass destination accents')return;
+        if(node.isMesh&&node.material?.uniforms?.uSeed)return; // drifting mist
+        node.updateMatrix();node.matrixAutoUpdate=false;
+        node.children.forEach(freezeScenery);
+      }
+      freezeScenery(revealWorld);
+      revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';
+      renderer.shadowMap.needsUpdate=true;lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();applyQuality();journeyLoop?.wake();
+    }
+    let energyTime=0,scrollEnergy=0,lastProgress=0,charge=0,portalLip,energyParticles,energyTrails;
+    let electricalField,fieldUniforms,opening=0,channelUniforms,channelEdges;
+    const strikePosition=new T.Vector3(),branchEnd=new T.Vector3(),capTip=new T.Vector3(0,0,.057);
+    // Seat the membrane inside the rear barrel, behind the emitter hardware.
+    const fieldRadius=3.445,fieldZ=-.65,fieldBend=.24,mouthZ=fieldZ-fieldBend,portalDepth=10.5;
+    const particleCount=76,particlePositions=new Float32Array(particleCount*3),trailPositions=new Float32Array(particleCount*6);
+    const upAxis=new T.Vector3(0,1,0);
+    const electricNoiseGLSL=`
+      float eHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+      float eNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(eHash(i),eHash(i+vec2(1.,0.)),f.x),mix(eHash(i+vec2(0.,1.)),eHash(i+vec2(1.)),f.x),f.y);}
+      float eFbm(vec2 p){return .57*eNoise(p)+.28*eNoise(p*2.07+13.1)+.15*eNoise(p*4.31-7.4);}
+    `;
+    function electricHash(n){const x=Math.sin(n*127.13+311.7)*43758.5453;return (x-Math.floor(x))*2-1;}
+    function arcNoise(n,t){const k=Math.floor(t),f=t-k,s=f*f*(3-2*f);return electricHash(n+k*17.31)*(1-s)+electricHash(n+(k+1)*17.31)*s;}
+    function makeElectricalArc(count,width){
+      const geometry=new T.BufferGeometry(),positions=new Float32Array(count*6),tangents=new Float32Array(count*6),sides=new Float32Array(count*2),along=new Float32Array(count*2),indices=[];
+      for(let i=0;i<count;i++){sides[i*2]=-1;sides[i*2+1]=1;along[i*2]=along[i*2+1]=i/(count-1);if(i<count-1){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}}
+      geometry.setAttribute('position',new T.BufferAttribute(positions,3).setUsage(T.DynamicDrawUsage));geometry.setAttribute('aTangent',new T.BufferAttribute(tangents,3).setUsage(T.DynamicDrawUsage));geometry.setAttribute('aSide',new T.BufferAttribute(sides,1));geometry.setAttribute('aAlong',new T.BufferAttribute(along,1));geometry.setIndex(indices);
+      const uniforms={uColor:{value:new T.Color(0x48bcff)},uPower:{value:.5},uWidth:{value:width},uHead:{value:-1}};
+      const material=new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending,
+        vertexShader:`attribute vec3 aTangent;attribute float aSide;attribute float aAlong;uniform float uWidth;varying float vSide;varying float vAlong;
+          void main(){vec3 world=(modelMatrix*vec4(position,1.)).xyz;vec3 sideways=normalize(cross(normalize(aTangent+vec3(.00001)),normalize(cameraPosition-world))+vec3(.000001));world+=sideways*aSide*uWidth;vSide=aSide;vAlong=aAlong;gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,
+        fragmentShader:`uniform vec3 uColor;uniform float uPower;uniform float uHead;varying float vSide;varying float vAlong;
+          void main(){float d=abs(vSide),core=1.-smoothstep(.065,.265,d),glow=exp(-d*d*5.)*.26;float packet=exp(-pow((vAlong-uHead)*14.,2.));vec3 col=mix(uColor,vec3(.86,.96,1.),core*.79);gl_FragColor=vec4(col,(core+glow)*uPower*(.72+packet*.62));
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+          }`});
+      const object=new T.Mesh(geometry,material);object.frustumCulled=false;scene.add(object);
+      return{object,uniforms,points:Array.from({length:count},()=>new T.Vector3()),positions,tangents};
+    }
+    function uploadArc(arc){
+      const points=arc.points;
+      for(let i=0;i<points.length;i++){
+        const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],v=points[i];
+        for(let side=0;side<2;side++){const j=i*6+side*3;arc.positions[j]=v.x;arc.positions[j+1]=v.y;arc.positions[j+2]=v.z;arc.tangents[j]=b.x-a.x;arc.tangents[j+1]=b.y-a.y;arc.tangents[j+2]=b.z-a.z;}
+      }
+      arc.object.geometry.attributes.position.needsUpdate=true;arc.object.geometry.attributes.aTangent.needsUpdate=true;
+    }
+    function traceBolt(arc,start,end,key,amplitude,clearRadius=0){
+      const dx=end.x-start.x,dy=end.y-start.y,dz=end.z-start.z,flat=Math.hypot(dx,dy)||1;
+      for(let j=0;j<arc.points.length;j++){
+        const u=j/(arc.points.length-1),env=Math.pow(Math.sin(Math.PI*u),.72),n=arcNoise(key+j*3.17,energyTime*7.2),m=arcNoise(key+93+j*1.73,energyTime*6.4);
+        const v=arc.points[j];v.set(start.x+dx*u-dy/flat*n*amplitude*env,start.y+dy*u+dx/flat*n*amplitude*env,start.z+dz*u+m*amplitude*.28*env);
+        if(j>0&&j<arc.points.length-1&&clearRadius>0){const r=Math.hypot(v.x,v.y-apertureY);if(r<clearRadius){v.x*=clearRadius/Math.max(.001,r);v.y=apertureY+(v.y-apertureY)*clearRadius/Math.max(.001,r);}}
+        if(j>0&&j<arc.points.length-1){const rr=(v.x*v.x+(v.y-apertureY)*(v.y-apertureY))/(fieldRadius*fieldRadius);v.z=Math.max(v.z,fieldZ-fieldBend*rr+.065);}
+      }
+      uploadArc(arc);
+    }
+    function vortexRadius(u){return 3.445+.90*u-.12*Math.sin(Math.PI*u);}
+    function buildPortal(){
+      portalUniforms={uTime:{value:0},uColor:{value:new T.Color(0x24bfff)},uCharge:{value:0},uTravel:{value:0},uOpening:{value:0},uPower:{value:0},uSurge:{value:0},uInstability:{value:0},uClarity:{value:0}};
+      const radial=80,longitudinal=64,positions=[],uvs=[],indices=[];
+      for(let j=0;j<=longitudinal;j++)for(let i=0;i<=radial;i++){
+        const u=j/longitudinal,a=i/radial*Math.PI*2,r=vortexRadius(u);
+        positions.push(Math.cos(a)*r,Math.sin(a)*r,mouthZ-u*portalDepth);uvs.push(i/radial,u);
+      }
+      for(let j=0;j<longitudinal;j++)for(let i=0;i<radial;i++){const a=j*(radial+1)+i,b=a+radial+1;indices.push(a,b,a+1,b,b+1,a+1);}
+      const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();
+      const material=new T.ShaderMaterial({uniforms:portalUniforms,side:T.DoubleSide,
+        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;float bend=sin(uv.x*25.1327+uv.y*18.-uTime*.65);p.xy*=1.+sin(uv.y*3.14159)*(.008+uInstability*.013)*bend;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+        fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uTravel;uniform float uOpening;uniform float uPower;uniform float uSurge,uInstability;
+          ${electricNoiseGLSL}
+          void main(){float a=vUv.x*6.2831853,d=vUv.y,t=uTime;a+=sin(d*14.-t*.37)*(.025+uInstability*.025);vec2 cyc=vec2(cos(a),sin(a));
+            float n=eFbm(cyc*1.8+vec2(d*3.-t*.09,d*2.+t*.06));
+            float flow=.5+.5*sin(a*3.+d*5.-t*.45+n*1.8);
+            float silk=pow(flow,5.);float pearl=pow(.5+.5*sin(a*2.-d*6.+t*.24+n),14.);
+            vec3 col=mix(vec3(.018,.045,.095),vec3(.13,.045,.23),n);
+            col+=uColor*(.06+silk*.15)+vec3(.35,.055,.24)*(.06+pearl*.18);
+            float jungleHint=smoothstep(.54,.98,d)*smoothstep(.82,1.60,uTravel);
+            col=mix(col,col*.60+vec3(.012,.080,.058)*(1.+silk),jungleHint*.78);
+            col*=.57*(1.-smoothstep(.7,1.,d)*.35);col+=uColor*uSurge*.075*exp(-d*3.);
+            col=mix(vec3(.002,.004,.012),col,uPower);gl_FragColor=vec4(col,1.);
+            #include <tonemapping_fragment>
+            #include <colorspace_fragment>
+          }`});
+      portalSurface=mesh(geometry,material,0,apertureY,0,machine);
+      fieldUniforms={uTime:portalUniforms.uTime,uColor:portalUniforms.uColor,uCharge:portalUniforms.uCharge,uOpening:portalUniforms.uOpening,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uInstability:portalUniforms.uInstability,uClarity:portalUniforms.uClarity,uHits:{value:Array.from({length:9},()=>new T.Vector4())}};
+      const fieldMaterial=new T.ShaderMaterial({uniforms:fieldUniforms,side:T.DoubleSide,transparent:true,depthWrite:false,
+        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;vec2 q=uv*2.-1.;float r=clamp(length(q),0.,1.);p.z-=.24*dot(q,q);p.z+=(.025+uInstability*.07)*(1.-r)*sin(uv.x*17.+uv.y*13.-uTime*.8);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+        fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uOpening;uniform float uPower,uSurge,uInstability,uClarity;uniform vec4 uHits[9];
+          ${electricNoiseGLSL}
+          void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;float t=uTime;float a=atan(q.y,q.x);
+            float hole=uOpening*1.035;if(uOpening>.0001&&r<hole)discard;
+            vec2 warp=vec2(eFbm(q*2.+vec2(t*.045,-t*.04)),eFbm(q*2.4+vec2(8.1,-t*.05)))-.5;
+            vec2 refracted=q+warp*(.10+uInstability*.11)*(1.-r);
+            float perspective=1./(.38+r*.85);
+            float n=eFbm(refracted*2.8*perspective+warp*.8+vec2(t*.025,-t*.035));
+            float wave=.5+.5*sin(refracted.x*4.+refracted.y*3.-t*.45+warp.x*3.+warp.y*2.);
+            float silk=pow(wave,9.);float sheen=pow(.5+.5*sin(q.x*3.+q.y*2.+n*4.-t*.2),12.);
+            vec3 col=mix(vec3(.015,.025,.065),vec3(.125,.035,.205),n);
+            col+=uColor*(.035+silk*.095)+vec3(.29,.17,.40)*sheen*.17;
+            float well=pow(1.-r,1.5);col*=1.-well*.67*uPower;
+            float depthVeil=pow(.5+.5*sin(r*19.+sin(a*3.+n)*1.5-t*.30),14.)*(1.-r)*.06;
+            col+=uColor*depthVeil+vec3(.012,.035,.06)*well*uPower;
+            col+=uColor*uSurge*(.055+.12*pow(r,5.));
+            for(int i=0;i<9;i++){vec4 hit=uHits[i];float dd=length(q-hit.xy);col+=uColor*exp(-dd*24.)*exp(-hit.z*6.)*hit.w*.30;}
+            float edge=exp(-abs(r-hole)*52.)*smoothstep(.005,.045,uOpening);float border=exp(-abs(1.-r)*90.);
+            float shimmer=pow(.5+.5*sin(a*5.+t*.38+warp.y*3.),9.);
+            col+=mix(uColor,vec3(.74,.91,1.),.38)*edge*.28+uColor*border*(.24+shimmer*.11);
+            col+=vec3(.20,.035,.22)*exp(-abs(r-.965-warp.x*.006)*95.)*shimmer*.18;
+            col=mix(vec3(.002,.004,.012),col,uPower);gl_FragColor=vec4(col,1.-pow(1.-smoothstep(.10,.82,r),1.3)*uClarity*.80);
+            #include <tonemapping_fragment>
+            #include <colorspace_fragment>
+          }`});
+      electricalField=mesh(new T.PlaneGeometry(fieldRadius*2,fieldRadius*2,56,56),fieldMaterial,0,apertureY,fieldZ,machine);
+      portalLip=mesh(new T.TorusGeometry(3.445,.027,8,96),neon(0x48bfff),0,apertureY,mouthZ-.025,machine);
+      // Recessed metallic shoulders flank one segmented energy channel.
+      channelEdges=new T.MeshStandardMaterial({color:0x586575,metalness:.64,roughness:.37,emissive:0x493887,emissiveIntensity:.025});
+      for(const z of [-.14,-.53])mesh(new T.TorusGeometry(3.429,.024,6,80),channelEdges,0,apertureY,z,machine);
+      channelUniforms={uTime:portalUniforms.uTime,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uColor:portalUniforms.uColor};
+      const channelMaterial=new T.ShaderMaterial({uniforms:channelUniforms,
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+        fragmentShader:`varying vec2 vUv;uniform float uTime,uPower,uSurge;uniform vec3 uColor;void main(){float gap=smoothstep(.05,.13,fract(vUv.x*18.))*(1.-smoothstep(.78,.93,fract(vUv.x*18.)));float pass=pow(.5+.5*sin(vUv.x*6.283185-uTime*.5),16.);vec3 col=mix(vec3(.018,.025,.04),uColor*(.10+pass*.27+uSurge*.38),gap*uPower);gl_FragColor=vec4(col,1.);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`});
+      mesh(new T.TorusGeometry(3.412,.014,6,96),channelMaterial,0,apertureY,-.32,machine);
+      coreHalo=new T.Sprite(new T.SpriteMaterial({map:softMap,color:0x42bfff,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));coreHalo.position.set(0,apertureY,fieldZ+.05);machine.add(coreHalo);
+      washMat=new T.MeshBasicMaterial({map:softMap,color:0x00ddff,transparent:true,opacity:.32,depthWrite:false,blending:T.AdditiveBlending});
+      const wash=mesh(new T.PlaneGeometry(9.5,13),washMat,0,.012,2.8,scene);wash.rotation.x=-Math.PI/2;
+      wallWash=mesh(new T.PlaneGeometry(12,12),new T.MeshBasicMaterial({map:softMap,color:0x00ddff,transparent:true,opacity:.18,depthWrite:false}),0,apertureY,-.65,scene);
+      machineGlow=new T.PointLight(0x38ddff,20,13,2);machineGlow.position.set(0,apertureY,.95);scene.add(machineGlow);
+      // A low bounce illuminates the actual sill, shoes and nearby floor geometry.
+      portalFloorLight=new T.PointLight(0x51cfff,6.3,10.5,2);portalFloorLight.position.set(0,.90,1.3);scene.add(portalFloorLight);
+      const dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3).setUsage(T.DynamicDrawUsage));
+      portalDust=new T.Points(dustGeometry,new T.PointsMaterial({color:0x9fe6ff,size:.037,map:softMap,transparent:true,opacity:.35,depthWrite:false,blending:T.AdditiveBlending}));portalDust.frustumCulled=false;scene.add(portalDust);
+      thresholdLight=new T.PointLight(0x38ddff,9,9,2);thresholdLight.position.set(0,apertureY,-3.5);scene.add(thresholdLight);
+      const particleGeo=new T.BufferGeometry();particleGeo.setAttribute('position',new T.BufferAttribute(particlePositions,3).setUsage(T.DynamicDrawUsage));
+      energyParticles=new T.Points(particleGeo,new T.PointsMaterial({color:0xbaf7ff,size:.065,map:softMap,transparent:true,opacity:.65,depthWrite:false,blending:T.AdditiveBlending}));energyParticles.frustumCulled=false;scene.add(energyParticles);
+      const trailGeo=new T.BufferGeometry();trailGeo.setAttribute('position',new T.BufferAttribute(trailPositions,3).setUsage(T.DynamicDrawUsage));
+      energyTrails=new T.LineSegments(trailGeo,new T.LineBasicMaterial({color:0x57eaff,transparent:true,opacity:.2,depthWrite:false,blending:T.AdditiveBlending}));energyTrails.frustumCulled=false;scene.add(energyTrails);
+    }
+    function updateMachine(dt){
+      if(!portalReady)return;
+      if(p>.58){
+        if(machineRunning)energyTime+=dt;
+        lastProgress=p;portalDust.visible=energyParticles.visible=energyTrails.visible=electricalField.visible=false;
+        entranceFloorUniforms.uFloorPortalPower.value=entranceFloorUniforms.uFloorDischarge.value=0;
+        return;
+      }
+      const speed=Math.min(1,Math.abs(p-lastProgress)/Math.max(.001,dt)*3.5);lastProgress=p;scrollEnergy+=(speed-scrollEnergy)*(1-Math.exp(-dt*7));
+      if(machineRunning)portalClock+=dt;
+      // Travel may skip ahead, but idle activation never advances the camera.
+      const travelPower=T.MathUtils.smoothstep(p,0,.17);
+      if(machineRunning)portalClock=Math.max(portalClock,powerUpDuration*travelPower);
+      powerUpTime=Math.min(powerUpDuration,Math.max(portalClock,powerUpDuration*travelPower));
+      const energy=portalEnergy.sample(portalClock),lightPower=Math.max(energy.power,travelPower);
+      if(root.dataset.powerStage!==energy.stage)root.dataset.powerStage=energy.stage;
+      formation=Math.max(energy.formation,travelPower);
+      charge=Math.max(energy.charge,T.MathUtils.smoothstep(p,.035,.29))*(1-T.MathUtils.smoothstep(p,.42,.53));
+      if(machineRunning){machineTime+=dt;energyTime+=dt*(.15+formation*.85)*(1+charge*.7+scrollEnergy*.4);}
+      illuminatedLetters.forEach(letter=>{
+        letter.lit=T.MathUtils.smoothstep(powerUpTime,.45+letter.index*.07,1.85+letter.index*.07);
+        letter.material.color.copy(logoNeutral).lerp(letter.color,letter.lit);
+        letter.material.emissiveIntensity=letter.lit*(.48+.025*Math.sin(energyTime*.8));
+        letter.halo.material.opacity=letter.lit*.20;
+      });
+      const t=machineTime,hue=.555+.16*(.5-.5*Math.cos(t*.19));
+      opening=Math.sqrt(T.MathUtils.smoothstep(p,.015,.17));
+      const visibility=1-T.MathUtils.smoothstep(p,.315,.35),beamVisibility=1-T.MathUtils.smoothstep(opening,.08,.55);
+      const reaction=energy.reaction*visibility*beamVisibility,surge=energy.surge*visibility*beamVisibility;
+      portalUniforms.uTime.value=energyTime;portalUniforms.uColor.value.setHSL(hue,.92,.51);portalUniforms.uCharge.value=charge;portalUniforms.uTravel.value=reducedMotion?0:p*3;portalUniforms.uOpening.value=opening;portalUniforms.uPower.value=formation;
+      portalUniforms.uClarity.value=T.MathUtils.smoothstep(powerUpTime,6.4,powerUpDuration);
+      portalUniforms.uSurge.value=surge;portalUniforms.uInstability.value=energy.instability*beamVisibility;
+      electricalField.visible=opening<.997;portalSurface.visible=formation>.05||opening>.001;
+      portalLip.material.color.setHSL(hue,.88,.56).multiplyScalar(.025+.72*lightPower+surge*.32);rotor.rotation.z=-energyTime*.12;
+      channelEdges.emissiveIntensity=.025+lightPower*.10+surge*.22;
+      const retract=T.MathUtils.smoothstep(opening,0,.60),clearRadius=Math.min(3.28,opening*fieldRadius*1.035+.025);
+      strikePosition.set(0,apertureY,fieldZ);
+      // Reuse the emitter ribbons and sprites, keeping most of them asleep.
+      activeHeads.forEach(h=>{
+        h.start.copy(capTip);h.cap.localToWorld(h.start);h.power=0;
+        h.arc.object.visible=false;h.branches.forEach(b=>b.object.visible=false);
+        h.flare.material.opacity=0;h.impact.material.opacity=0;
+        h.tipMat.color.set(0x42e7ff).multiplyScalar(.008+lightPower*.26);
+        fieldUniforms.uHits.value[h.i].set(0,0,1,0);
+      });
+      let activeArcCount=0;
+      for(const event of energy.events){
+        if(activeArcCount++>=quality.arcs)break;
+        if(beamVisibility*visibility<.001)break;
+        const h=activeHeads[event.head],isCrawl=event.type==='crawl',isSurge=event.type==='surge';
+        const beamHue=hue+event.turn*.045,angle=h.a+event.turn*(isSurge?.45:.25);
+        h.power=event.power*visibility*beamVisibility;
+        h.arc.object.visible=h.power>.008;h.arc.uniforms.uPower.value=h.power;
+        h.arc.uniforms.uColor.value.setHSL(beamHue,.86,.61);h.arc.uniforms.uWidth.value=event.width*(1-retract*.75);h.arc.uniforms.uHead.value=event.age*1.5;
+        if(isCrawl){
+          // A short packet travels along the recessed channel, never a full neon circle.
+          const direction=event.turn<0?-1:1,from=h.a+direction*event.age*.65;
+          for(let j=0;j<h.arc.points.length;j++){
+            const u=j/(h.arc.points.length-1),a=from+direction*u*(.22+event.reach*.55),r=3.412+arcNoise(event.seed+j,energyTime*4)*.018*Math.sin(u*Math.PI);
+            h.arc.points[j].set(Math.cos(a)*r,apertureY+Math.sin(a)*r,-.20+Math.sin(u*Math.PI)*.025);
+          }
+          uploadArc(h.arc);h.end.copy(h.arc.points[h.arc.points.length-1]);
+        }else{
+          if(event.type==='bridge')h.end.copy(activeHeads[event.target].start);
+          else{
+            const radius=isSurge?.55+event.reach*.70:event.type==='branch'?1.80+event.reach*.55:2.66+event.reach*.33;
+            h.end.set(Math.cos(angle)*radius,apertureY+Math.sin(angle)*radius,fieldZ-fieldBend*Math.pow(radius/fieldRadius,2)+.11);
+          }
+          h.end.lerp(h.start,retract*.985);
+          traceBolt(h.arc,h.start,h.end,event.seed,(isSurge?.22:event.type==='snap'?.065:.13)*(1-retract),clearRadius);
+          if(event.type==='branch'||isSurge)h.branches.forEach((branch,k)=>{
+            if(quality.compact&&k>0)return;
+            const anchor=h.arc.points[k?17:11],turn=angle+(k?-.9:.7),reach=(isSurge?.75:.38)*(1-retract);
+            branchEnd.set(h.end.x+Math.cos(turn)*reach,h.end.y+Math.sin(turn)*reach,h.end.z+.012);
+            branch.object.visible=h.power>.03;branch.uniforms.uColor.value.setHSL(beamHue+(k?.045:-.015),.88,.65);
+            branch.uniforms.uPower.value=h.power*(k?.28:.48);branch.uniforms.uWidth.value=event.width*(k?.42:.55);branch.uniforms.uHead.value=event.age*1.5;
+            traceBolt(branch,anchor,branchEnd,event.seed+k*71+117,.13*(1-retract),clearRadius);
+          });
+        }
+        h.tipMat.color.copy(h.arc.uniforms.uColor.value).multiplyScalar(.08+lightPower*.23+h.power*.35);
+        h.flare.position.copy(isCrawl?h.arc.points[0]:h.start);h.flare.material.color.copy(h.arc.uniforms.uColor.value);h.flare.material.opacity=h.power*(isSurge?.18:.09);
+        h.flare.scale.setScalar(isSurge?.88:.52);
+        h.impact.position.copy(h.end);h.impact.material.color.setHSL(beamHue,.6,.73);h.impact.material.opacity=h.power*(isSurge?.30:.11);h.impact.scale.setScalar(isSurge?1.05:.43);
+        fieldUniforms.uHits.value[h.i].set(h.end.x/fieldRadius,(h.end.y-apertureY)/fieldRadius,event.age*.5,h.power);
+        if(isSurge||energy.events.length===1)strikePosition.copy(h.start);
+      }
+      // All room reactions share the discharge envelope rather than an unrelated pulse.
+      entranceMural?.update(p,energyTime,lightPower,reaction,strikePosition);
+      entranceFloorUniforms.uFloorPortalPower.value=lightPower*(1-T.MathUtils.smoothstep(p,.32,.50));
+      entranceFloorUniforms.uFloorPortalTime.value=reducedMotion?0:energyTime;
+      entranceFloorUniforms.uFloorDischarge.value=reaction;entranceFloorUniforms.uFloorStrike.value=strikePosition.x;
+      coreHalo.material.opacity=0;machineGlow.color.setHSL(hue,.89,.57);machineGlow.intensity=(17+charge*4+Math.sin(energyTime*.85)*.7)*lightPower+reaction*8;
+      thresholdLight.color.copy(machineGlow.color);thresholdLight.intensity=(4+opening*5)*lightPower+reaction*2;
+      washMat.color.copy(machineGlow.color);washMat.opacity=(.19+charge*.04)*lightPower+reaction*.085;
+      wallWash.material.color.copy(machineGlow.color);wallWash.material.opacity=(.09+charge*.04)*lightPower+reaction*.045;
+      portalFloorLight.color.copy(machineGlow.color);portalFloorLight.intensity=(6.3+charge*1.2)*lightPower+reaction*3.7;
+      portalDust.visible=p<.36;portalDust.material.opacity=.35*lightPower;portalDust.material.color.copy(machineGlow.color);
+      if(portalDust.visible)for(let i=0;i<Math.ceil(dustCount*quality.density);i++){
+        const a=i*2.39996+energyTime*.035,r=2.7+revealRandom(i+321)*1.4;
+        dustPositions[i*3]=Math.cos(a)*r;dustPositions[i*3+1]=.35+((revealRandom(i+221)*6.5+energyTime*.075)%6.5);dustPositions[i*3+2]=.65+revealRandom(i+131)*4;
+      }
+      portalDust.geometry.attributes.position.needsUpdate=true;
+      glow.color.copy(machineGlow.color);glow.intensity=4*lightPower;tunnelMat.color.setHSL(hue,.80,.15);tunnelMat.emissive.setHSL(hue,.88,.065);ledRings.forEach(r=>r.material.color.setHSL(T.MathUtils.lerp(hue,.48,T.MathUtils.smoothstep(p,.35,.55)),.58,.26));
+      energyParticles.visible=energyTrails.visible=opening>.01;energyParticles.material.opacity=.65*opening;energyTrails.material.color.setHSL(hue,.9,.58);energyTrails.material.opacity=(.09+charge*.13)*opening;
+      if(energyParticles.visible)for(let i=0;i<Math.ceil(particleCount*quality.density);i++){
+        const seed=i*.61803398875%1,u=(seed+energyTime*.048)%1,a=i*2.39996+u*9-energyTime*.19,r=vortexRadius(u)*(.89+.07*(i%7)/6),x=Math.cos(a)*r,y=apertureY+Math.sin(a)*r,z=mouthZ-u*portalDepth;
+        particlePositions[i*3]=x;particlePositions[i*3+1]=y;particlePositions[i*3+2]=z;
+        const tail=Math.max(0,u-(.005+charge*.018)),ta=i*2.39996+tail*9-energyTime*.19,tr=vortexRadius(tail)*(.89+.07*(i%7)/6);const k=i*6;trailPositions[k]=x;trailPositions[k+1]=y;trailPositions[k+2]=z;trailPositions[k+3]=Math.cos(ta)*tr;trailPositions[k+4]=apertureY+Math.sin(ta)*tr;trailPositions[k+5]=mouthZ-tail*portalDepth;
+      }
+      energyParticles.geometry.attributes.position.needsUpdate=true;energyTrails.geometry.attributes.position.needsUpdate=true;
+    }
+
+    requestAnimationFrame(buildReference);
+
+    // JOURNEY_NAV_START
+    let p=0,target=0,auto=false,lastTime=performance.now(),currentKey='',dragY=null;
+    const pageStops=jungleSidePaths.map(stop=>({...stop,point:stop.curve.getPointAt(.28).setY(2.35),button:root.querySelector('[data-jungle-page="'+stop.id+'"]')}));
+    const projectedStop=new T.Vector3();
+    // A card occupies 3.8m of each 7.49m stretch. Every stop ends before the next reveal.
+    function pageStopVisible(stop){
+      const distance=camera.position.z-stop.z;
+      return p>=.58&&distance<=10&&distance>6.2;
+    }
+    function updatePageStops(){
+      const width=viewportWidth,height=viewportHeight;
+      pageStops.forEach(stop=>{
+        const visible=pageStopVisible(stop);
+        stop.button.inert=guide.state().busy;
+        if(stop.button.hidden===visible)stop.button.hidden=!visible;if(!visible)return;
+        projectedStop.copy(stop.point).project(camera);
+        const x=T.MathUtils.clamp((projectedStop.x*.5+.5)*width,100,width-100);
+        const y=T.MathUtils.clamp((-.5*projectedStop.y+.5)*height,120,Math.max(120,height-230));
+        stop.button.style.transform=`translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) translate(-50%,-50%)`;
+      });
+    }
+    pageStops.forEach(stop=>stop.button.addEventListener('click',()=>{if(guide.state().busy)return;pauseJourney();root.visitorNavigation.open(stop.id);}));
+    const pos=new T.Vector3(0,3.05,17),look=new T.Vector3(0,3.05,0);
+    const ease=t=>t*t*(3-2*t),lerp=(a,b,t)=>a+(b-a)*t;
+    // The first scroll opens the membrane before forward travel gains speed.
+    const approachKeys=[[0,arrivalCameraZ,0],[.17,arrivalCameraZ-.8,-12],[.26,8.8,-100],[.33,1.8,-85],[.40,-3.0,-62],[.50,-9.4,-56],[.58,-15.0,-56]];
+    function approachZ(v){
+      for(let i=1;i<approachKeys.length;i++)if(v<=approachKeys[i][0]){
+        const a=approachKeys[i-1],b=approachKeys[i],h=b[0]-a[0],t=(v-a[0])/h,t2=t*t,t3=t2*t;
+        return (2*t3-3*t2+1)*a[1]+(t3-2*t2+t)*h*a[2]+(-2*t3+3*t2)*b[1]+(t3-t2)*h*b[2];
+      }
+      return -15.0;
+    }
+    function pose(v){
+      if(v<=.58){
+        const yy=lerp(arrivalEyeY,3.05,ease(Math.min(1,v/.27)))-.35*T.MathUtils.smoothstep(v,.41,.58),zz=approachZ(v);
+        return{pos:[0,yy,zz],look:[0,yy+.16*T.MathUtils.smoothstep(v,.42,.58),-32]};
+      }
+      const t=(v-.58)/.42;
+      const settle=T.MathUtils.smoothstep(v,.91,1);
+      // Leave a short clearing beyond the final destination, with room for the invitation.
+      const distance=Math.max(8.8,3.0/(Math.tan(37*Math.PI/180)*camera.aspect*.80));
+      const endCameraZ=endingZ+Math.min(13.5,distance);
+      // Carry the portal's exit velocity into the jungle, then rejoin its existing path.
+      // Both curves meet at the same position and tangent; neither restarts from rest.
+      const join=.24,u=Math.min(1,t/join),u2=u*u,u3=u2*u;
+      const entrySlope=.42*56/(-15-endCameraZ),joinSlope=6*join*(1-join);
+      const travel=t<join?(u3-2*u2+u)*join*entrySlope+(-2*u3+3*u2)*ease(join)+(u3-u2)*join*joinSlope:ease(t);
+      const z=lerp(-15,endCameraZ,travel),gaze=ease(Math.min(1,t/.16)),endX=junglePathX(endingZ);
+      return{pos:[lerp(junglePathX(z),endX,settle),2.70,z],look:[lerp(junglePathX(z-6)*gaze,endX,settle),lerp(2.86,3.48,settle),lerp(lerp(-32,z-7,gaze),endingZ,settle)]};
+    }
+    // Pause wheel/touch travel at the next readable stop within each gesture.
+    let cachedStopAspect=null,cachedStops=null;
+    const stopProgress=()=>{
+      if(cachedStops&&cachedStopAspect===camera.aspect)return cachedStops;
+      cachedStopAspect=camera.aspect;return cachedStops=pageStops.map(stop=>{
+      const z=stop.z+8.1;let lo=0,hi=1;
+      for(let i=0;i<32;i++){const t=(lo+hi)/2;if(pose(.58+.42*t).pos[2]>z)lo=t;else hi=t;}
+      return .58+.42*(lo+hi)/2;
+    });};
+    const guide=window.createJourneyGuide({stops:stopProgress,reducedMotion,initialProgress:root.resumeProgress});
+    let guideState=guide.state();
+    function atJourneyEnd(){return guideState.mode==='idle'&&guideState.index===pageStops.length;}
+    // Overlay/tab visibility suspends the existing loop, preserving the in-flight transition.
+    function pauseJourney(){dragY=null;root.wakeJourney?.();}
+    function updateJourney(dt){
+      guideState=guide.tick(dt,{sceneReady:revealReady,introPlaying:machineRunning||reducedMotion});
+      p=guideState.progress;target=guideState.target;auto=guideState.mode==='intro';
+    }
+    function requestDestination(direction=1){
+      if(root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return false;
+      if(atJourneyEnd()&&direction>0){root.visitRoom?.open();return true;}
+      const moved=guide.advance(direction);
+      if(moved){guideState=guide.state();target=guideState.target;updateLabels();root.wakeJourney?.();}
+      return moved;
+    }
+    function applyJourneyCamera(){
+      const state=pose(p);pos.set(...state.pos);look.set(...state.look);camera.position.copy(pos);camera.lookAt(look);
+    }
+    function updateLabels(){
+      root.dataset.journeyEnd=String(atJourneyEnd());
+      root.dataset.ending=String(p>=.94);
+      const key=p<.3?'start':p<.555?'tunnel':'jungle';
+      root.dataset.phase=key;
+      root.dataset.journeyMode=guideState.mode;
+      root.dataset.destination=guideState.mode==='idle'&&guideState.index<pageStops.length?pageStops[guideState.index].id:'';
+      root.journeyInterface?.update(p,atJourneyEnd(),guideState);
+      const skip=root.querySelector('.explore');skip.hidden=guideState.mode!=='intro';
+      skip.disabled=guideState.skipPending;
+      const skipLabel=guideState.skipPending?'PREPARING JUNGLE…':'SKIP INTRO';
+      if(skip.querySelector('.enter-desktop-label').textContent!==skipLabel){
+        skip.querySelector('.enter-desktop-label').textContent=skipLabel;
+        skip.querySelector('.enter-mobile-label').textContent=skipLabel;
+      }
+      skip.setAttribute('aria-label',guideState.skipPending?'Preparing jungle':'Skip intro');
+      skip.dataset.entryState='moving';
+      entranceCopy.hidden=p>.075;
+    }
+    // The complete viewport owns travel gestures. Only menus and the visit room scroll.
+    let travelPointer=null,dragStartX=0,dragStartY=0,dragConsumed=false,suppressTapUntil=0;
+    let lastWheelAt=-Infinity,wheelDirection=0,wheelDistance=0,wheelConsumed=false;
+    const menuIsOpen=()=>root.dataset.menuOpen==='true';
+    const interactiveTarget=e=>e.target.closest('button,input,a,summary,.menu-panel');
+    root.addEventListener('wheel',e=>{
+      if(root.dataset.visitOpen==='true'||e.target.closest('.menu-panel')||e.ctrlKey)return;
+      e.preventDefault();
+      const now=performance.now(),direction=Math.sign(e.deltaY),fresh=now-lastWheelAt>260||direction!==wheelDirection;
+      lastWheelAt=now;wheelDirection=direction;
+      if(fresh){wheelDistance=0;wheelConsumed=false;}
+      if(menuIsOpen()||guide.state().busy){wheelConsumed=true;return;}
+      if(wheelConsumed||!direction)return;
+      wheelDistance+=Math.abs(e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?stage.clientHeight:1));
+      if(wheelDistance>=36){wheelConsumed=true;requestDestination(direction);}
+    },{passive:false});
+    root.addEventListener('pointerdown',e=>{
+      const swipeControl=e.target.closest('.jungle-page-stop');
+      if(root.dataset.visitOpen==='true'||menuIsOpen()||guide.state().busy||(interactiveTarget(e)&&!swipeControl)||e.isPrimary===false||e.button>0||travelPointer!==null)return;
+      travelPointer=e.pointerId;dragStartX=e.clientX;dragStartY=dragY=e.clientY;dragConsumed=false;
+    });
+    root.addEventListener('pointermove',e=>{
+      if(e.pointerId!==travelPointer||dragY===null||dragConsumed||root.dataset.visitOpen==='true'||menuIsOpen())return;
+      const dy=dragStartY-e.clientY,dx=dragStartX-e.clientX;
+      if(Math.abs(dy)<44||Math.abs(dy)<Math.abs(dx)*1.15)return;
+      e.preventDefault();dragConsumed=true;suppressTapUntil=performance.now()+550;
+      root.setPointerCapture(e.pointerId);requestDestination(Math.sign(dy));
+    });
+    const releaseTravel=e=>{
+      if(e&&e.pointerId!==travelPointer)return;
+      const pointer=travelPointer;travelPointer=null;dragY=null;dragConsumed=false;
+      if(pointer!==null&&root.hasPointerCapture(pointer))root.releasePointerCapture(pointer);
+    };
+    root.addEventListener('pointerup',releaseTravel);root.addEventListener('pointercancel',releaseTravel);
+    root.addEventListener('lostpointercapture',e=>{if(e.target===root)releaseTravel(e);});
+    window.addEventListener('pointerup',releaseTravel);window.addEventListener('pointercancel',releaseTravel);
+    root.addEventListener('click',e=>{
+      if(e.detail!==0&&performance.now()<suppressTapUntil){e.preventDefault();e.stopImmediatePropagation();}
+    },true);
+    stage.addEventListener('keydown',e=>{
+      if(root.dataset.visitOpen==='true'||menuIsOpen()||interactiveTarget(e))return;
+      const direction={ArrowDown:1,ArrowUp:-1,PageDown:1,PageUp:-1,' ':1}[e.key];
+      if(direction){e.preventDefault();if(!e.repeat)requestDestination(direction);}
+    });
+    function skipIntro(){guide.skip();root.wakeJourney?.();updateLabels();stage.focus({preventScroll:true});}
+    root.querySelector('.explore').addEventListener('click',skipIntro);
+    root.querySelector('.destination-next').addEventListener('click',()=>{if(requestDestination(1)&&guide.state().index===pageStops.length){root.focusFinaleOnArrival=true;stage.focus({preventScroll:true});}});
+    root.tourControls={pause:pauseJourney,explore:skipIntro};
+    root.navigationState=()=>({progress:p,target,auto,mode:guideState.mode,destinationIndex:guideState.index,camera:camera.position.toArray(),visiblePageStops:pageStops.filter(stop=>!stop.button.hidden).map(stop=>stop.id)});
+    // JOURNEY_NAV_END
+    function applyQuality(){
+      renderer.setPixelRatio(quality.ratio);
+      portalDust?.geometry.setDrawRange(0,Math.ceil(dustCount*quality.density));
+      energyParticles?.geometry.setDrawRange(0,Math.ceil(particleCount*quality.density));
+      energyTrails?.geometry.setDrawRange(0,Math.ceil(particleCount*quality.density)*2);
+      revealMotes?.geometry.setDrawRange(0,Math.ceil(revealMoteCount*quality.density));
+      jungleSky?.setPixelRatio(quality.ratio);
+      root.dataset.renderScale=quality.ratio.toFixed(2);
+    }
+    // Mobile browser chrome can resize dvh repeatedly. Coalesce changes and resize
+    // only inside the next draw, so a cleared WebGL buffer is never presented.
+    let pendingViewport=null,drawWidth=0,drawHeight=0;
+    function resize(){
+      const w=stage.clientWidth,h=stage.clientHeight;
+      if(w<1||h<1)return;
+      pendingViewport=w===drawWidth&&h===drawHeight?null:{w,h};
+      if(pendingViewport)root.wakeJourney?.();
+    }
+    function applyViewport(){
+      if(!pendingViewport)return;
+      const {w,h}=pendingViewport;pendingViewport=null;
+      viewportWidth=drawWidth=w;viewportHeight=drawHeight=h;
+      renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+      fitEntranceWordmark();destinationGrass?.resize(w<700);return true;
+    }
+    const sceneResize=new ResizeObserver(resize),headerResize=new ResizeObserver(fitEntranceWordmark);
+    sceneResize.observe(stage);headerResize.observe(root.querySelector('.site-header'));resize();
+    let lastLabelUpdate=-Infinity,lastVisualProgress=-1,lastEffectTime=-1,qualityPending=false;
+    const effectsCadence=window.createJourneyCadence(quality.compact?30:60);
+    const profileFrames=new URLSearchParams(location.search).has('profile');
+    let sampleFrames=0,sampleSeconds=0,totalFrames=0,frameCosts=[];
+    function frame(dt,now,elapsed){
+      const frameStarted=profileFrames?performance.now():0;
+      const viewportChanged=applyViewport();
+      if(!portalReady)return true;
+      // Resizing the drawing buffer clears it: adjust quality before this frame's draw.
+      if(revealReady&&performanceBudget.sample(elapsed))qualityPending=true;
+      const previousMode=guideState.mode;updateJourney(dt);
+      const modeChanged=previousMode!==guideState.mode;
+      // Buffer reallocations wait for a settled destination, never mid-camera travel.
+      if(qualityPending&&guideState.mode==='idle'){applyQuality();qualityPending=false;}
+      const changed=p!==lastVisualProgress;
+      if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();}
+      const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);
+      if(machineRunning||changed||lastEffectTime<0){
+        updateMachine(dt);
+        const jungleActive=revealReady&&p>.27;
+        // Camera remains at display cadence. Movement does not bypass this budget.
+        if(effectDelta!==null){
+          if(jungleActive)updateReveal();
+          journeyAtmosphere?.update(p,energyTime,formation,camera.position.z,quality.mistRange);
+          jungleSky?.update(p,energyTime);endingAfterglow?.update(energyTime,camera.position.z);
+
+        }
+        if(p<.40)enclosureFans.forEach((fan,i)=>fan.rotation.z=energyTime*(i?-.8:.8));
+        lastEffectTime=energyTime;
+      }
+      if(changed){
+        const arrivalVisibility=1-T.MathUtils.smoothstep(p,.005,.075);
+        arrivalShade.style.opacity=String(arrivalVisibility);
+        const pull=reducedMotion?0:T.MathUtils.smoothstep(p,.22,.33)*(1-T.MathUtils.smoothstep(p,.46,.54));
+        const crossing=reducedMotion?0:T.MathUtils.smoothstep(p,.34,.36)*(1-T.MathUtils.smoothstep(p,.373,.405));
+        thresholdWash.style.opacity=String(crossing*.65);
+        const lens=74+pull*3;if(Math.abs(camera.fov-lens)>.01){camera.fov=lens;camera.updateProjectionMatrix();}
+      }
+      if((changed&&now-lastLabelUpdate>=66)||modeChanged||lastVisualProgress<0){updateLabels();lastLabelUpdate=now;}
+      if(changed||modeChanged||lastVisualProgress<0)updatePageStops();
+      if(revealReady&&effectDelta!==null)destinationGrass?.update(p,energyTime,effectDelta,machineRunning);
+      const veil=String(guideState.motionVeil||0);if(motionVeil.style.opacity!==veil)motionVeil.style.opacity=veil;
+      renderer.render(scene,camera);lastVisualProgress=p;
+      if(root.dataset.firstFrame!=='true'){root.dataset.firstFrame='true';root.dataset.firstFrameMs=performance.now().toFixed(0);}
+      if(profileFrames){
+        totalFrames++;sampleFrames++;sampleSeconds+=elapsed;frameCosts.push(performance.now()-frameStarted);
+        root.dataset.renderedFrames=String(totalFrames);
+        if(sampleSeconds>=2){frameCosts.sort((a,b)=>a-b);root.dataset.frameCpuP95Ms=frameCosts[Math.min(frameCosts.length-1,Math.floor(frameCosts.length*.95))].toFixed(2);frameCosts=[];const fcp=performance.getEntriesByName('first-contentful-paint')[0];if(fcp)root.dataset.firstContentfulPaintMs=fcp.startTime.toFixed(0);root.dataset.measuredFps=(sampleFrames/sampleSeconds).toFixed(1);root.dataset.drawCalls=String(renderer.info.render.calls);root.dataset.triangles=String(renderer.info.render.triangles);sampleFrames=sampleSeconds=0;}
+      }
+      return machineRunning||guideState.mode==='transition'||(auto&&(machineRunning||reducedMotion))||!revealReady;
+    }
+    journeyLoop=window.createJourneyLoop({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),render:frame});
+    root.wakeJourney=()=>{lastVisualProgress=-1;journeyLoop.wake();};
+    let sceneInView=true,pageActive=true;
+    function syncVisibility(){
+      const visible=pageActive&&!document.hidden&&sceneInView&&root.dataset.view!=='info'&&root.dataset.visitOpen!=='true'&&root.dataset.menuOpen!=='true';
+      root.dataset.effectsResting=String(!visible);journeyLoop.setVisible(visible);performanceBudget.reset();
+      if(visible&&preparation)queuePreparation();
+    }
+    document.addEventListener('visibilitychange',syncVisibility);
+    const viewObserver=new IntersectionObserver(entries=>{sceneInView=entries[0].isIntersecting;syncVisibility();},{threshold:0});viewObserver.observe(stage);
+    const modeObserver=new MutationObserver(syncVisibility);modeObserver.observe(root,{attributes:true,attributeFilter:['data-view','data-visit-open','data-menu-open']});
+    window.addEventListener('pagehide',event=>{pageActive=false;syncVisibility();if(!event.persisted){journeyLoop.dispose();viewObserver.disconnect();modeObserver.disconnect();sceneResize.disconnect();headerResize.disconnect();document.removeEventListener('visibilitychange',syncVisibility);}});
+    window.addEventListener('pageshow',()=>{pageActive=true;syncVisibility();});
+    syncVisibility();applyQuality();
+    root.dataset.ready='true';
+    root.electricState=()=>({opening,fieldVisible:electricalField.visible,tunnelVisible:portalSurface.visible,arcs:activeHeads.map(h=>({power:h.power,start:h.start.toArray(),end:h.end.toArray(),tip:h.cap.localToWorld(new T.Vector3(0,0,.057)).toArray(),mid:h.arc.points[12].toArray()})),time:energyTime});
+    root.logoPowerState=()=>illuminatedLetters.map(l=>({index:l.index,color:l.color.getHexString(),lit:l.lit,emissive:l.material.emissiveIntensity}));
+    root.enclosureState=()=>({panels:enclosurePanels.length,headerCableRuns:headerCables.length,fans:enclosureFans.map(f=>f.rotation.z),machineFixed:machine.position.y===0&&machine.rotation.y===0});
+    root.enclosureAngle=()=>{camera.position.set(7,8.5,19);camera.lookAt(0,7.2,0);renderer.render(scene,camera);return renderer.domElement.toDataURL('image/png');};
+    root.cameraPath=()=>Array.from({length:581},(_,i)=>({progress:i/1000,z:approachZ(i/1000)}));
+    root.constructionSnapshot=()=>({transforms:fixtureNodes.map(n=>[...n.position.toArray(),...n.quaternion.toArray()]),emitters:activeHeads.map(h=>h.cap.position.toArray()),partsHaveMaps:fixtureNodes.some(n=>{let v=false;n.traverse(o=>{if(o.material?.map)v=true;});return v;})});
+    root.constructionAngle=()=>{camera.position.set(9,6.7,16);camera.lookAt(0,4.8,0);renderer.render(scene,camera);return renderer.domElement.toDataURL('image/png');};
+    root.previewState=()=>({progress:p,playing:auto,machineRunning,machineTime,portalReady,formation,powerUpTime,powerUpComplete:powerUpTime>=powerUpDuration,emitters:activeHeads.length,parts:outerModules.length,fixtures:fixtureNodes.length,hoses:hoses.length,structureFixed:machine.position.y===0&&machine.rotation.y===0,spin:activeHeads[0]?.spinner.rotation.z,charge,energyTime,opening,fieldVisible:electricalField?.visible,tunnelVisible:portalSurface?.visible,activeBolts:activeHeads.filter(h=>h.power>.5).length,cableClamps:cableClamps.length,portalDepth,fov:camera.fov,camera:camera.position.toArray()});
+  })();
+  }));
+  },{once:true});

@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const T=require('../dist/assets/three.min.js');
-const html=fs.readFileSync(require('path').join(__dirname,'../dist/index.html'),'utf8');
+const html=require('./read-journey-source.cjs')();
 const route=html.slice(html.indexOf('    const jungleStretch='),html.indexOf('    function sidePathOpening'));
 const pose=html.slice(html.indexOf('    function pose(v)'),html.indexOf('    // Pause wheel/touch'));
 const solve=html.slice(html.indexOf('    let cachedStopAspect='),html.indexOf('    const guide='));

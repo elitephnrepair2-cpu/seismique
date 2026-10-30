@@ -13,7 +13,8 @@
           const relative=inverse.clone().multiply(node.matrixWorld);
           // Reflections require a winding correction; retain these uncommon meshes.
           if(relative.determinant()>0){
-            const z=new T.Vector3().setFromMatrixPosition(relative).z;
+            if(!g.boundingBox)g.computeBoundingBox();
+            const z=g.boundingBox.getCenter(new T.Vector3()).applyMatrix4(relative).z;
             const key=[m.uuid,Math.floor(z/8),node.castShadow,node.receiveShadow,node.renderOrder,node.frustumCulled,names.map(n=>n+g.attributes[n].itemSize+g.attributes[n].normalized+g.attributes[n].array.constructor.name).join(':')].join('/');
             if(!groups.has(key))groups.set(key,[]);
             groups.get(key).push({node,relative});

@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const dir=require('path').resolve(__dirname,'..');
-const html=fs.readFileSync(dir+'/dist/index.html','utf8');
+const html=require('./read-journey-source.cjs')();
 for(const [i,m] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].entries())if(!/src=|type="(?:application|importmap)/.test(m[1]))new vm.Script(m[2],{filename:'inline-'+i});
 const T=require(dir+'/dist/assets/three.min.js');
 const fit=html.slice(html.indexOf('    function fitEntranceWordmark(){'),html.indexOf('    const entranceWallMaterials='));
