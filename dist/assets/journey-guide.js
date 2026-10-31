@@ -11,8 +11,8 @@
     let mode=index<0?'intro':'idle',ready=false,skipPending=false,transition=null;
     let introFrom=progress,introElapsed=0,motionVeil=0;
     const introDuration=Math.max(1,11/introSpeed*(first-progress)/first);
-    const chargeEnd=progress;
-    const chargeDuration=progress<.005?Math.min(introDuration,2.6):0;
+    const chargeEnd=Math.max(progress,Math.min(.17,first));
+    const chargeDuration=Math.min(introDuration,3*(chargeEnd-progress)/.17);
     function state(){return {progress,target:mode==='intro'?stops()[0]:points()[index],index,mode,busy:mode!=='idle',skipPending,ready,motionVeil};}
     function settle(i){index=i;progress=points()[i];mode='idle';transition=null;skipPending=false;motionVeil=0;}
     return {
@@ -51,7 +51,7 @@
               progress=introFrom+(chargeEnd-introFrom)*ease(introElapsed/chargeDuration);
               if(introElapsed<chargeDuration)return state();
             }
-            // Keep the camera anchored during charge-up. A slower
+            // Begin a gentle approach immediately. A slower
             // phone can prepare here without freezing halfway through a move.
             if(!ready)return state();
             introElapsed=Math.min(introDuration,introElapsed+remaining);

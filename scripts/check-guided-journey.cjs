@@ -45,7 +45,9 @@ assert([...html.matchAll(/<script src=[^>]+>/g)].every(m=>m[0].includes('defer')
 assert(html.includes('[data-first-frame="true"] .loading-portal'),'Loading cover remains until the first actual render');
 console.log('PASS: faster intro independent of original destination pace, calm reduced-motion dissolves, stall protection and visible loading handoff.');
 
-g=make();run(g,20,{sceneReady:false});assert(Math.abs(g.state().progress)<1e-8,'Slow loading keeps the camera anchored during charge-up');
+g=make();g.tick(1/60,{sceneReady:false});assert(g.state().progress>0,'Automatic camera movement starts on the first active frame, before jungle readiness');
+run(g,.5,{sceneReady:false});assert(g.state().progress>.01,'The opening must visibly progress within half a second');
+run(g,20,{sceneReady:false});assert(Math.abs(g.state().progress-.17)<1e-8,'Slow loading eases into the safe portal checkpoint');
 const checkpoint=g.state().progress;g.tick(1/60,{sceneReady:true});assert(g.state().progress>checkpoint&&g.state().progress-checkpoint<.00005,'Ready handoff accelerates gently rather than jumping back into motion');run(g,8);assert.equal(g.state().index,0);
 assert(html.includes('introPlaying:(machineRunning||reducedMotion)&&entrancePrepared'),'Entrance shader preparation must gate cinematic movement');
 assert(html.includes('if(renderer.getPixelRatio()!==quality.ratio)'),'An unchanged quality setting must not clear the opening canvas');
