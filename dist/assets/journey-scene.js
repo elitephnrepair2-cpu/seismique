@@ -8,9 +8,9 @@
     const skyMaps=window.preloadJungleSky(T);
     const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const performanceBudget=window.createJourneyPerformance({compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
-    const quality=performanceBudget.budget;
     let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
+    const performanceBudget=window.createJourneyPerformance({width:viewportWidth,height:viewportHeight,touch:navigator.maxTouchPoints>0,compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
+    const quality=performanceBudget.budget;
     let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     root.dataset.antialias=String(renderer.getContext().getContextAttributes().antialias);
     renderer.setPixelRatio(quality.ratio);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(0x080c16);stage.prepend(renderer.domElement);
@@ -700,7 +700,7 @@
       return m;
     }
     function roundedGeometry(w,h,d,r){
-      const geo=new T.BoxGeometry(w,h,d,10,10,10),a=geo.attributes.position,n=geo.attributes.normal;
+      const geo=new T.BoxGeometry(w,h,d,quality.compact?6:10,quality.compact?6:10,quality.compact?6:10),a=geo.attributes.position,n=geo.attributes.normal;
       const inner=new T.Vector3(w/2-r,h/2-r,d/2-r),v=new T.Vector3(),q=new T.Vector3(),normal=new T.Vector3();
       for(let i=0;i<a.count;i++){
         v.fromBufferAttribute(a,i);q.set(T.MathUtils.clamp(v.x,-inner.x,inner.x),T.MathUtils.clamp(v.y,-inner.y,inner.y),T.MathUtils.clamp(v.z,-inner.z,inner.z));normal.copy(v).sub(q).normalize();v.copy(q).addScaledVector(normal,r);a.setXYZ(i,v.x,v.y,v.z);n.setXYZ(i,normal.x,normal.y,normal.z);
@@ -708,7 +708,7 @@
       return geo;
     }
     function rounded(w,h,d,r,mat,x,y,z,parent=machine,outlined=true){return solid(roundedGeometry(w,h,d,r),mat,x,y,z,parent,outlined);}
-    function cyl(r1,r2,h,mat,x,y,z,parent=machine,outlined=false){return solid(new T.CylinderGeometry(r1,r2,h,28),mat,x,y,z,parent,outlined);}
+    function cyl(r1,r2,h,mat,x,y,z,parent=machine,outlined=false){return solid(new T.CylinderGeometry(r1,r2,h,quality.compact?20:28),mat,x,y,z,parent,outlined);}
     function bolt(x,y,z,parent=machine,r=.054){
       const b=cyl(r,r,.045,gunmetal,x,y,z,parent);b.rotation.x=Math.PI/2;
       const slot=box(r*1.05,.017,.011,silver,x,y,z+.026,parent);return b;
@@ -1068,6 +1068,22 @@
       curve.add(new T.LineCurve3(last,points[points.length-1]));return curve;
     }
 
+    async function preparePortalScenery(){
+      let before=0,after=0,start=performance.now();
+      // Fixed details share draws; each moving assembly keeps its own transform.
+      const moving=new Set([rotor,...activeHeads.map(head=>head.mount),portalSurface,electricalField,portalLip]);
+      for(const parent of [machine,rotor,...activeHeads.map(head=>head.mount)]){
+        for(let pass=0;pass<2;pass++){
+          const work=window.batchStaticScenery(T,parent,parent===machine?moving:new Set());let step;
+          do{
+            step=work.next();
+            if(!step.done&&performance.now()-start>3){await new Promise(resolve=>requestAnimationFrame(resolve));start=performance.now();}
+          }while(!step.done);
+          before+=step.value.before;after+=step.value.after;
+        }
+      }
+      root.dataset.portalDraws=String(after)+'/'+String(before);
+    }
     async function buildReference(){
       // Paper wall and logo are behind the machine; no duplicate machine remains.
       const bc=document.createElement('canvas');bc.width=artWidth;bc.height=artHeight;const bg=bc.getContext('2d');
@@ -1080,6 +1096,7 @@
       entranceWallMaterials.push(wallMat);
       buildConstruction();buildMachineWall();buildPortal();
       entranceMural=window.createEntranceMural({THREE:T,scene,wallMaterials:entranceWallMaterials,apertureY,reducedMotion});
+      await preparePortalScenery();
       root.dataset.entrancePreparation='compiling';
       try{await renderer.compileAsync(scene,camera);}
       catch(error){root.dataset.entrancePreparation='failed';root.querySelector('.error').hidden=false;return;}
@@ -1166,7 +1183,7 @@
       }
       freezeScenery(revealWorld);
       revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';let pointLights=0;scene.traverse(node=>{if(node.isPointLight)pointLights++;});root.dataset.shaderPointLights=String(pointLights);
-      lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();applyQuality();journeyLoop?.wake();
+      lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();qualityPending=true;journeyLoop?.wake();
       root.dataset.entranceJungleReadyMs=performance.now().toFixed(0);root.dataset.entranceTrees=String(revealTrees);
       root.dataset.distantPreparation='building';preparation=prepareDistantScenery();queuePreparation();
     }
@@ -1257,7 +1274,7 @@
     function vortexRadius(u){return 3.445+.90*u-.12*Math.sin(Math.PI*u);}
     function buildPortal(){
       portalUniforms={uTime:{value:0},uColor:{value:new T.Color(0x24bfff)},uCharge:{value:0},uTravel:{value:0},uOpening:{value:0},uPower:{value:0},uSurge:{value:0},uInstability:{value:0},uClarity:{value:0}};
-      const radial=80,longitudinal=64,positions=[],uvs=[],indices=[];
+      const radial=quality.compact?64:80,longitudinal=quality.compact?40:64,positions=[],uvs=[],indices=[];
       for(let j=0;j<=longitudinal;j++)for(let i=0;i<=radial;i++){
         const u=j/longitudinal,a=i/radial*Math.PI*2,r=vortexRadius(u);
         positions.push(Math.cos(a)*r,Math.sin(a)*r,mouthZ-u*portalDepth);uvs.push(i/radial,u);
@@ -1282,10 +1299,11 @@
             #include <colorspace_fragment>
           }`});
       portalSurface=mesh(geometry,material,0,apertureY,0,machine);
-      fieldUniforms={uTime:portalUniforms.uTime,uColor:portalUniforms.uColor,uCharge:portalUniforms.uCharge,uOpening:portalUniforms.uOpening,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uInstability:portalUniforms.uInstability,uClarity:portalUniforms.uClarity,uHits:{value:Array.from({length:9},()=>new T.Vector4())}};
+      const hitCount=quality.compact?2:3;
+      fieldUniforms={uTime:portalUniforms.uTime,uColor:portalUniforms.uColor,uCharge:portalUniforms.uCharge,uOpening:portalUniforms.uOpening,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uInstability:portalUniforms.uInstability,uClarity:portalUniforms.uClarity,uHits:{value:Array.from({length:hitCount},()=>new T.Vector4())}};
       const fieldMaterial=new T.ShaderMaterial({uniforms:fieldUniforms,side:T.DoubleSide,transparent:true,depthWrite:false,
         vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;vec2 q=uv*2.-1.;float r=clamp(length(q),0.,1.);p.z-=.24*dot(q,q);p.z+=(.025+uInstability*.07)*(1.-r)*sin(uv.x*17.+uv.y*13.-uTime*.8);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
-        fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uOpening;uniform float uPower,uSurge,uInstability,uClarity;uniform vec4 uHits[9];
+        fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uOpening;uniform float uPower,uSurge,uInstability,uClarity;uniform vec4 uHits[${hitCount}];
           ${electricNoiseGLSL}
           void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;float t=uTime;float a=atan(q.y,q.x);
             float hole=uOpening*1.035;if(uOpening>.0001&&r<hole)discard;
@@ -1301,7 +1319,7 @@
             float depthVeil=pow(.5+.5*sin(r*19.+sin(a*3.+n)*1.5-t*.30),14.)*(1.-r)*.06;
             col+=uColor*depthVeil+vec3(.012,.035,.06)*well*uPower;
             col+=uColor*uSurge*(.055+.12*pow(r,5.));
-            for(int i=0;i<9;i++){vec4 hit=uHits[i];float dd=length(q-hit.xy);col+=uColor*exp(-dd*24.)*exp(-hit.z*6.)*hit.w*.30;}
+            for(int i=0;i<${hitCount};i++){vec4 hit=uHits[i];float dd=length(q-hit.xy);col+=uColor*exp(-dd*24.)*exp(-hit.z*6.)*hit.w*.30;}
             float edge=exp(-abs(r-hole)*52.)*smoothstep(.005,.045,uOpening);float border=exp(-abs(1.-r)*90.);
             float shimmer=pow(.5+.5*sin(a*5.+t*.38+warp.y*3.),9.);
             col+=mix(uColor,vec3(.74,.91,1.),.38)*edge*.28+uColor*border*(.24+shimmer*.11);
@@ -1310,7 +1328,7 @@
             #include <tonemapping_fragment>
             #include <colorspace_fragment>
           }`});
-      electricalField=mesh(new T.PlaneGeometry(fieldRadius*2,fieldRadius*2,56,56),fieldMaterial,0,apertureY,fieldZ,machine);
+      electricalField=mesh(new T.PlaneGeometry(fieldRadius*2,fieldRadius*2,quality.compact?32:56,quality.compact?32:56),fieldMaterial,0,apertureY,fieldZ,machine);
       portalLip=mesh(new T.TorusGeometry(3.445,.027,8,96),neon(0x48bfff),0,apertureY,mouthZ-.025,machine);
       // Recessed metallic shoulders flank one segmented energy channel.
       channelEdges=new T.MeshStandardMaterial({color:0x586575,metalness:.64,roughness:.37,emissive:0x493887,emissiveIntensity:.025});
@@ -1375,13 +1393,14 @@
       channelEdges.emissiveIntensity=.025+lightPower*.10+surge*.22;
       const retract=T.MathUtils.smoothstep(opening,0,.60),clearRadius=Math.min(3.28,opening*fieldRadius*1.035+.025);
       strikePosition.set(0,apertureY,fieldZ);
+      // Only active discharges consume per-pixel hit calculations.
+      fieldUniforms.uHits.value.forEach(hit=>hit.set(0,0,1,0));
       // Reuse the emitter ribbons and sprites, keeping most of them asleep.
       activeHeads.forEach(h=>{
         h.start.copy(capTip);h.cap.localToWorld(h.start);h.power=0;
         h.arc.object.visible=false;h.branches.forEach(b=>b.object.visible=false);
         h.flare.material.opacity=0;h.impact.material.opacity=0;
         h.tipMat.color.set(0x42e7ff).multiplyScalar(.008+lightPower*.26);
-        fieldUniforms.uHits.value[h.i].set(0,0,1,0);
       });
       let activeArcCount=0;
       for(const event of energy.events){
@@ -1421,7 +1440,7 @@
         h.flare.position.copy(isCrawl?h.arc.points[0]:h.start);h.flare.material.color.copy(h.arc.uniforms.uColor.value);h.flare.material.opacity=h.power*(isSurge?.18:.09);
         h.flare.scale.setScalar(isSurge?.88:.52);
         h.impact.position.copy(h.end);h.impact.material.color.setHSL(beamHue,.6,.73);h.impact.material.opacity=h.power*(isSurge?.30:.11);h.impact.scale.setScalar(isSurge?1.05:.43);
-        fieldUniforms.uHits.value[h.i].set(h.end.x/fieldRadius,(h.end.y-apertureY)/fieldRadius,event.age*.5,h.power);
+        fieldUniforms.uHits.value[activeArcCount-1].set(h.end.x/fieldRadius,(h.end.y-apertureY)/fieldRadius,event.age*.5,h.power);
         if(isSurge||energy.events.length===1)strikePosition.copy(h.start);
       }
       // All room reactions share the discharge envelope rather than an unrelated pulse.
@@ -1616,6 +1635,7 @@
       revealMotes?.geometry.setDrawRange(0,Math.ceil(revealMoteCount*quality.density));
       jungleSky?.setPixelRatio(quality.ratio);
       root.dataset.renderScale=quality.ratio.toFixed(2);
+      root.dataset.renderPixels=String(Math.round(viewportWidth*viewportHeight*quality.ratio*quality.ratio));
     }
     // Mobile browser chrome can resize dvh repeatedly. Coalesce changes and resize
     // only inside the next draw, so a cleared WebGL buffer is never presented.
@@ -1630,6 +1650,7 @@
       if(!pendingViewport)return;
       const {w,h}=pendingViewport;pendingViewport=null;
       viewportWidth=drawWidth=w;viewportHeight=drawHeight=h;
+      performanceBudget.resize(w,h);
       renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
       fitEntranceWordmark();destinationGrass?.resize(w<700);return true;
     }
@@ -1644,11 +1665,12 @@
       const viewportChanged=applyViewport();
       if(!portalReady)return true;
       // Resizing the drawing buffer clears it: adjust quality before this frame's draw.
-      if(revealReady&&performanceBudget.sample(elapsed))qualityPending=true;
-      const previousMode=guideState.mode;updateJourney(dt);
+      if(performanceBudget.sample(elapsed)||viewportChanged)qualityPending=true;
+      const previousMode=guideState.mode;updateJourney(guideState.mode==='intro'?elapsed:dt);
       const modeChanged=previousMode!==guideState.mode;
-      // Buffer reallocations wait for a settled destination, never mid-camera travel.
-      if(qualityPending&&guideState.mode==='idle'){applyQuality();qualityPending=false;}
+      // Lower excessive load in the same draw, including during startup.
+      // Quality recovery waits for a settled view to avoid resolution pumping.
+      if(qualityPending&&(quality.ratio<renderer.getPixelRatio()||guideState.mode==='idle')){applyQuality();qualityPending=false;}
       const changed=p!==lastVisualProgress;
       if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();}
       const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);

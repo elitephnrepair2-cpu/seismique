@@ -68,3 +68,7 @@ for(const readyAt of [0,3,4,5,6]){
  assert.equal(g.state().index,0);assert.equal(g.state().mode,'idle');
 }
 console.log('PASS: continuous opening through 3–6 second readiness delays; no stopped checkpoint, backward movement or abrupt speed restart.');
+const ten=make(),sixty=make();for(let i=0;i<50;i++)ten.tick(.1);for(let i=0;i<300;i++)sixty.tick(1/60);
+assert(Math.abs(ten.state().progress-sixty.state().progress)<1e-5,'A sustained 10 FPS intro must retain real elapsed time instead of running at half speed');
+const stalled=make();stalled.tick(3);assert(stalled.state().progress<.001,'A single long stall must still avoid a camera teleport');
+console.log('PASS: low-frame-rate intro keeps its intended duration; isolated stalls remain bounded.');

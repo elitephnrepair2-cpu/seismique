@@ -32,7 +32,7 @@
       },
       tick(seconds,{sceneReady=true,introPlaying=true}={}){
         ready=sceneReady;
-        const dt=clamp(seconds,0,.05);
+        const dt=clamp(seconds>.25?.05:seconds,0,mode==='intro'?.1:.05);
         if(!ready&&mode!=='intro'){progress=Math.min(progress,.26);return state();}
         if(mode==='intro'){
           if(skipPending&&ready){settle(0);return state();}

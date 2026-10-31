@@ -10,7 +10,7 @@ for(const refresh of [30,60,90,120]){
 }
 const html=require('./read-journey-source.cjs')();
 assert(!html.includes('if(changed||secondaryElapsed'),'Camera movement must not bypass the effects budget');
-assert(html.includes("qualityPending&&guideState.mode==='idle'"),'Quality changes wait for a stationary camera');
+assert(html.includes("quality.ratio<renderer.getPixelRatio()||guideState.mode==='idle'"),'Overloaded frames can reduce GPU work immediately; recovery waits for a settled camera');
 assert(html.indexOf('await warmJungleBuffers();')<html.indexOf("revealReady=true;revealWorld.visible=true"),'GPU preparation finishes before the crossing is released');
 const source=html.slice(html.indexOf('    async function warmJungleBuffers('),html.indexOf('    async function finishPreparation(){'));
 async function checkWarmup(fail=false){

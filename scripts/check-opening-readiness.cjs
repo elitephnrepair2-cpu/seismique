@@ -3,7 +3,7 @@ const source=require('./read-journey-source.cjs')();
 const build=source.slice(source.indexOf('    async function buildReference(){'),source.indexOf('    let preparation='));
 assert(build.indexOf('await renderer.compileAsync(scene,camera)')<build.indexOf('portalReady=true'),'Entrance programs compile before the visible animation is released');
 const qualitySource=source.slice(source.indexOf('    function applyQuality(){'),source.indexOf('    // Mobile browser chrome'));
-let ratio=1.5,resizes=0;const ctx={quality:{ratio:1.5,density:.65},renderer:{getPixelRatio:()=>ratio,setPixelRatio(value){ratio=value;resizes++;}},portalDust:null,energyParticles:null,energyTrails:null,revealMotes:null,jungleSky:null,root:{dataset:{}}};vm.createContext(ctx);vm.runInContext(qualitySource,ctx);
+let ratio=1.5,resizes=0;const ctx={viewportWidth:390,viewportHeight:844,quality:{ratio:1.5,density:.65},renderer:{getPixelRatio:()=>ratio,setPixelRatio(value){ratio=value;resizes++;}},portalDust:null,energyParticles:null,energyTrails:null,revealMotes:null,jungleSky:null,root:{dataset:{}}};vm.createContext(ctx);vm.runInContext(qualitySource,ctx);
 ctx.applyQuality();ctx.applyQuality();assert.equal(resizes,0,'Finishing preparation at unchanged quality must not clear the canvas');ctx.quality.ratio=1.6;ctx.applyQuality();assert.equal(resizes,1);
 const queueSource=source.slice(source.indexOf('    function queuePreparation(){'),source.indexOf('    function* prepareResources(){'));
 let clock=0,calls=0;const jobs=[];
