@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict'),T=require('../dist/assets/three.min.js');
+const {createJungleLightBudget}=require('../dist/assets/jungle-light-budget.js');
+const scene=new T.Scene(),budget=createJungleLightBudget(T,scene,{compact:true}),sources=[];
+for(let i=0;i<11;i++){const light=budget.create(0x35ddbb,20,12,i===10?4:1);light.position.set(i%2?2:-2,2,-i*8);sources.push(light);}
+const camera=new T.PerspectiveCamera();camera.position.set(0,2,-60);
+const lights=scene.children.filter(o=>o.isPointLight);assert.equal(lights.length,4);assert(sources.every(source=>source.parent===null),'Logical source count must not expand shader programs');
+budget.sync(camera,.033,{snap:true});assert(lights.some(light=>light.position.equals(sources[10].position)),'Keep the active destination spill');
+assert.equal(new Set(lights.filter(l=>l.intensity>0).map(l=>l.position.z)).size,4,'Each source occupies only one physical slot');
+assert(!lights.some(l=>l.position.equals(sources[0].position)),'Distant irrelevant sources must not consume shader work');
+const sourceIntensity=sources.map(s=>s.intensity);camera.position.z=-10;
+for(let i=0;i<90;i++)budget.sync(camera,1/60);
+assert(lights.some(light=>light.position.equals(sources[1].position)));assert.deepEqual(sources.map(s=>s.intensity),sourceIntensity,'Original source intensity/animation stays unchanged');
+assert.equal(scene.children.filter(o=>o.isPointLight).length,4,'Travel must never add/remove shader lights');
+assert(lights.every(l=>Number.isFinite(l.intensity)&&l.intensity>=0&&l.intensity<=20));
+budget.sync(camera,.016,{enabled:false});assert(lights.every(l=>l.intensity===0),'Jungle lights rest during the entrance');
+const desktopScene=new T.Scene(),desktop=createJungleLightBudget(T,desktopScene);for(let i=0;i<11;i++)desktop.create(0xffffff,10,12);assert.equal(desktopScene.children.length,11);desktop.sync(camera,.03);assert(desktopScene.children.every(l=>l.intensity===10));
+console.log('PASS: four stable mobile shader lights; active accent retained; nearby selection; no duplicate slots or source mutation; quiet entrance; desktop lighting preserved.');

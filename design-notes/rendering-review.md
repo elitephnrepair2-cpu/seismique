@@ -32,3 +32,9 @@ A desktop Chrome browser at 414×896 CSS pixels, actual device-pixel ratio 1, on
 These are local engineering measurements, not iPhone 11, Safari, cold-network, or cellular results. They do not establish a universal load-time or frame-rate guarantee. Physical-phone checks should compare cold opening, portal crossing, each destination transition, fine floor/bark edges, and the final sky.
 
 Regression checks cover the protected mobile resolution, native-density bounds, one-time galaxy cache, live stars, GPU state restoration, actual geometry-location batching, camera/effects cadence, safe-area layout, gesture isolation, scene readiness, route continuity, and navigation integrity.
+
+## Follow-up: remaining stutter after the sharper build
+
+Mobile still evaluated eleven jungle point-light sources plus four entrance/portal sources per lit surface. Added four reusable physical jungle lights, selected from the original logical sources by relevance to the camera. The active destination spill retains a slot. Existing assignments receive a small preference to prevent selection chatter, and replacements fade out/in rather than changing abruptly. Logical source colors and animations remain intact. Desktop retains all eleven original jungle sources.
+
+The mobile shader count is now eight point lights total instead of fifteen. The count stays constant during travel to avoid shader recompilation. The sharper resolution floor and antialiasing remain unchanged. Local mobile-sized browser validation confirmed eight shader lights, four jungle lights, antialiasing enabled, working transitions, and no graphics errors. Actual iPhone performance remains a physical-device validation item.

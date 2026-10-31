@@ -97,11 +97,11 @@
     const ledRings=[],tunnelMat=new T.MeshStandardMaterial({color:0x092534,emissive:0x053349,emissiveIntensity:.32,metalness:.46,roughness:.40,side:T.DoubleSide});
     const glow=new T.PointLight(0x00dfff,2,15);glow.position.set(0,3,-4);scene.add(glow);
     const revealWorld=new T.Group();revealWorld.visible=false;scene.add(revealWorld);
-    // Keep the shader light count stable through every reveal. Darkness uses intensity,
-    // never light visibility; toggling nested lights would rebuild every lit program.
-    const jungleLightPool=Array.from({length:11},()=>{const light=new T.PointLight(0xffffff,0,1,2);scene.add(light);return light;});
-    let nextJungleLight=0;
-    function jungleLight(color,intensity,distance){const light=jungleLightPool[nextJungleLight++];light.color.set(color);light.intensity=intensity;light.distance=distance;return light;}
+    // Four reusable mobile lights replace eleven simultaneous shader sources.
+    // The desktop lighting and every logical source retain their original values.
+    const lightBudget=window.createJungleLightBudget(T,scene,{compact:quality.compact});
+    const jungleLight=(color,intensity,distance,priority=1)=>lightBudget.create(color,intensity,distance,priority);
+    root.dataset.jungleShaderLights=String(lightBudget.physicalCount);
     const hangingPods=[],revealLights=[],revealPools=[],revealPlants=[];
     let revealReady=false,revealMotes,revealTime=0,revealTrees=0,destinationGrass,jungleLighting;
     const revealMoteCount=70,revealMotePositions=new Float32Array(revealMoteCount*3);
@@ -568,10 +568,10 @@
         [junglePathX(jungleZ(-51))+5.2,2.1,-51,0x38c8be,28,13],
         [0,4.2,-7.5,0x36c5df,32,15]
       ];
-      keys.forEach(([x,y,z,c,intensity,range])=>{const light=jungleLight(c,intensity,range);light.position.set(x,y,jungleZ(z));scene.add(light);revealLights.push({light,intensity});});
+      keys.forEach(([x,y,z,c,intensity,range])=>{const light=jungleLight(c,intensity,range);light.position.set(x,y,jungleZ(z));revealLights.push({light,intensity});});
       const moteGeo=new T.BufferGeometry();moteGeo.setAttribute('position',new T.BufferAttribute(revealMotePositions,3).setUsage(T.DynamicDrawUsage));revealMotes=new T.Points(moteGeo,new T.PointsMaterial({color:0x86dce3,map:softMap,size:.055,transparent:true,opacity:.20,depthWrite:false,blending:T.AdditiveBlending}));revealMotes.frustumCulled=false;revealWorld.add(revealMotes);
       jungleLighting=window.createJungleLighting({THREE:T,foliage:leafMaterial,bark:barkMaterials,path:pathMaterial,sidePath:sidePathMaterial,beds:[stoneMaterial,soil],reducedMotion});
-      destinationGrass=window.createDestinationGrass({THREE:T,parent:revealWorld,stops:jungleSidePaths,root,groundAt:plantingTop,pathX:junglePathX,softMap,reducedMotion,light:jungleLight(0x9cb3d8,0,3.6),compact:viewportWidth<700});
+      destinationGrass=window.createDestinationGrass({THREE:T,parent:revealWorld,stops:jungleSidePaths,root,groundAt:plantingTop,pathX:junglePathX,softMap,reducedMotion,light:jungleLight(0x9cb3d8,0,3.6,4),compact:viewportWidth<700});
       root.revealState=()=>({trees:revealTrees,plantClusters:revealPlants.length,hangingPods:hangingPods.length,rocks:ri,broadLeaves:broadIndex,fernFronds:fernIndex,trailingLeaves:trailingIndex,plantingIslands:plantingIslands.length,crossingBoughs,drapedRoots,sidePaths:jungleSidePaths.length,signs:0,ready:revealReady,time:revealTime,camera:camera.position.toArray(),fogFar:scene.fog.far});
     }
     function makeHangingPod(anchor,i,stemMaterial){
@@ -593,7 +593,7 @@
       let bulbLight=null;
       if([0,5,10].includes(i)){
         const intensity=18;bulbLight=jungleLight(podColor,intensity,6.5);
-        bulbLight.position.set(anchor[0]-.12,anchor[1]-drop-.45*scale,anchor[2]+.06);scene.add(bulbLight);revealLights.push({light:bulbLight,intensity});
+        bulbLight.position.set(anchor[0]-.12,anchor[1]-drop-.45*scale,anchor[2]+.06);revealLights.push({light:bulbLight,intensity});
       }
       const pool=mesh(new T.PlaneGeometry(2.0,3.3),new T.MeshBasicMaterial({map:softMap,color:podColor,transparent:true,opacity:.16,depthWrite:false,blending:T.AdditiveBlending}),anchor[0]-.12,.038,anchor[2],revealWorld);pool.rotation.x=-Math.PI/2;revealPools.push(pool);
       const hsl=mat.uniforms.uColor.value.getHSL({h:0,s:0,l:0});
@@ -1106,6 +1106,7 @@
             await new Promise(resolve=>setTimeout(resolve,200));
           }
           const view=pose(progress);probe.position.set(...view.pos);probe.lookAt(...view.look);probe.updateMatrixWorld();
+          lightBudget.sync(probe,0,{snap:true});
           revealWorld.visible=true;renderer.setRenderTarget(target);
           renderer.render(scene,probe);
           renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;
@@ -1129,7 +1130,7 @@
         node.children.forEach(freezeScenery);
       }
       freezeScenery(revealWorld);
-      revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';
+      revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';let pointLights=0;scene.traverse(node=>{if(node.isPointLight)pointLights++;});root.dataset.shaderPointLights=String(pointLights);
       renderer.shadowMap.needsUpdate=true;lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();applyQuality();journeyLoop?.wake();
     }
     let energyTime=0,scrollEnergy=0,lastProgress=0,charge=0,portalLip,energyParticles,energyTrails;
@@ -1594,6 +1595,7 @@
       if((changed&&now-lastLabelUpdate>=66)||modeChanged||lastVisualProgress<0){updateLabels();lastLabelUpdate=now;}
       if(changed||modeChanged||lastVisualProgress<0)updatePageStops();
       if(revealReady&&effectDelta!==null)destinationGrass?.update(p,energyTime,effectDelta,machineRunning);
+      if(effectDelta!==null)lightBudget.sync(camera,effectDelta,{enabled:p>.27});
       const veil=String(guideState.motionVeil||0);if(motionVeil.style.opacity!==veil)motionVeil.style.opacity=veil;
       renderer.render(scene,camera);lastVisualProgress=p;
       if(root.dataset.firstFrame!=='true'){root.dataset.firstFrame='true';root.dataset.firstFrameMs=performance.now().toFixed(0);}
