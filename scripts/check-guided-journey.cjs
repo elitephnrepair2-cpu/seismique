@@ -47,8 +47,24 @@ console.log('PASS: faster intro independent of original destination pace, calm r
 
 g=make();g.tick(1/60,{sceneReady:false});assert(g.state().progress>0,'Automatic camera movement starts on the first active frame, before jungle readiness');
 run(g,.5,{sceneReady:false});assert(g.state().progress>.01,'The opening must visibly progress within half a second');
-run(g,20,{sceneReady:false});assert(Math.abs(g.state().progress-.17)<1e-8,'Slow loading eases into the safe portal checkpoint');
-const checkpoint=g.state().progress;g.tick(1/60,{sceneReady:true});assert(g.state().progress>checkpoint&&g.state().progress-checkpoint<.00005,'Ready handoff accelerates gently rather than jumping back into motion');run(g,8);assert.equal(g.state().index,0);
+run(g,20,{sceneReady:false});assert(g.state().progress<=.26&&g.state().progress>.25,'Unusually slow loading approaches the safe lobby-side limit');
+const checkpoint=g.state().progress;g.tick(1/60,{sceneReady:true});assert(g.state().progress>checkpoint&&g.state().progress-checkpoint<.0002,'A delayed-ready handoff resumes without a position jump');run(g,8);assert.equal(g.state().index,0);
 assert(html.includes('introPlaying:(machineRunning||reducedMotion)&&entrancePrepared'),'Entrance shader preparation must gate cinematic movement');
 assert(html.includes('if(renderer.getPixelRatio()!==quality.ratio)'),'An unchanged quality setting must not clear the opening canvas');
-console.log('PASS: smooth readiness checkpoint and restart; entrance preparation before motion; no redundant canvas resize.');
+console.log('PASS: safe loading limit and smooth handoff; entrance preparation before motion; no redundant canvas resize.');
+
+// Reproduce the phone's 3–5 second readiness window. Camera progress must
+// remain continuous through the old checkpoint and must not relaunch from rest.
+for(const readyAt of [0,3,4,5,6]){
+ g=make();let previous=0,previousStep=null;const steps=[];
+ for(let i=0;i<60*14;i++){
+  const state=g.tick(1/60,{sceneReady:i/60>=readyAt});const step=state.progress-previous;
+  assert(step>=-1e-12,'The opening must never move backward');
+  if(i>=120&&i<=330&&state.mode==='intro')steps.push(step);
+  if(i===readyAt*60&&readyAt>=3&&previousStep>.00001)assert(step/previousStep<1.25,'Readiness must not abruptly multiply the camera speed');
+  previous=state.progress;previousStep=step;
+ }
+ assert(Math.min(...steps)>.00002,'No stopped camera frames in the observed phone loading window');
+ assert.equal(g.state().index,0);assert.equal(g.state().mode,'idle');
+}
+console.log('PASS: continuous opening through 3–6 second readiness delays; no stopped checkpoint, backward movement or abrupt speed restart.');
