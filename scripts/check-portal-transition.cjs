@@ -20,3 +20,20 @@ for(const [w,h] of [[320,568],[390,844],[430,932],[844,390],[1280,720]]){
  assert(checked>10&&p>=.68,'The crossing must complete on every screen shape');
 }
 console.log('PASS: continuous portal exit position and speed, no transition dead zone, and monotonic travel at five screen sizes.');
+// Small acceleration discontinuities feel like nudges even when position/speed
+// match. Check both sides of every approach knot, including the jungle join.
+for(const aspect of [320/568,390/844,430/932,844/390,1280/720]){
+ const ctx={T,camera:{aspect},arrivalCameraZ:14.8,arrivalEyeY:5.35,ease:t=>t*t*(3-2*t),lerp:(a,b,t)=>a+(b-a)*t};vm.createContext(ctx);vm.runInContext(route+path,ctx);
+ const z=p=>ctx.pose(p).pos[2],h=1e-6;
+ for(const knot of [.17,.26,.33,.4,.5,.58]){
+  const left=(z(knot)-2*z(knot-h)+z(knot-2*h))/(h*h),right=(z(knot+2*h)-2*z(knot+h)+z(knot))/(h*h);
+  assert(Math.abs(left-right)<3,`Acceleration must remain continuous at ${knot}: ${left} versus ${right}`);
+ }
+ let previous=z(0);for(let i=1;i<=5800;i++){const current=z(i/10000);assert(current<=previous+1e-10,'The softened launch must never drift backward');previous=current;}
+ for(const channel of ['pos','look'])for(const knot of [.27,.41,.42,.58]){
+  const y=p=>ctx.pose(p)[channel][1],left=(y(knot)-2*y(knot-h)+y(knot-2*h))/(h*h),right=(y(knot+2*h)-2*y(knot+h)+y(knot))/(h*h);
+  assert(Math.abs(left-right)<1,'Height and pitch easing must not introduce acceleration nudges');
+ }
+ for(const [p,expected] of [[0,14.8],[.17,14],[.26,8.8],[.33,1.8],[.4,-3],[.5,-9.4],[.58,-15]])assert(Math.abs(z(p)-expected)<1e-9,'Camera landmarks stay in their original positions');
+}
+console.log('PASS: matching acceleration at all six approach joins; unchanged landmarks, monotonic launch and original jungle-entry speed.');

@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const T=require('../dist/assets/three.min.js');
 const html=require('./read-journey-source.cjs')();
 const route=html.slice(html.indexOf('    const jungleStretch='),html.indexOf('    function sidePathOpening'));
-const pose=html.slice(html.indexOf('    function pose(v)'),html.indexOf('    // Pause wheel/touch'));
+const pose=html.slice(html.indexOf('    function exitCameraZ()'),html.indexOf('    function approachAcceleration('))+html.slice(html.indexOf('    function pose(v)'),html.indexOf('    // Pause wheel/touch'));
 const solve=html.slice(html.indexOf('    let cachedStopAspect='),html.indexOf('    const guide='));
 for(const [w,h] of [[320,568],[390,844],[430,932],[844,390],[1280,720]]){
  const camera=new T.PerspectiveCamera(74,w/h,.1,180);

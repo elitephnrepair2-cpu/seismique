@@ -1508,29 +1508,47 @@
     const ease=t=>t*t*(3-2*t),lerp=(a,b,t)=>a+(b-a)*t;
     // The first scroll opens the membrane before forward travel gains speed.
     const approachKeys=[[0,arrivalCameraZ,0],[.17,arrivalCameraZ-.8,-12],[.26,8.8,-100],[.33,1.8,-85],[.40,-3.0,-62],[.50,-9.4,-56],[.58,-15.0,-56]];
+    function exitCameraZ(){
+      const distance=Math.max(8.8,3.0/(Math.tan(37*Math.PI/180)*camera.aspect*.80));
+      return endingZ+Math.min(13.5,distance);
+    }
+    function approachAcceleration(index){
+      if(index===1){
+        const a=approachKeys[0],b=approachKeys[1],h=b[0]-a[0];
+        // Keep the gentle launch monotonic while matching both sides of the join.
+        return Math.min(0,20*(a[1]-b[1]+2*h*b[2]/5)/(h*h));
+      }
+      if(index===approachKeys.length-1){
+        const span=-15-exitCameraZ(),join=.24,entry=.42*56/span,slope=6*join*(1-join);
+        return -span*(-4*join*entry+6*ease(join)-2*join*slope)/(join*join*.42*.42);
+      }
+      return 0;
+    }
     function approachZ(v){
       for(let i=1;i<approachKeys.length;i++)if(v<=approachKeys[i][0]){
-        const a=approachKeys[i-1],b=approachKeys[i],h=b[0]-a[0],t=(v-a[0])/h,t2=t*t,t3=t2*t;
-        return (2*t3-3*t2+1)*a[1]+(t3-2*t2+t)*h*a[2]+(-2*t3+3*t2)*b[1]+(t3-t2)*h*b[2];
+        const a=approachKeys[i-1],b=approachKeys[i],h=b[0]-a[0],t=(v-a[0])/h,u=1-t;
+        // Quintic controls match position, speed AND acceleration at every join.
+        const p0=a[1],p1=p0+h*a[2]/5,p2=p0+2*h*a[2]/5+h*h*approachAcceleration(i-1)/20;
+        const p5=b[1],p4=p5-h*b[2]/5,p3=p5-2*h*b[2]/5+h*h*approachAcceleration(i)/20;
+        return p0*u**5+5*p1*u**4*t+10*p2*u**3*t*t+10*p3*u*u*t**3+5*p4*u*t**4+p5*t**5;
       }
       return -15.0;
     }
     function pose(v){
       if(v<=.58){
-        const yy=lerp(arrivalEyeY,3.05,ease(Math.min(1,v/.27)))-.35*T.MathUtils.smoothstep(v,.41,.58),zz=approachZ(v);
-        return{pos:[0,yy,zz],look:[0,yy+.16*T.MathUtils.smoothstep(v,.42,.58),-32]};
+        const yy=lerp(arrivalEyeY,3.05,T.MathUtils.smootherstep(v,0,.27))-.35*T.MathUtils.smootherstep(v,.41,.58),zz=approachZ(v);
+        return{pos:[0,yy,zz],look:[0,yy+.16*T.MathUtils.smootherstep(v,.42,.58),-32]};
       }
       const t=(v-.58)/.42;
       const settle=T.MathUtils.smoothstep(v,.91,1);
       // Leave a short clearing beyond the final destination, with room for the invitation.
-      const distance=Math.max(8.8,3.0/(Math.tan(37*Math.PI/180)*camera.aspect*.80));
-      const endCameraZ=endingZ+Math.min(13.5,distance);
+      const endCameraZ=exitCameraZ();
       // Carry the portal's exit velocity into the jungle, then rejoin its existing path.
       // Both curves meet at the same position and tangent; neither restarts from rest.
       const join=.24,u=Math.min(1,t/join),u2=u*u,u3=u2*u;
       const entrySlope=.42*56/(-15-endCameraZ),joinSlope=6*join*(1-join);
       const travel=t<join?(u3-2*u2+u)*join*entrySlope+(-2*u3+3*u2)*ease(join)+(u3-u2)*join*joinSlope:ease(t);
-      const z=lerp(-15,endCameraZ,travel),gaze=ease(Math.min(1,t/.16)),endX=junglePathX(endingZ);
+      const z=lerp(-15,endCameraZ,travel),gaze=T.MathUtils.smootherstep(t,0,.16),endX=junglePathX(endingZ);
       return{pos:[lerp(junglePathX(z),endX,settle),2.70,z],look:[lerp(junglePathX(z-6)*gaze,endX,settle),lerp(2.86,3.48,settle),lerp(lerp(-32,z-7,gaze),endingZ,settle)]};
     }
     // Pause wheel/touch travel at the next readable stop within each gesture.
@@ -1701,7 +1719,7 @@
       if(changed){
         const arrivalVisibility=1-T.MathUtils.smoothstep(p,.005,.075);
         arrivalShade.style.opacity=String(arrivalVisibility);
-        const pull=reducedMotion?0:T.MathUtils.smoothstep(p,.22,.33)*(1-T.MathUtils.smoothstep(p,.46,.54));
+        const pull=reducedMotion?0:T.MathUtils.smootherstep(p,.22,.33)*(1-T.MathUtils.smootherstep(p,.46,.54));
         const crossing=reducedMotion?0:T.MathUtils.smoothstep(p,.34,.36)*(1-T.MathUtils.smoothstep(p,.373,.405));
         thresholdWash.style.opacity=String(crossing*.65);
         const lens=74+pull*3;if(Math.abs(camera.fov-lens)>.01){camera.fov=lens;camera.updateProjectionMatrix();}
