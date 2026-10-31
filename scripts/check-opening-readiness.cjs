@@ -7,7 +7,7 @@ let ratio=1.5,resizes=0;const ctx={quality:{ratio:1.5,density:.65},renderer:{get
 ctx.applyQuality();ctx.applyQuality();assert.equal(resizes,0,'Finishing preparation at unchanged quality must not clear the canvas');ctx.quality.ratio=1.6;ctx.applyQuality();assert.equal(resizes,1);
 const queueSource=source.slice(source.indexOf('    function queuePreparation(){'),source.indexOf('    function* prepareResources(){'));
 let clock=0,calls=0;const jobs=[];
-const work={profileFrames:true,preparationHandle:null,document:{hidden:false},root:{dataset:{}},performance:{now:()=>clock},preparation:{next(){calls++;clock+=4;return {done:false};}},window:{requestIdleCallback:true},requestIdleCallback(fn){jobs.push(fn);return jobs.length;},finishPreparation(){}};
+const work={maxPrepSlice:0,profileFrames:true,preparationHandle:null,document:{hidden:false},root:{dataset:{}},performance:{now:()=>clock},preparation:{next(){calls++;clock+=4;return {done:false};}},window:{requestIdleCallback:true},requestIdleCallback(fn){jobs.push(fn);return jobs.length;},finishPreparation(){}};
 vm.createContext(work);vm.runInContext(queueSource,work);work.queuePreparation();jobs.shift()({timeRemaining:()=>10});assert.equal(calls,1,'A build step over the time budget must yield back to the browser');assert.equal(jobs.length,1);assert.equal(work.root.dataset.prepMaxSliceMs,'4.00');
 work.root.dataset.menuOpen='true';jobs.shift()({timeRemaining:()=>10});assert.equal(calls,1,'Opening preparation rests behind navigation');
 console.log('PASS: entrance shaders before animation; unchanged-quality canvas protection; bounded preparation slices; overlay suspension.');
@@ -20,3 +20,7 @@ const iterator=branchCtx.organicBranch([[0,0,0],[.1,2,0],[.4,5,-.2]],1.1,.035,ma
 do{step=iterator.next();if(!step.done){yields++;assert.equal(parent.children.length,0,'Part-built sculpted trunks remain outside the scene');}}while(!step.done);
 assert(yields>=10,'Detailed bark construction yields between small row groups');assert.equal(parent.children.length,1);assert.equal(step.value.branch.material,material);assert([...step.value.branch.geometry.attributes.normal.array].every(Number.isFinite));
 console.log('PASS: detailed trunk construction yields cooperatively and commits a complete mesh with finite normals.');
+
+clock=0;calls=0;work.root.dataset.menuOpen='false';work.preparation={next(){calls++;clock+=.1;return {done:false};}};work.queuePreparation();jobs.shift()({didTimeout:false,timeRemaining:()=>Math.max(0,2-clock)});assert(calls>=10,'A two-millisecond idle window must process several tiny jobs, not one');assert(clock<2.1,'Preparation must still return before the idle window is exhausted');
+jobs.length=0;work.preparationHandle=null;clock=0;calls=0;work.queuePreparation();jobs.shift()({didTimeout:true,timeRemaining:()=>0});assert(calls>=10&&clock<1.7,'Timed-out idle work makes bounded progress instead of starving');
+console.log('PASS: narrow idle windows batch tiny build steps; timeout progress stays within its bounded budget.');

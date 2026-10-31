@@ -5,6 +5,7 @@
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
     if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
+    const skyMaps=window.preloadJungleSky(T);
     const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const performanceBudget=window.createJourneyPerformance({compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
@@ -1071,27 +1072,28 @@
       // Paint the entrance first; construct the next world in bounded idle slices.
       requestAnimationFrame(()=>requestAnimationFrame(()=>prepareJungle()));
     }
-    let preparation=null,preparationHandle=null,preparing=false;
+    let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0;
     function queuePreparation(){
       if(preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
       const task=deadline=>{
         preparationHandle=null;
         if(document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
-        const start=performance.now();let done=false;
+        const start=performance.now(),budget=deadline?.didTimeout?1.5:3;let done=false;
         do{
           const sliceStart=performance.now();done=preparation.next().done;
-          root.dataset.prepMaxSliceMs=Math.max(Number(root.dataset.prepMaxSliceMs||0),performance.now()-sliceStart).toFixed(2);
-        }while(!done&&performance.now()-start<3&&(!deadline||deadline.timeRemaining()>3));
+          const sliceMs=performance.now()-sliceStart;
+          if(profileFrames&&sliceMs>maxPrepSlice){maxPrepSlice=sliceMs;root.dataset.prepMaxSliceMs=sliceMs.toFixed(2);}
+        }while(!done&&performance.now()-start<budget&&(!deadline||deadline.didTimeout||deadline.timeRemaining()>.25));
         if(done){preparation=null;finishPreparation();}else queuePreparation();
       };
-      preparationHandle=window.requestIdleCallback?requestIdleCallback(task,{timeout:100}):setTimeout(()=>task(null),16);
+      preparationHandle=window.requestIdleCallback?requestIdleCallback(task,{timeout:32}):setTimeout(()=>task(null),16);
     }
     function* prepareResources(){
       yield* buildRevealWorld();
       const batching=yield* window.batchStaticScenery(T,revealWorld,new Set([...hangingPods.map(pod=>pod.pivot),revealWorld.getObjectByName('Alien Grass destination accents')]));
       root.dataset.sceneryDraws=String(batching.after)+'/'+String(batching.before);
       journeyAtmosphere=window.createJourneyAtmosphere({THREE:T,scene,machine,revealWorld,apertureY,mouthZ,portalDepth,vortexRadius,softMap,reducedMotion,mapJungleZ:jungleZ,light:jungleLight(0x32b9a2,0,11)});yield;
-      jungleSky=window.createJungleSky({THREE:T,scene,reducedMotion,pixelRatio:quality.ratio});yield;
+      jungleSky=window.createJungleSky({THREE:T,scene,reducedMotion,pixelRatio:quality.ratio,mapsReady:skyMaps});yield;
       // Upload each small procedural map before the first jungle frame needs it.
       const textures=new Set();scene.traverse(object=>{for(const material of (Array.isArray(object.material)?object.material:[object.material])){
         if(!material)continue;
@@ -1109,7 +1111,7 @@
         // A tiny offscreen draw uploads geometry as well as compiling shaders.
         // The visible camera and canvas are never changed by this preparation.
         for(const progress of [.58,...stopProgress(),1]){
-          await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:200}):setTimeout(resolve,16));
+          await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:32}):setTimeout(resolve,16));
           while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'){
             await new Promise(resolve=>setTimeout(resolve,200));
           }
@@ -1127,7 +1129,7 @@
     async function finishPreparation(){
       root.dataset.scenePreparation='compiling';
       // compileAsync uses parallel shader compilation where the GPU supports it.
-      await jungleSky?.prepare(renderer);root.dataset.skyMode='cached';
+      root.dataset.skyMode=await jungleSky?.prepare(renderer)||'cached';
       await renderer.compileAsync(scene,camera);
       await warmJungleBuffers();
       const dynamicRoots=new Set(hangingPods.map(pod=>pod.pivot));

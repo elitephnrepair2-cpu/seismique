@@ -16,3 +16,14 @@ async function verifyBake(fail=false){
  assert.equal(target,'visible','Baking never leaves the visible renderer pointed at a texture');assert(targets.every(t=>t.width===1024&&t.height===512));
 }
 (async()=>{await verifyBake();await verifyBake(true);console.log('PASS: sharper protected mobile resolution; antialiasing; small cacheable first document; two one-time nebula bakes; live stars preserved; render state restored.');})().catch(e=>{console.error(e);process.exitCode=1;});
+async function verifyPrebuilt(){
+ const context={window:{},setTimeout};vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../dist/assets/jungle-sky.js'),'utf8'),context);
+ const maps=[new T.Texture(),new T.Texture()];maps.forEach(map=>map.colorSpace=T.SRGBColorSpace);
+ const world=new T.Scene(),sky=context.window.createJungleSky({THREE:T,scene:world,reducedMotion:false,pixelRatio:1.5,mapsReady:Promise.resolve(maps)});
+ const mode=await sky.prepare({getRenderTarget(){throw Error('A prebuilt sky must not allocate or render bake targets');}});assert.equal(mode,'prebuilt');assert.equal(await sky.prepare({}),'prebuilt');assert.equal(world.children[0].children[0].material.uniforms.uCanopy.value,maps[0]);
+ let requests=0;const Loader=class{loadAsync(url){requests++;assert(url.endsWith('.webp'));return Promise.resolve(new T.Texture());}};
+ const first=context.window.preloadJungleSky({TextureLoader:Loader,SRGBColorSpace:T.SRGBColorSpace,RepeatWrapping:T.RepeatWrapping,LinearFilter:T.LinearFilter});assert.equal(context.window.preloadJungleSky({}),first);const loaded=await first;assert(loaded.every(t=>!t.generateMipmaps&&t.minFilter===T.LinearFilter),'Longitude wrapping must not generate a mipmap seam');assert.equal(requests,2,'Each cached map downloads once per page');
+ const bytes=['canopy','horizon'].map(name=>fs.readFileSync(path.join(__dirname,'../dist/assets/nebula-'+name+'-v1.webp')));assert(bytes.every(buffer=>buffer.toString('ascii',0,4)==='RIFF'&&buffer.toString('ascii',8,12)==='WEBP'));assert(bytes.reduce((n,b)=>n+b.length,0)<32768,'The galaxy assets must remain small enough to overlap startup');
+ console.log('PASS: prebuilt sky bypasses all GPU baking; idempotent preparation; shared downloads; valid WebP maps under 32 KB total.');
+}
+verifyPrebuilt().catch(error=>{console.error(error);process.exitCode=1;});

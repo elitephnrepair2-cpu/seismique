@@ -48,3 +48,19 @@ Background work is split more finely: smaller texture row groups, separate roots
 ## Correction: opening felt too slow to start
 
 Removed the stationary charge-up interval after physical-phone feedback. The camera now starts a gentle approach on its first active frame, independent of jungle readiness. It reaches an eased safe checkpoint at progress 0.17 over three seconds, and only waits there if preparation actually remains unfinished. A warm load does not wait for a fixed timer before moving. Entrance shader preparation, cooperative construction, protected sharpness, and destination timings are retained. Tests require positive first-frame progress and visible progress within half a second, including when the jungle is not ready.
+
+## Loading throughput correction
+
+The preparation scheduler's three-millisecond minimum remaining-idle-time threshold could drain just one tiny yielded job per frame, even when a narrower idle window could fit several. The scheduler now uses the available window down to a quarter millisecond while retaining a three-millisecond work budget, with a smaller 1.5 ms cap for timed-out idle callbacks. Timeout progress is bounded instead of starved; the scheduling timeout is 32 ms instead of 100 ms. Profiling metadata is updated only when a new maximum slice is observed.
+
+Galaxy maps are now prebuilt authoring assets (1024×512 WebP each, 26,734 bytes combined). They download alongside entrance construction and are cached by versioned filename on Vercel. The normal path bypasses both device-side galaxy bake passes and their shader compilation; the previous GPU bake remains a fallback if the assets fail. Linear filtering without mipmaps avoids an equirectangular longitude seam. Live stars/meteors, mobile resolution, antialiasing, lighting count and geometry remain unchanged.
+
+Authoring rebuild: run `node scripts/build-nebula-assets.cjs`, then `python3 scripts/encode-nebula-assets.py` using Python with Pillow. Intermediate PNGs go to the operating-system temporary directory; no authoring dependency is loaded by visitors.
+
+Local Chrome comparison at 414×896 CSS pixels, actual DPR 1, cached localhost reloads:
+- Current baseline scene/GPU readiness: 8,952 ms.
+- Prebuilt maps alone, before the scheduling correction: 8,655 ms.
+- Prebuilt maps plus scheduler correction: 3,159 ms; first 3D frame 327 ms.
+- No console graphics errors; prebuilt sky path confirmed visually and in diagnostics.
+
+This is a local paired engineering check, not a statistically controlled physical-iPhone or cellular benchmark. It isolates a meaningful scheduler bottleneck but does not promise those exact visitor timings.
