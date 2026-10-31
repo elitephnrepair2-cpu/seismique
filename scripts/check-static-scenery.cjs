@@ -29,3 +29,12 @@ const localBatch=batchStaticScenery(T,located);while(!localBatch.next().done){}
 assert.equal(located.children.length,2,'Geometry-space locations must remain in separate spatial batches');
 assert(located.children.every(m=>m.geometry.boundingBox.max.z-m.geometry.boundingBox.min.z<5));
 console.log('PASS: world-coordinate trunk geometry groups by actual location, preserving local culling.');
+// Count expensive operations per yielded step, rather than relying on a fast
+// development computer's timing to stand in for an older phone.
+const sliced=new T.Group(),curve=new T.CatmullRomCurve3([new T.Vector3(),new T.Vector3(.2,2,0),new T.Vector3(.4,5,.1)]);
+for(let i=0;i<24;i++){const mesh=new T.Mesh(new T.TubeGeometry(curve,48,.3,32),material);mesh.position.x=i*.1;sliced.add(mesh);}
+const apply=T.BufferGeometry.prototype.applyMatrix4,get=T.BufferAttribute.prototype.getX;let copies=0,indexReads=0,maxCopies=0,maxIndices=0,steps=0;
+T.BufferGeometry.prototype.applyMatrix4=function(...args){copies++;return apply.apply(this,args);};T.BufferAttribute.prototype.getX=function(i){if(this.itemSize===1)indexReads++;return get.call(this,i);};
+try{const iterator=batchStaticScenery(T,sliced);let step;do{copies=indexReads=0;step=iterator.next();maxCopies=Math.max(maxCopies,copies);maxIndices=Math.max(maxIndices,indexReads);steps++;}while(!step.done);}finally{T.BufferGeometry.prototype.applyMatrix4=apply;T.BufferAttribute.prototype.getX=get;}
+assert(maxCopies<=1,'No cooperative step may transform a whole geometry batch');assert(maxIndices<=4096,'Index remapping must yield in small bounded runs');assert(steps>100,'A large geometry merge must provide enough opportunities for animation to draw');
+console.log(`PASS: large merges yield ${steps} times; at most ${maxCopies} geometry transform and ${maxIndices} index reads per step.`);

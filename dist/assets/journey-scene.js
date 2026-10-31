@@ -146,7 +146,7 @@
         phase:revealRandom(k+seed*13+83)*Math.PI*2
       }));
       for(let i=0;i<=segments;i++){
-        if(sculpted&&i%4===0)yield;
+        if(sculpted&&i%(quality.compact?2:4)===0)yield;
         const u=i/segments,center=curve.getPointAt(u),knot=sculpted?1+.21*Math.exp(-Math.pow((u-.27)/.085,2))+.12*Math.exp(-Math.pow((u-.64)/.07,2)):1;
         const radius=T.MathUtils.lerp(r0,r1,Math.pow(u,.84))*knot*(1+.04*Math.sin(u*28+seed));
         for(let j=0;j<=radial;j++){
@@ -193,7 +193,7 @@
       const barkSize=256,barkCanvas=document.createElement('canvas'),barkColorCanvas=document.createElement('canvas');
       barkCanvas.width=barkCanvas.height=barkColorCanvas.width=barkColorCanvas.height=barkSize;
       const bc=barkCanvas.getContext('2d'),cc=barkColorCanvas.getContext('2d'),bp=bc.createImageData(barkSize,barkSize),cp=cc.createImageData(barkSize,barkSize);
-      for(let y=0;y<barkSize;y++){if(y%4===0)yield;for(let x=0;x<barkSize;x++){
+      for(let y=0;y<barkSize;y++){if(y%(quality.compact?2:4)===0)yield;for(let x=0;x<barkSize;x++){
         const pores=surfaceNoise(x/4,y/4,64,407),rough=surfaceNoise(x/16,y/16,16,211),mottle=surfaceNoise(x/64,y/64,4,819),k=(x+y*barkSize)*4;
         const height=.43+rough*.19+pores*.10,shade=.94+mottle*.06;
         bp.data[k]=bp.data[k+1]=bp.data[k+2]=height*255;bp.data[k+3]=255;
@@ -210,7 +210,7 @@
       const stemMaterial=new T.MeshStandardMaterial({color:0xb13a74,emissive:0x3d0926,emissiveIntensity:.35,roughness:.43});
       const stoneCanvas=document.createElement('canvas');stoneCanvas.width=stoneCanvas.height=128;
       const stoneContext=stoneCanvas.getContext('2d'),stonePixels=stoneContext.createImageData(128,128);
-      for(let y=0;y<128;y++){if(y%4===0)yield;for(let x=0;x<128;x++){
+      for(let y=0;y<128;y++){if(y%(quality.compact?2:4)===0)yield;for(let x=0;x<128;x++){
         const grain=.58*surfaceNoise(x/8,y/8,16,170)+.27*surfaceNoise(x/2,y/2,64,361)+.15*surfaceNoise(x/32,y/32,4,542),k=(y*128+x)*4;
         stonePixels.data[k]=stonePixels.data[k+1]=stonePixels.data[k+2]=grain*255;stonePixels.data[k+3]=255;
       }
@@ -236,7 +236,7 @@
       // Mottled teal floor, like the painted surface in the supplied Eden video.
       const floorCanvas=document.createElement('canvas');floorCanvas.width=floorCanvas.height=256;
       const fc=floorCanvas.getContext('2d'),pixels=fc.createImageData(256,256);
-      for(let y=0;y<256;y++){if(y%4===0)yield;for(let x=0;x<256;x++){
+      for(let y=0;y<256;y++){if(y%(quality.compact?2:4)===0)yield;for(let x=0;x<256;x++){
         const n=.52*surfaceNoise(x/64,y/64,4,8)+.27*surfaceNoise(x/16,y/16,16,72)+.15*surfaceNoise(x/4,y/4,64,201)+.06*revealRandom(x+y*256),k=(y*256+x)*4;
         pixels.data[k]=20+n*15;pixels.data[k+1]=56+n*27;pixels.data[k+2]=59+n*25;pixels.data[k+3]=255;
       }

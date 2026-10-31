@@ -3,8 +3,10 @@
   function* batchStaticScenery(T,parent,excluded=new Set()){
     parent.updateWorldMatrix(true,true);
     const inverse=parent.matrixWorld.clone().invert(),groups=new Map(),instances=[];
-    function visit(node){
+    let visited=0;
+    function* visit(node){
       if(excluded.has(node)||(node!==parent&&!node.visible))return;
+      if(++visited%12===0)yield;
       const g=node.geometry,m=node.material;
       if(node.isInstancedMesh&&node.count>=64&&!node.morphTexture)instances.push(node);
       if(node.isMesh&&node.children.length===0&&!node.isInstancedMesh&&!node.isSkinnedMesh&&m&&!Array.isArray(m)&&!m.transparent&&g?.attributes.position&&g.drawRange.start===0&&g.drawRange.count===Infinity&&!Object.keys(g.morphAttributes).length){
@@ -21,9 +23,9 @@
           }
         }
       }
-      node.children.forEach(visit);
+      for(const child of node.children)yield* visit(child);
     }
-    visit(parent);
+    yield* visit(parent);
     // Split whole-jungle instance buffers into local clusters. Frustum culling
     // can then reject plants behind the visitor instead of drawing every plant.
     for(const node of instances){
@@ -32,12 +34,13 @@
         node.getMatrixAt(i,matrix);matrix.premultiply(relative);
         const z=new T.Vector3().setFromMatrixPosition(matrix).z,key=Math.floor(z/8);
         if(!cells.has(key))cells.set(key,[]);cells.get(key).push({matrix:matrix.clone(),index:i});
+        if(i%64===63)yield;
       }
       if(cells.size<2)continue;
       for(const cell of cells.values()){
         const cluster=new T.InstancedMesh(node.geometry,node.material,cell.length);
         cluster.name='Local foliage cluster';cluster.castShadow=node.castShadow;cluster.receiveShadow=node.receiveShadow;cluster.renderOrder=node.renderOrder;
-        cell.forEach(({matrix,index},i)=>{cluster.setMatrixAt(i,matrix);if(node.instanceColor){const color=new T.Color();node.getColorAt(index,color);cluster.setColorAt(i,color);}});
+        for(let i=0;i<cell.length;i++){const {matrix,index}=cell[i];cluster.setMatrixAt(i,matrix);if(node.instanceColor){const color=new T.Color();node.getColorAt(index,color);cluster.setColorAt(i,color);}if(i%64===63)yield;}
         cluster.computeBoundingSphere();parent.add(cluster);yield;
       }
       node.removeFromParent();
@@ -47,28 +50,29 @@
       if(list.length<2)continue;
       // Bound allocations and idle work per chunk on phones.
       let chunk=[],vertices=0;
-      function combine(){
+      function* combine(){
         if(chunk.length<2)return;
-        const first=chunk[0].node,names=Object.keys(first.geometry.attributes),copies=chunk.map(({node,relative})=>node.geometry.clone().applyMatrix4(relative));
+        const first=chunk[0].node,names=Object.keys(first.geometry.attributes),copies=[];
+        for(const {node,relative} of chunk){copies.push(node.geometry.clone().applyMatrix4(relative));yield;}
         const merged=new T.BufferGeometry();
         for(const name of names){
           const sample=copies[0].attributes[name],array=new sample.array.constructor(copies.reduce((sum,g)=>sum+g.attributes[name].array.length,0));
           let offset=0;for(const g of copies){array.set(g.attributes[name].array,offset);offset+=g.attributes[name].array.length;}
-          merged.setAttribute(name,new T.BufferAttribute(array,sample.itemSize,sample.normalized));
+          merged.setAttribute(name,new T.BufferAttribute(array,sample.itemSize,sample.normalized));yield;
         }
         const indices=new Uint32Array(copies.reduce((sum,g)=>sum+(g.index?.count||g.attributes.position.count),0));
         let cursor=0,base=0;
-        for(const g of copies){const count=g.index?.count||g.attributes.position.count;for(let i=0;i<count;i++)indices[cursor++]=base+(g.index?g.index.getX(i):i);base+=g.attributes.position.count;}
-        merged.setIndex(new T.BufferAttribute(indices,1));merged.computeBoundingBox();merged.computeBoundingSphere();
+        for(const g of copies){const count=g.index?.count||g.attributes.position.count;for(let i=0;i<count;i++){indices[cursor++]=base+(g.index?g.index.getX(i):i);if(i%2048===2047)yield;}base+=g.attributes.position.count;}
+        merged.setIndex(new T.BufferAttribute(indices,1));merged.computeBoundingBox();yield;merged.computeBoundingSphere();yield;
         const mesh=new T.Mesh(merged,first.material);mesh.name='Batched static jungle';mesh.castShadow=first.castShadow;mesh.receiveShadow=first.receiveShadow;mesh.renderOrder=first.renderOrder;mesh.frustumCulled=first.frustumCulled;parent.add(mesh);
         for(const {node} of chunk)node.removeFromParent();copies.forEach(g=>g.dispose());before+=chunk.length;after++;
       }
       for(const item of list){
         const count=item.node.geometry.attributes.position.count;
-        if(vertices+count>24000&&chunk.length){combine();yield;chunk=[];vertices=0;}
+        if(vertices+count>24000&&chunk.length){yield* combine();yield;chunk=[];vertices=0;}
         chunk.push(item);vertices+=count;
       }
-      combine();yield;
+      yield* combine();yield;
     }
     return {before,after};
   }
