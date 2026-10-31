@@ -104,6 +104,8 @@
     const jungleLight=(color,intensity,distance,priority=1)=>lightBudget.create(color,intensity,distance,priority);
     root.dataset.jungleShaderLights=String(lightBudget.physicalCount);
     const hangingPods=[],revealLights=[],revealPools=[],revealPlants=[];
+    const distantSceneryJobs=[];
+    const bulbLights=new Map();
     let revealReady=false,revealMotes,revealTime=0,revealTrees=0,destinationGrass,jungleLighting;
     const revealMoteCount=70,revealMotePositions=new Float32Array(revealMoteCount*3);
     // Increase distances between destinations without stretching trees or textures.
@@ -433,35 +435,41 @@
         }
       }
       const vineMaterial=new T.MeshStandardMaterial({color:0x216448,roughness:.84});
-      function hangingGreenery(anchor,seed,length){
+      function hangingGreenery(anchor,seed,length,parent=revealWorld,batch=trailingLeaves){
+        let index=batch===trailingLeaves?trailingIndex:0;
         const curve=new T.CatmullRomCurve3([new T.Vector3(...anchor),new T.Vector3(anchor[0]+.12,anchor[1]-length*.35,anchor[2]+.08),new T.Vector3(anchor[0]-.08,anchor[1]-length*.72,anchor[2]+.16),new T.Vector3(anchor[0]+.02,anchor[1]-length,anchor[2]+.13)]);
-        mesh(new T.TubeGeometry(curve,18,.012,5,false),vineMaterial,0,0,0,revealWorld);
+        mesh(new T.TubeGeometry(curve,18,.012,5,false),vineMaterial,0,0,0,parent);
         for(let leaf=1;leaf<=10;leaf++){
           const point=curve.getPointAt(leaf/11),a=leaf*2.399+seed;dummy.position.copy(point);dummy.rotation.set(2.25,a,.15*Math.sin(a));dummy.scale.set(.22,.26,.22);dummy.updateMatrix();
           if(!foliageFits(leafGeometry,dummy.matrix))continue;
-          trailingLeaves.setMatrixAt(trailingIndex,dummy.matrix);color.setHSL(.34+revealRandom(seed+leaf)*.12,.70,.32+revealRandom(leaf)*.10);trailingLeaves.setColorAt(trailingIndex,color);trailingIndex++;
+          batch.setMatrixAt(index,dummy.matrix);color.setHSL(.34+revealRandom(seed+leaf)*.12,.70,.32+revealRandom(leaf)*.10);batch.setColorAt(index,color);index++;
         }
+        if(batch===trailingLeaves)trailingIndex=index;else{batch.count=index;batch.computeBoundingSphere();parent.add(batch);}
       }
       plantingIslands.forEach((bed,i)=>{if(i%2===0){const p=bed.outline(bed.side<0?Math.PI:0);if(!inSidePath(p.x,p.z,.65))hangingGreenery([p.x,bed.height+.12,p.z],i,.72);}});
 
       yield;
       // Broad rooted trunks with attached, tapering branch hierarchies.
       const treeLocations=[[-4.1,-11.5,7.3],[4.8,-14,7.7],[-4.5,-19,7.5],[4.7,-21,7.4],[-4.5,-24.2,7.8],[4.1,-27,6.6],[-3.65,-27.5,7.4],[5,-36,7.8],[-4.7,-36,6.9],[3.8,-39.5,7.4],[-4.6,-43,7.6],[4.8,-46,6.9],[-5.6,-55,7.4],[5.8,-55.5,7.2],[-7.8,-27.5,7.8],[7.9,-36,8],[-7.5,-44,7.7],[7.6,-50,7.9]];
-      const crownLeaves=new T.InstancedMesh(leafGeometry,leafMaterial,treeLocations.length*3*2*12);let crownIndex=0;
       const treePodAnchors=[];let crossingBoughs=0,drapedRoots=0;
-      for(const [i,location] of treeLocations.entries()){
+      // Build the entrance canopy first. Far trees retain identical detail, but
+      // are prepared in detached groups after the opening is already ready.
+      function* buildTree(i,location){
+        const treeGroup=new T.Group();treeGroup.name='Jungle tree '+i;
+        const growBranch=(points,start,end,material,segments)=>organicBranch(points,start,end,material,segments,treeGroup);
+        const crownLeaves=new T.InstancedMesh(leafGeometry,leafMaterial,72);let crownCount=0,crownIndex=i*72;
         yield;let [baseX,z,h]=location;
         z=jungleZ(z);
         const side=baseX<0?-1:1,originalX=baseX+junglePathX(z),x=inSidePath(originalX,z,1.7)?side*8.2:originalX,mat=barkMaterials[i%4];
         const lean=-side*(.55+revealRandom(i+5)*.65),width=1.06+revealRandom(i+41)*.30;
         const spine=[[x,.12,z],[x+side*.10,.70,z+.10],[x+lean*.28,h*.28,z-.12],[x+lean*.55,h*.47,z+.17],[x+lean,h*.67,z-.13],[x+lean*1.35,h*.87,z+.25],[x+lean*1.55,h,z+.40]];
-        const trunk=yield* organicBranch(spine,width,.035,mat,56);revealTrees++;yield;
+        const trunk=yield* growBranch(spine,width,.035,mat,56);revealTrees++;yield;
         // Buttress roots enter the trunk below its surface, then flatten into the bed.
         for(let k=0;k<6;k++){yield;
           const a=k/6*Math.PI*2+i*.73,length=1.25+revealRandom(i*19+k)*.85;
           const endX=x+Math.cos(a)*length,endZ=z+Math.sin(a)*length;
           const safeX=side<0?Math.min(endX,junglePathX(endZ)-2.65):Math.max(endX,junglePathX(endZ)+2.65);
-          const root=yield* organicBranch([[x+lean*.05,1.3,z],[x+(safeX-x)*.28,.66,z+(endZ-z)*.28],[x+(safeX-x)*.67,.22,z+(endZ-z)*.67],[safeX,.055,endZ]],width*.43,.025,mat,22);
+          const root=yield* growBranch([[x+lean*.05,1.3,z],[x+(safeX-x)*.28,.66,z+(endZ-z)*.28],[x+(safeX-x)*.67,.22,z+(endZ-z)*.67],[safeX,.055,endZ]],width*.43,.025,mat,22);
           const rp=root.branch.geometry.attributes.position;
           for(let n=0;n<rp.count;n++)rp.setY(n,Math.max(.035,rp.getY(n)));
           smoothBranchNormals(root.branch.geometry);
@@ -472,17 +480,17 @@
           for(let root=0;root<2;root++){yield;
             const a=(side<0?0:Math.PI)+(root===0?-.34:.38),edge=bed.outline(a),endX=edge.x-side*.15,endZ=edge.z+.18;
             if(inSidePath(endX,endZ,.45)||Math.abs(endX-junglePathX(endZ))<2.5)continue;
-            yield* organicBranch([[x,1.85,z],[x+(edge.x-x)*.55,bed.height+.25,z+(edge.z-z)*.55],[edge.x,bed.height+.08,edge.z],[endX,.58,endZ],[endX-side*.10,.07,endZ+.16]],.29,.025,mat,28);drapedRoots++;
+            yield* growBranch([[x,1.85,z],[x+(edge.x-x)*.55,bed.height+.25,z+(edge.z-z)*.55],[edge.x,bed.height+.08,edge.z],[endX,.58,endZ],[endX-side*.10,.07,endZ+.16]],.29,.025,mat,28);drapedRoots++;
           }
         }
         // Staggered, attached boughs interlock at a lower overhead height.
         if([0,1,2,4,7,10].includes(i)){
           const base=trunk.curve.getPointAt(.56),path=junglePathX(z),ceiling=5.35+revealRandom(i+712)*.70+(i===13?1.35:0),drift=(i%2?1:-1)*1.1;
-          const arch=yield* organicBranch([base.toArray(),[path+side*2.35,ceiling-.15,z+.25],[path+side*.45,ceiling+.30,z+drift*.50],[path-side*1.55,ceiling+.08,z+drift],[path-side*3.15,ceiling-.24,z+drift*1.15]],.43,.065,mat,48);crossingBoughs++;
-          if(i%2===0)hangingGreenery(arch.curve.getPointAt(.14).toArray(),i+31,.72);
+          const arch=yield* growBranch([base.toArray(),[path+side*2.35,ceiling-.15,z+.25],[path+side*.45,ceiling+.30,z+drift*.50],[path-side*1.55,ceiling+.08,z+drift],[path-side*3.15,ceiling-.24,z+drift*1.15]],.43,.065,mat,48);crossingBoughs++;
+          if(i%2===0)hangingGreenery(arch.curve.getPointAt(.14).toArray(),i+31,.72,treeGroup,new T.InstancedMesh(leafGeometry,leafMaterial,10));
           for(let fork=0;fork<2;fork++){yield;
             const start=arch.curve.getPointAt(.43+fork*.27),sign=fork?1:-1;
-            yield* organicBranch([start.toArray(),[start.x-side*.45,start.y+.20,start.z+sign*.75],[start.x-side*1.10,start.y+.32,start.z+sign*1.65],[start.x-side*1.55,start.y+.59,start.z+sign*1.72]],.15,.016,mat,24);
+            yield* growBranch([start.toArray(),[start.x-side*.45,start.y+.20,start.z+sign*.75],[start.x-side*1.10,start.y+.32,start.z+sign*1.65],[start.x-side*1.55,start.y+.59,start.z+sign*1.72]],.15,.016,mat,24);
           }
         }
         // Unequal forks grow out of the trunk and carry smaller lateral branches.
@@ -492,22 +500,28 @@
           const reach=(limb===0?3.4+revealRandom(i+8)*.7:2+revealRandom(i+limb*9)*1.2)*(i===13?.67:1);
           const dx=Math.cos(direction),dz=Math.sin(direction),top=Math.min(h+.12,base.y+2.25+revealRandom(i+limb)*.6);
           const points=[[base.x,base.y,base.z],[base.x+dx*reach*.23,base.y+.7,base.z+dz*reach*.19],[base.x+dx*reach*.64,top-.27,base.z+dz*reach*.64],[base.x+dx*reach,top,base.z+dz*reach]];
-          const bough=yield* organicBranch(points,width*(.39-limb*.065),.022,mat,32);
-          if(limb===0){const anchor=bough.curve.getPointAt(.79);treePodAnchors.push(anchor.toArray());if(i<12)makeHangingPod(anchor.toArray(),i,stemMaterial);}
+          const bough=yield* growBranch(points,width*(.39-limb*.065),.022,mat,32);
+          if(limb===0){const anchor=bough.curve.getPointAt(.79);const record=anchor.toArray();record.index=i;treePodAnchors.push(record);if(i<12)makeHangingPod(anchor.toArray(),i,stemMaterial,treeGroup);}
           for(let fork=0;fork<2;fork++){yield;
             const start=bough.curve.getPointAt(.48+fork*.23),angle=direction+(fork===0?-.8:.72),spread=.95+revealRandom(i*11+limb*3+fork)*.75;
             const tip=[start.x+Math.cos(angle)*spread,Math.min(h-.35,start.y+.8+revealRandom(i+fork)*.4),start.z+Math.sin(angle)*spread];
-            yield* organicBranch([start.toArray(),[start.x+Math.cos(angle)*spread*.43,start.y+.46,start.z+Math.sin(angle)*spread*.42],tip],.13-fork*.035,.008,mat,18);
+            yield* growBranch([start.toArray(),[start.x+Math.cos(angle)*spread*.43,start.y+.46,start.z+Math.sin(angle)*spread*.42],tip],.13-fork*.035,.008,mat,18);
             // Sparse foliage at twig tips keeps the sculptural branch silhouette visible.
             for(let leaf=0;leaf<12;leaf++){
               const a=leaf*2.399+i+limb,scale=.38+revealRandom(crownIndex+51)*.34;
-              dummy.position.set(tip[0]+Math.cos(a)*.30,tip[1]-.08,tip[2]+Math.sin(a)*.30);dummy.rotation.set(.65+revealRandom(crownIndex)*.7,a,.25*Math.sin(a));dummy.scale.set(scale,scale,scale);dummy.updateMatrix();crownLeaves.setMatrixAt(crownIndex,dummy.matrix);
-              color.setHSL(i%7===0?.07:.35+revealRandom(i)*.10,.66,.21+revealRandom(crownIndex)*.12);crownLeaves.setColorAt(crownIndex,color);crownIndex++;
+              dummy.position.set(tip[0]+Math.cos(a)*.30,tip[1]-.08,tip[2]+Math.sin(a)*.30);dummy.rotation.set(.65+revealRandom(crownIndex)*.7,a,.25*Math.sin(a));dummy.scale.set(scale,scale,scale);dummy.updateMatrix();crownLeaves.setMatrixAt(crownCount,dummy.matrix);
+              color.setHSL(i%7===0?.07:.35+revealRandom(i)*.10,.66,.21+revealRandom(crownIndex)*.12);crownLeaves.setColorAt(crownCount,color);crownCount++;crownIndex++;
             }
           }
         }
+        crownLeaves.count=crownCount;crownLeaves.computeBoundingSphere();treeGroup.add(crownLeaves);
+        if(i%3===0&&i!==12){const anchor=treePodAnchors.find(item=>item.index===i);if(anchor)makeHangingPod([anchor[0]+.12,anchor[1]-.14,anchor[2]+.08],i+60,stemMaterial,treeGroup);}
+        return treeGroup;
       }
-      crownLeaves.count=crownIndex;revealWorld.add(crownLeaves);
+      for(const [i,location] of treeLocations.entries()){
+        if(location[1]>=-27.5){revealWorld.add(yield* buildTree(i,location));}
+        else distantSceneryJobs.push(()=>buildTree(i,location));
+      }
       yield;
       // Layered understory and high foliage hide the enclosure while keeping every path open.
       const backgroundLeaves=new T.InstancedMesh(broadGeometry,leafMaterial,1100);let backgroundCount=0;
@@ -523,13 +537,17 @@
         }
       }
       // Back-row trunks create depth behind the foreground trees instead of a black void.
-      for(let i=0;i<10;i++){yield;
+      distantSceneryJobs.push(function*(){
+        const group=new T.Group();group.name="Distant jungle backdrop";
+        for(let i=0;i<10;i++){yield;
         const side=i%2?1:-1,z=jungleZ(-29-Math.floor(i/2)*6.3),x=side*(8.6+revealRandom(i+1900));
         if(inSidePath(x,z,1.4))continue;
         const mat=barkMaterials[(i+2)%4],h=6.1+revealRandom(i+1901)*1.2;
-        const trunk=yield* organicBranch([[x,.1,z],[x-side*.25,2,z+.2],[x-side*.7,4.1,z-.3],[x-side*1.1,h,z+.3]],.67,.07,mat,30);
-        for(let k=0;k<2;k++){const base=trunk.curve.getPointAt(.55+k*.18);yield* organicBranch([base.toArray(),[base.x-side*1.1,base.y+.8,z+(k?1:-1)],[base.x-side*2.3,base.y+1.3,z+(k?2:-2)]],.26,.035,mat,22);}
+        const trunk=yield* organicBranch([[x,.1,z],[x-side*.25,2,z+.2],[x-side*.7,4.1,z-.3],[x-side*1.1,h,z+.3]],.67,.07,mat,30,group);
+        for(let k=0;k<2;k++){const base=trunk.curve.getPointAt(.55+k*.18);yield* organicBranch([base.toArray(),[base.x-side*1.1,base.y+.8,z+(k?1:-1)],[base.x-side*2.3,base.y+1.3,z+(k?2:-2)]],.26,.035,mat,22,group);}
       }
+        return group;
+      });
       yield;
       // Residual portal light settles into an open, conclusive jungle clearing.
       const endZ=endingZ,endX=junglePathX(endZ);
@@ -552,8 +570,6 @@
 
       for(const [batch,count] of [[leaves,li],[broadLeaves,broadIndex],[ferns,fernIndex],[trailingLeaves,trailingIndex]]){batch.count=count;batch.computeBoundingSphere();revealWorld.add(batch);}
       yield;
-      // Lanterns hang from actual boughs, keeping the canopy rooted in the trees.
-      treePodAnchors.forEach((anchor,i)=>{if(i%3===0&&i!==12)makeHangingPod([anchor[0]+.12,anchor[1]-.14,anchor[2]+.08],i+60,stemMaterial);});
       // Lower lantern-like pods sit above the colorful planting beds.
       for(let i=0;i<16;i++){
         const z=jungleZ(-18-i*2.25);
@@ -576,8 +592,8 @@
       destinationGrass=window.createDestinationGrass({THREE:T,parent:revealWorld,stops:jungleSidePaths,root,groundAt:plantingTop,pathX:junglePathX,softMap,reducedMotion,light:jungleLight(0x9cb3d8,0,3.6,4),compact:viewportWidth<700});
       root.revealState=()=>({trees:revealTrees,plantClusters:revealPlants.length,hangingPods:hangingPods.length,rocks:ri,broadLeaves:broadIndex,fernFronds:fernIndex,trailingLeaves:trailingIndex,plantingIslands:plantingIslands.length,crossingBoughs,drapedRoots,sidePaths:jungleSidePaths.length,signs:0,ready:revealReady,time:revealTime,camera:camera.position.toArray(),fogFar:scene.fog.far});
     }
-    function makeHangingPod(anchor,i,stemMaterial){
-      const pivot=new T.Group();pivot.position.set(...anchor);revealWorld.add(pivot);
+    function makeHangingPod(anchor,i,stemMaterial,parent=revealWorld){
+      const pivot=new T.Group();pivot.position.set(...anchor);parent.add(pivot);
       const drop=i>=90?.22:.30+revealRandom(i+3)*1.0,scale=(.38+revealRandom(i+10)*.46)*(i===40||i===41?1.16:1);
       const podColor=[0xff47cf,0xffca35,0x66f246,0x40deff,0xff7934,0xb480ff][i%6];
       const stem=organicBranch([[0,0,0],[.15,-.28,0],[.13,-drop+.1,.03],[-.12,-drop-.11,.06]],.031,.022,stemMaterial,24,pivot);while(!stem.next().done){}
@@ -594,10 +610,10 @@
       // Share each bulb's changing color with its glow and nearby surfaces.
       let bulbLight=null;
       if([0,5,10].includes(i)){
-        const intensity=18;bulbLight=jungleLight(podColor,intensity,6.5);
-        bulbLight.position.set(anchor[0]-.12,anchor[1]-drop-.45*scale,anchor[2]+.06);revealLights.push({light:bulbLight,intensity});
+        const intensity=18;bulbLight=bulbLights.get(i);bulbLight.userData.pendingGroup=parent;
+        bulbLight.position.set(anchor[0]-.12,anchor[1]-drop-.45*scale,anchor[2]+.06);
       }
-      const pool=mesh(new T.PlaneGeometry(2.0,3.3),new T.MeshBasicMaterial({map:softMap,color:podColor,transparent:true,opacity:.16,depthWrite:false,blending:T.AdditiveBlending}),anchor[0]-.12,.038,anchor[2],revealWorld);pool.rotation.x=-Math.PI/2;revealPools.push(pool);
+      const pool=mesh(new T.PlaneGeometry(2.0,3.3),new T.MeshBasicMaterial({map:softMap,color:podColor,transparent:true,opacity:.16,depthWrite:false,blending:T.AdditiveBlending}),anchor[0]-.12,.038,anchor[2],parent);pool.rotation.x=-Math.PI/2;revealPools.push(pool);
       const hsl=mat.uniforms.uColor.value.getHSL({h:0,s:0,l:0});
       hangingPods.push({pivot,pod,halo,pool,light:bulbLight,phase:i,colorOffset:hsl.h,colorPeriod:14+revealRandom(i+812)*6});
     }
@@ -607,7 +623,7 @@
       jungleLighting?.update(p,revealTime);
       ambientLight.intensity=T.MathUtils.lerp(.82,.39,arrival);sun.intensity=T.MathUtils.lerp(1.2,.10,arrival);
       scene.fog.color.setRGB(T.MathUtils.lerp(.008,.003,arrival),T.MathUtils.lerp(.006,.008,arrival),T.MathUtils.lerp(.021,.020,arrival));scene.fog.near=T.MathUtils.lerp(24,20,arrival*richness);scene.fog.far=T.MathUtils.lerp(70,49,arrival);
-      revealLights.forEach(({light,intensity})=>{const depth=T.MathUtils.smoothstep(-light.position.z,16,65);light.intensity=intensity*(.85+.15*arrival)*(1+richness*(.10+.20*depth));});
+      revealLights.forEach(({light,intensity})=>{const depth=T.MathUtils.smoothstep(-light.position.z,16,65);light.intensity=(light.userData.pendingGroup&&light.userData.pendingGroup.parent!==revealWorld?0:intensity)*(.85+.15*arrival)*(1+richness*(.10+.20*depth));});
       hangingPods.forEach(({pivot,pod,halo,pool,light,phase,colorOffset,colorPeriod})=>{
         const distance=camera.position.z-pivot.position.z;
         if(distance < -7 || distance > (quality.compact?25:38))return;
@@ -1072,23 +1088,30 @@
       // Paint the entrance first; construct the next world in bounded idle slices.
       requestAnimationFrame(()=>requestAnimationFrame(()=>prepareJungle()));
     }
-    let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0;
+    let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0,preparationWaiting=false;
     function queuePreparation(){
-      if(preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
+      if(preparationWaiting||preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
       const task=deadline=>{
         preparationHandle=null;
         if(document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
         const start=performance.now(),budget=deadline?.didTimeout?1.5:3;let done=false;
         do{
-          const sliceStart=performance.now();done=preparation.next().done;
+          const sliceStart=performance.now(),step=preparation.next();done=step.done;
+          if(step.value?.warm){
+            preparationWaiting=true;
+            warmDistantGroup(step.value.warm).then(()=>{preparationWaiting=false;queuePreparation();}).catch(error=>{preparationWaiting=false;root.dataset.distantPreparation='failed';console.error('Distant jungle preparation failed',error);});
+            return;
+          }
           const sliceMs=performance.now()-sliceStart;
           if(profileFrames&&sliceMs>maxPrepSlice){maxPrepSlice=sliceMs;root.dataset.prepMaxSliceMs=sliceMs.toFixed(2);}
         }while(!done&&performance.now()-start<budget&&(!deadline||deadline.didTimeout||deadline.timeRemaining()>.25));
-        if(done){preparation=null;finishPreparation();}else queuePreparation();
+        if(done){preparation=null;if(revealReady)finishDistantPreparation();else finishPreparation();}else queuePreparation();
       };
       preparationHandle=window.requestIdleCallback?requestIdleCallback(task,{timeout:32}):setTimeout(()=>task(null),16);
     }
     function* prepareResources(){
+      // Allocate every shader light before compilation, including future bulbs.
+      for(const i of [0,5,10]){const light=jungleLight([0xff47cf,0xffca35,0x66f246,0x40deff,0xff7934,0xb480ff][i%6],18,6.5);light.userData.pendingGroup=revealWorld;bulbLights.set(i,light);revealLights.push({light,intensity:18});}
       yield* buildRevealWorld();
       const batching=yield* window.batchStaticScenery(T,revealWorld,new Set([...hangingPods.map(pod=>pod.pivot),revealWorld.getObjectByName('Alien Grass destination accents')]));
       root.dataset.sceneryDraws=String(batching.after)+'/'+String(batching.before);
@@ -1103,23 +1126,25 @@
       for(const texture of textures){renderer.initTexture(texture);yield;}
     }
     function prepareJungle(){if(preparing)return;preparing=true;root.dataset.scenePreparation='building';preparation=prepareResources();queuePreparation();}
-    async function warmJungleBuffers(){
+    async function warmJungleBuffers(views=[.40,.58,stopProgress()[0]]){
       root.dataset.gpuPreparation='warming';
       const target=new T.WebGLRenderTarget(32,32),probe=camera.clone();
       const previousTarget=renderer.getRenderTarget(),previousVisibility=revealWorld.visible;
       try{
         // A tiny offscreen draw uploads geometry as well as compiling shaders.
         // The visible camera and canvas are never changed by this preparation.
-        for(const progress of [.58,...stopProgress(),1]){
+        for(const progress of views){
           await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:32}):setTimeout(resolve,16));
           while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'){
             await new Promise(resolve=>setTimeout(resolve,200));
           }
           const view=pose(progress);probe.position.set(...view.pos);probe.lookAt(...view.look);probe.updateMatrixWorld();
+          const lights=lightBudget.capture();
           lightBudget.sync(probe,0,{snap:true});
           revealWorld.visible=true;renderer.setRenderTarget(target);
-          renderer.render(scene,probe);
-          renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;
+          try{renderer.render(scene,probe);}finally{
+            renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;lightBudget.restore(lights);
+          }
         }
       }finally{
         renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;target.dispose();
@@ -1142,6 +1167,44 @@
       freezeScenery(revealWorld);
       revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';let pointLights=0;scene.traverse(node=>{if(node.isPointLight)pointLights++;});root.dataset.shaderPointLights=String(pointLights);
       lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();applyQuality();journeyLoop?.wake();
+      root.dataset.entranceJungleReadyMs=performance.now().toFixed(0);root.dataset.entranceTrees=String(revealTrees);
+      root.dataset.distantPreparation='building';preparation=prepareDistantScenery();queuePreparation();
+    }
+    function* prepareDistantScenery(){
+      for(const create of distantSceneryJobs){
+        const group=yield* create();
+        yield* window.batchStaticScenery(T,group,new Set(hangingPods.map(pod=>pod.pivot)));
+        // All geometry is complete before it joins the world. This work happens
+        // while the visitor is still approaching the jungle, never at a tap.
+        group.updateMatrixWorld(true);yield {warm:group};
+        const animated=new Set(hangingPods.map(pod=>pod.pivot));
+        function freeze(node){if(animated.has(node))return;node.updateMatrix();node.matrixAutoUpdate=false;node.children.forEach(freeze);}
+        freeze(group);revealWorld.add(group);root.dataset.preparedTrees=String(revealTrees);yield;
+      }
+    }
+    async function warmDistantGroup(group){
+      // Upload only this completed group in an isolated scene. Reuse the same
+      // lighting layout without changing the visible world's light selection.
+      const staging=new T.Scene();staging.fog=scene.fog;
+      for(const node of scene.children)if(node.isLight)staging.add(node.clone());
+      staging.add(group);const probe=camera.clone(),bounds=new T.Box3().setFromObject(group),center=bounds.getCenter(new T.Vector3());
+      probe.position.copy(center).add(new T.Vector3(0,0,10));probe.lookAt(center);probe.updateMatrixWorld();
+      const culling=[];group.traverse(node=>{if(node.isMesh){culling.push([node,node.frustumCulled]);node.frustumCulled=false;}});
+      const target=new T.WebGLRenderTarget(16,16);
+      try{
+        await renderer.compileAsync(staging,probe);
+        await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:32}):setTimeout(resolve,16));
+        while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true')await new Promise(resolve=>setTimeout(resolve,200));
+        const previous=renderer.getRenderTarget();
+        try{renderer.setRenderTarget(target);renderer.render(staging,probe);}finally{renderer.setRenderTarget(previous);}
+      }finally{
+        culling.forEach(([node,value])=>node.frustumCulled=value);group.removeFromParent();target.dispose();
+      }
+    }
+    async function finishDistantPreparation(){
+      await warmJungleBuffers([...stopProgress().slice(1),1]);
+      root.dataset.distantPreparation='ready';root.dataset.distantReadyMs=performance.now().toFixed(0);
+      lastVisualProgress=-1;journeyLoop?.wake();
     }
     let energyTime=0,scrollEnergy=0,lastProgress=0,charge=0,portalLip,energyParticles,energyTrails;
     let electricalField,fieldUniforms,opening=0,channelUniforms,channelEdges;
@@ -1450,17 +1513,25 @@
       return .58+.42*(lo+hi)/2;
     });};
     const guide=window.createJourneyGuide({stops:stopProgress,reducedMotion,initialProgress:root.resumeProgress});
-    let guideState=guide.state();
+    let guideState=guide.state(),pendingDestination=0;
     function atJourneyEnd(){return guideState.mode==='idle'&&guideState.index===pageStops.length;}
     // Overlay/tab visibility suspends the existing loop, preserving the in-flight transition.
     function pauseJourney(){dragY=null;root.wakeJourney?.();}
     function updateJourney(dt){
-      guideState=guide.tick(dt,{sceneReady:revealReady,introPlaying:(machineRunning||reducedMotion)&&entrancePrepared});
+      if(pendingDestination&&root.dataset.distantPreparation==='ready'&&root.dataset.visitOpen!=='true'&&root.dataset.menuOpen!=='true'){
+        const direction=pendingDestination;pendingDestination=0;requestDestination(direction);
+      }
+      const resumeReady=!Number.isFinite(root.resumeProgress)||root.resumeProgress<=stopProgress()[0]||root.dataset.distantPreparation==='ready';
+      guideState=guide.tick(dt,{sceneReady:revealReady&&resumeReady,introPlaying:(machineRunning||reducedMotion)&&entrancePrepared});
       p=guideState.progress;target=guideState.target;auto=guideState.mode==='intro';
     }
     function requestDestination(direction=1){
       if(root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return false;
       if(atJourneyEnd()&&direction>0){root.visitRoom?.open();return true;}
+      if(direction>0&&guideState.mode==='idle'&&root.dataset.distantPreparation!=='ready'){
+        pendingDestination=direction;updateLabels();root.wakeJourney?.();return true;
+      }
+      pendingDestination=0;
       const moved=guide.advance(direction);
       if(moved){guideState=guide.state();target=guideState.target;updateLabels();root.wakeJourney?.();}
       return moved;
@@ -1475,7 +1546,7 @@
       root.dataset.phase=key;
       root.dataset.journeyMode=guideState.mode;
       root.dataset.destination=guideState.mode==='idle'&&guideState.index<pageStops.length?pageStops[guideState.index].id:'';
-      root.journeyInterface?.update(p,atJourneyEnd(),guideState);
+      root.journeyInterface?.update(p,atJourneyEnd(),{...guideState,waitingForScenery:!!pendingDestination});
       const skip=root.querySelector('.explore');skip.hidden=guideState.mode!=='intro';
       skip.disabled=guideState.skipPending;
       const skipLabel=guideState.skipPending?'PREPARING JUNGLE…':'SKIP INTRO';

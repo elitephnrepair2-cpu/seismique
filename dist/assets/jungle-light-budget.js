@@ -35,7 +35,9 @@
         slot.light.intensity=snap?source.intensity:T.MathUtils.damp(slot.light.intensity,source.intensity,14,dt);
       }
     }
-    return {create,sync,physicalCount:compact?4:11};
+    function capture(){return slots.map(slot=>({source:slot.source,position:slot.light.position.clone(),color:slot.light.color.clone(),intensity:slot.light.intensity,distance:slot.light.distance,decay:slot.light.decay}));}
+    function restore(snapshot){snapshot.forEach((saved,i)=>{const slot=slots[i];slot.source=saved.source;slot.light.position.copy(saved.position);slot.light.color.copy(saved.color);slot.light.intensity=saved.intensity;slot.light.distance=saved.distance;slot.light.decay=saved.decay;});}
+    return {create,sync,capture,restore,physicalCount:compact?4:11};
   }
   scope.createJungleLightBudget=createJungleLightBudget;
   if(typeof module!=='undefined')module.exports={createJungleLightBudget};

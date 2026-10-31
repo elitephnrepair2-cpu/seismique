@@ -67,11 +67,11 @@
     finale.inert=arrival<.45;
     const browsing=state.ready&&state.mode!=='intro'&&state.index<labels.length;
     controls.hidden=!browsing;
-    next.setAttribute('aria-disabled',String(state.busy||!state.ready));
-    const label=state.busy?'MOVING…':state.index===labels.length-1?'PLAN YOUR VISIT':'NEXT: '+(labels[state.index+1]||labels[0]).toUpperCase();
+    next.setAttribute('aria-disabled',String(state.busy||state.waitingForScenery||!state.ready));
+    const label=state.waitingForScenery?'PREPARING NEXT DISCOVERY…':state.busy?'MOVING…':state.index===labels.length-1?'PLAN YOUR VISIT':'NEXT: '+(labels[state.index+1]||labels[0]).toUpperCase();
     if(nextLabel.textContent!==label)nextLabel.textContent=label;
     gesture.textContent=cueDevice.matches?'or swipe up':'or scroll';
-    gesture.hidden=state.busy;
+    gesture.hidden=state.busy||state.waitingForScenery;
     // One gesture cue, located with Next; the entrance and finale need no duplicate.
     cue.hidden=true;
     if(atEnd&&root.focusFinaleOnArrival){root.focusFinaleOnArrival=false;finale.querySelector('.finale-ticket').focus({preventScroll:true});}

@@ -7,7 +7,7 @@ let ratio=1.5,resizes=0;const ctx={quality:{ratio:1.5,density:.65},renderer:{get
 ctx.applyQuality();ctx.applyQuality();assert.equal(resizes,0,'Finishing preparation at unchanged quality must not clear the canvas');ctx.quality.ratio=1.6;ctx.applyQuality();assert.equal(resizes,1);
 const queueSource=source.slice(source.indexOf('    function queuePreparation(){'),source.indexOf('    function* prepareResources(){'));
 let clock=0,calls=0;const jobs=[];
-const work={maxPrepSlice:0,profileFrames:true,preparationHandle:null,document:{hidden:false},root:{dataset:{}},performance:{now:()=>clock},preparation:{next(){calls++;clock+=4;return {done:false};}},window:{requestIdleCallback:true},requestIdleCallback(fn){jobs.push(fn);return jobs.length;},finishPreparation(){}};
+const work={preparationWaiting:false,maxPrepSlice:0,profileFrames:true,preparationHandle:null,document:{hidden:false},root:{dataset:{}},performance:{now:()=>clock},preparation:{next(){calls++;clock+=4;return {done:false};}},window:{requestIdleCallback:true},requestIdleCallback(fn){jobs.push(fn);return jobs.length;},finishPreparation(){}};
 vm.createContext(work);vm.runInContext(queueSource,work);work.queuePreparation();jobs.shift()({timeRemaining:()=>10});assert.equal(calls,1,'A build step over the time budget must yield back to the browser');assert.equal(jobs.length,1);assert.equal(work.root.dataset.prepMaxSliceMs,'4.00');
 work.root.dataset.menuOpen='true';jobs.shift()({timeRemaining:()=>10});assert.equal(calls,1,'Opening preparation rests behind navigation');
 console.log('PASS: entrance shaders before animation; unchanged-quality canvas protection; bounded preparation slices; overlay suspension.');

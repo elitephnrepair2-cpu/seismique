@@ -15,3 +15,8 @@ assert(lights.every(l=>Number.isFinite(l.intensity)&&l.intensity>=0&&l.intensity
 budget.sync(camera,.016,{enabled:false});assert(lights.every(l=>l.intensity===0),'Jungle lights rest during the entrance');
 const desktopScene=new T.Scene(),desktop=createJungleLightBudget(T,desktopScene);for(let i=0;i<11;i++)desktop.create(0xffffff,10,12);assert.equal(desktopScene.children.length,11);desktop.sync(camera,.03);assert(desktopScene.children.every(l=>l.intensity===10));
 console.log('PASS: four stable mobile shader lights; active accent retained; nearby selection; no duplicate slots or source mutation; quiet entrance; desktop lighting preserved.');
+budget.sync(camera,.03,{snap:true});const snapshot=budget.capture(),before=lights.map(l=>({position:l.position.toArray(),color:l.color.getHex(),intensity:l.intensity,distance:l.distance}));
+camera.position.z=-70;budget.sync(camera,0,{snap:true});budget.restore(snapshot);
+assert.deepEqual(lights.map(l=>({position:l.position.toArray(),color:l.color.getHex(),intensity:l.intensity,distance:l.distance})),before,'Offscreen preparation must restore the exact visible light state');
+assert.deepEqual(budget.capture().map(s=>s.source),snapshot.map(s=>s.source),'Restore source ownership as well as light values');
+console.log('PASS: offscreen warmup restores physical light values and source ownership.');
