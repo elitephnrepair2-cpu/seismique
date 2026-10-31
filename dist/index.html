@@ -396,6 +396,19 @@ body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{display:flex;a
 body.jungle-home #seismique-jungle-reveal .jungle-page-stop small .destination-open-mark{font-size:18px;font-weight:400;line-height:1;letter-spacing:0;color:inherit}
 @media(max-height:500px){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{width:min(300px,calc(100% - 48px));min-height:0;padding:13px 20px;gap:7px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop strong{font-size:23px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{padding-top:8px;margin-top:0}}
 
+/* A visible page-opening action inside the single clickable card. */
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop{padding:22px 20px;gap:10px;transition:transform .16s ease,background 1.4s,border-color 1.2s,box-shadow 1.4s}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop .destination-summary{display:block;font:400 13px/1.45 Arial,sans-serif;color:#d5d9e5;max-width:100%}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{margin-top:6px;padding:12px 13px;min-height:48px;border:1px solid #ae82ff99;border-radius:3px 8px 3px 7px;background:linear-gradient(110deg,#600dff,#7022e8);box-shadow:0 5px 16px #600dff24;gap:10px}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop .destination-open-label{font:700 11px/1.35 Arial,sans-serif;letter-spacing:.035em;color:#fff}
+body.jungle-home #seismique-jungle-reveal .destination-next{text-align:left}
+body.jungle-home .destination-next>span:last-child{flex-shrink:0}
+@media(hover:hover) and (pointer:fine){body.jungle-home #seismique-jungle-reveal .jungle-page-stop:hover{transform:translate(-50%,calc(-50% - 3px))}body.jungle-home #seismique-jungle-reveal .jungle-page-stop:hover small{background:linear-gradient(110deg,#7224ff,#8134f1);border-color:#c7a5ff}}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop:active{transform:translate(-50%,-50%) scale(.985)}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop:focus-visible small{outline:1px solid #e9dcff;outline-offset:2px}
+@media(max-height:500px){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{padding:13px 16px;gap:6px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop .destination-summary{font-size:12px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{margin-top:4px;padding:9px 12px;min-height:44px}}
+@media(prefers-reduced-motion:reduce){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{transition:none}body.jungle-home #seismique-jungle-reveal .jungle-page-stop:hover,body.jungle-home #seismique-jungle-reveal .jungle-page-stop:active{transform:translate(-50%,-50%)}}
+
 /* Five equal destinations; the persistent ticket control remains separate. */
 #seismique-jungle-reveal .menu-panel{background:#100d16f7;border:1px solid #ffffff2b;box-shadow:0 18px 60px #0008}
 #seismique-jungle-reveal .direct-nav{display:flex;flex-direction:column;gap:0;padding:0}
@@ -446,10 +459,10 @@ body.jungle-home #seismique-jungle-reveal .jungle-page-stop small .destination-o
       <h1 class="visually-hidden">Explore Seismique</h1>
     <div class="scene" role="group" tabindex="0" aria-label="Seismique immersive journey">
       <div class="jungle-page-stops" aria-label="Discover more along the jungle path">
-        <button type="button" class="jungle-page-stop" data-jungle-page="exhibits" hidden><span>01 / DISCOVER</span><strong>Immersive Museum</strong><small>Explore the museum<span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
-        <button type="button" class="jungle-page-stop" data-jungle-page="mini-golf" hidden><span>02 / PLAY</span><strong>Glow Mini Golf</strong><small>Explore glow mini golf<span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
-        <button type="button" class="jungle-page-stop" data-jungle-page="parties" hidden><span>03 / CELEBRATE</span><strong>Parties &amp; Events</strong><small>Plan your event<span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
-        <button type="button" class="jungle-page-stop" data-jungle-page="whats-happening" hidden><span>04 / THE LATEST</span><strong>What’s Happening</strong><small>See events &amp; offers<span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
+        <button type="button" class="jungle-page-stop" data-jungle-page="exhibits" hidden><span>01 / DISCOVER</span><strong>Immersive Museum</strong><em class="destination-summary">Discover exhibits, photos &amp; details.</em><small><span class="destination-open-label" data-page-label="museum">TAP TO OPEN MUSEUM PAGE</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
+        <button type="button" class="jungle-page-stop" data-jungle-page="mini-golf" hidden><span>02 / PLAY</span><strong>Glow Mini Golf</strong><em class="destination-summary">Preview the course, arcade &amp; tickets.</em><small><span class="destination-open-label" data-page-label="mini golf">TAP TO OPEN MINI GOLF PAGE</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
+        <button type="button" class="jungle-page-stop" data-jungle-page="parties" hidden><span>03 / CELEBRATE</span><strong>Parties &amp; Events</strong><em class="destination-summary">Explore celebrations &amp; private events.</em><small><span class="destination-open-label" data-page-label="events">TAP TO OPEN EVENTS PAGE</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
+        <button type="button" class="jungle-page-stop" data-jungle-page="whats-happening" hidden><span>04 / THE LATEST</span><strong>What’s Happening</strong><em class="destination-summary">Find events, offers &amp; new discoveries.</em><small><span class="destination-open-label" data-page-label="what’s happening">TAP TO OPEN WHAT’S HAPPENING PAGE</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
       </div>
       <div class="arrival-shade" aria-hidden="true"></div>
       <div class="threshold-wash" aria-hidden="true"></div>
@@ -478,7 +491,7 @@ body.jungle-home #seismique-jungle-reveal .jungle-page-stop small .destination-o
     <div class="global-ticketbar"><a class="tickets button primary" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener"><svg class="ticket-mark" viewBox="0 0 24 18" aria-hidden="true" focusable="false"><path d="M3 3h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V3Z"/><path class="ticket-perforation" d="M16 4v10"/></svg><span>Get tickets</span></a></div>
   </div>
   <!--journey:ui-->
-<script src="/assets/journey-ui.42858e3246e1.js" defer fetchpriority="high"></script>
+<script src="/assets/journey-ui.08975a96f5b6.js" defer fetchpriority="high"></script>
 <!--/journey:ui-->
 
 

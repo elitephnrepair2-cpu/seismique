@@ -193,3 +193,16 @@ body.jungle-home #seismique-jungle-reveal .jungle-page-stop strong{font-size:cla
 body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{display:flex;align-items:center;justify-content:center;gap:12px;align-self:stretch;margin-top:3px;padding-top:12px;border-top:1px solid rgba(222,235,241,.18);font-size:12px;font-weight:700;line-height:1.4;color:#f3f5ff}
 body.jungle-home #seismique-jungle-reveal .jungle-page-stop small .destination-open-mark{font-size:18px;font-weight:400;line-height:1;letter-spacing:0;color:inherit}
 @media(max-height:500px){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{width:min(300px,calc(100% - 48px));min-height:0;padding:13px 20px;gap:7px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop strong{font-size:23px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{padding-top:8px;margin-top:0}}
+
+/* A visible page-opening action inside the single clickable card. */
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop{padding:22px 20px;gap:10px;transition:transform .16s ease,background 1.4s,border-color 1.2s,box-shadow 1.4s}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop .destination-summary{display:block;font:400 13px/1.45 Arial,sans-serif;color:#d5d9e5;max-width:100%}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{margin-top:6px;padding:12px 13px;min-height:48px;border:1px solid #ae82ff99;border-radius:3px 8px 3px 7px;background:linear-gradient(110deg,#600dff,#7022e8);box-shadow:0 5px 16px #600dff24;gap:10px}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop .destination-open-label{font:700 11px/1.35 Arial,sans-serif;letter-spacing:.035em;color:#fff}
+body.jungle-home #seismique-jungle-reveal .destination-next{text-align:left}
+body.jungle-home .destination-next>span:last-child{flex-shrink:0}
+@media(hover:hover) and (pointer:fine){body.jungle-home #seismique-jungle-reveal .jungle-page-stop:hover{transform:translate(-50%,calc(-50% - 3px))}body.jungle-home #seismique-jungle-reveal .jungle-page-stop:hover small{background:linear-gradient(110deg,#7224ff,#8134f1);border-color:#c7a5ff}}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop:active{transform:translate(-50%,-50%) scale(.985)}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop:focus-visible small{outline:1px solid #e9dcff;outline-offset:2px}
+@media(max-height:500px){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{padding:13px 16px;gap:6px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop .destination-summary{font-size:12px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{margin-top:4px;padding:9px 12px;min-height:44px}}
+@media(prefers-reduced-motion:reduce){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{transition:none}body.jungle-home #seismique-jungle-reveal .jungle-page-stop:hover,body.jungle-home #seismique-jungle-reveal .jungle-page-stop:active{transform:translate(-50%,-50%)}}

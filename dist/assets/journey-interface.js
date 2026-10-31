@@ -9,6 +9,10 @@
   const cueDevice=matchMedia('(pointer:coarse), (max-width:700px)');
   const controls=root.querySelector('.destination-controls'),next=root.querySelector('.destination-next'),nextLabel=next.querySelector('[data-next-label]'),gesture=root.querySelector('#destination-gesture'),announcement=root.querySelector('.journey-announcement');
   const labels=['Immersive Museum','Glow Mini Golf','Parties & Events','What’s Happening'];
+  function updatePageActions(){
+    root.querySelectorAll('[data-page-label]').forEach(label=>{label.textContent=(cueDevice.matches?'TAP':'CLICK')+' TO OPEN '+label.dataset.pageLabel.toUpperCase()+' PAGE';});
+  }
+  updatePageActions();cueDevice.addEventListener('change',updatePageActions);
   let returnFocus=stage,lastPercent=-1,lastDestination=-2,roomScroll=0;
   function open({history=true}={}){
     if(room.open)return;
@@ -68,7 +72,7 @@
     const browsing=state.ready&&state.mode!=='intro'&&state.index<labels.length;
     controls.hidden=!browsing;
     next.setAttribute('aria-disabled',String(state.busy||state.waitingForScenery||!state.ready));
-    const label=state.waitingForScenery?'PREPARING NEXT DISCOVERY…':state.busy?'MOVING…':state.index===labels.length-1?'PLAN YOUR VISIT':'NEXT: '+(labels[state.index+1]||labels[0]).toUpperCase();
+    const label=state.waitingForScenery?'PREPARING NEXT DISCOVERY…':state.busy?'MOVING…':state.index===labels.length-1?'PLAN YOUR VISIT':'CONTINUE TOUR: '+(labels[state.index+1]||labels[0]).toUpperCase();
     if(nextLabel.textContent!==label)nextLabel.textContent=label;
     gesture.textContent=cueDevice.matches?'or swipe up':'or scroll';
     gesture.hidden=state.busy||state.waitingForScenery;
@@ -76,7 +80,7 @@
     cue.hidden=true;
     if(atEnd&&root.focusFinaleOnArrival){root.focusFinaleOnArrival=false;finale.querySelector('.finale-ticket').focus({preventScroll:true});}
     if(state.mode==='idle'&&state.ready&&state.index!==lastDestination){
-      announcement.textContent=atEnd?'Your digital journey is complete. Now step inside.':labels[state.index]+'. '+label+'.';
+      announcement.textContent=atEnd?'Your digital journey is complete. Now step inside.':labels[state.index]+'. Open its page for details, or '+label.toLowerCase()+'.';
       lastDestination=state.index;
     }
 

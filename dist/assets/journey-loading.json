@@ -1,9 +1,9 @@
 {
   "bundles": {
     "ui": {
-      "file": "journey-ui.42858e3246e1.js",
-      "bytes": 6031,
-      "gzipBytes": 2388
+      "file": "journey-ui.08975a96f5b6.js",
+      "bytes": 6280,
+      "gzipBytes": 2501
     },
     "jungle": {
       "file": "journey-jungle.9b8360a0632b.js",
@@ -16,6 +16,6 @@
       "gzipBytes": 47179
     }
   },
-  "htmlBytes": 77418,
-  "htmlGzipBytes": 17704
+  "htmlBytes": 80148,
+  "htmlGzipBytes": 18218
 }
