@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto'),zlib=require('node:zlib');
+const base=path.join(__dirname,'../dist'),manifest=JSON.parse(fs.readFileSync(path.join(base,'assets/journey-loading.json'),'utf8')),html=fs.readFileSync(path.join(base,'index.html'),'utf8');
+const scripts=[...html.matchAll(/<script src="([^"]+)"[^>]*>/g)].map(m=>m[1]);assert.equal(scripts.length,3,'Only UI, engine and entrance should block DOMContentLoaded');assert(scripts[0].includes('journey-ui.'));assert(scripts[1].includes('three.min.js'));assert(scripts[2].includes('journey-entry.'));assert(!html.includes('<link rel="stylesheet"'),'First-screen styling needs no extra network round trip');assert(zlib.gzipSync(html).length<20000);
+const config=JSON.parse(fs.readFileSync(path.join(__dirname,'../vercel.json'),'utf8'));
+for(const [name,b] of Object.entries(manifest.bundles)){const bytes=fs.readFileSync(path.join(base,'assets',b.file));assert(b.file.includes(crypto.createHash('sha256').update(bytes).digest('hex').slice(0,12)));new vm.Script(bytes.toString());assert(config.headers.some(h=>h.source==='/assets/'+b.file&&h.headers.some(v=>v.key==='Cache-Control'&&v.value.includes('immutable'))));}
+assert(manifest.bundles.ui.gzipBytes<3000);assert(manifest.bundles.entry.gzipBytes<50000);assert(manifest.bundles.jungle.gzipBytes<11000);
+const entry=fs.readFileSync(path.join(base,'assets',manifest.bundles.entry.file),'utf8'),jungle=fs.readFileSync(path.join(base,'assets',manifest.bundles.jungle.file),'utf8');
+function context(){const appended=[],document={addEventListener(){},createElement:()=>({remove(){}}),head:{append(node){appended.push(node);}}},window={addEventListener(){}};const ctx={window,document,console};vm.createContext(ctx);vm.runInContext(entry,ctx);return {ctx,appended,window};}
+async function loaders(){
+ const a=context();assert.equal(typeof a.window.fadeEndingFloor,'function','Entrance floor lighting must remain in the critical download');assert.equal(a.window.createDestinationGrass,undefined,'Jungle factories must not execute before they are needed');
+ const one=a.window.loadJourneyJungle(),two=a.window.loadJourneyJungle();assert.equal(one,two);assert.equal(a.appended.length,1,'The intro and Skip must not trigger duplicate downloads');assert.equal(a.appended[0].fetchPriority,'low');a.appended[0].onload();await one;assert.equal(a.window.loadJourneyJungle(),one);
+ vm.runInContext(jungle,a.ctx);assert.equal(typeof a.window.createDestinationGrass,'function');assert.equal(typeof a.window.preloadJungleSky,'function');
+ const b=context(),failed=b.window.loadJourneyJungle();b.appended[0].onerror();await assert.rejects(failed,/interrupted/);const retry=b.window.loadJourneyJungle();assert.equal(b.appended.length,2,'A network failure can retry instead of caching a rejected promise forever');b.appended[1].onload();await retry;
+ console.log('PASS: three startup scripts; styled first response under 20 KB gzip; UI independent of 3D; small content-addressed cacheable bundles; delayed jungle factories; single-flight loading and interruption recovery.');
+}
+loaders().catch(e=>{console.error(e);process.exitCode=1;});

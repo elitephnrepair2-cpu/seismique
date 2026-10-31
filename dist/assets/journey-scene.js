@@ -5,7 +5,7 @@
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
     if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
-    const skyMaps=window.preloadJungleSky(T);
+    let skyMaps=null;
     const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
@@ -1142,7 +1142,17 @@
       }});
       for(const texture of textures){renderer.initTexture(texture);yield;}
     }
-    function prepareJungle(){if(preparing)return;preparing=true;root.dataset.scenePreparation='building';preparation=prepareResources();queuePreparation();}
+    async function prepareJungle(){
+      if(preparing)return;preparing=true;root.dataset.scenePreparation='downloading';
+      try{
+        await window.loadJourneyJungle();skyMaps=window.preloadJungleSky(T);
+        root.dataset.scenePreparation='building';preparation=prepareResources();queuePreparation();
+      }catch(error){
+        preparing=false;root.dataset.scenePreparation='download-interrupted';
+        const notice=root.querySelector('.error');notice.textContent='The connection interrupted the tour download. Tickets and navigation are still available. Reload to try again.';notice.hidden=false;
+      }
+    }
+    window.addEventListener('online',()=>{if(root.dataset.scenePreparation==='download-interrupted'){root.querySelector('.error').hidden=true;prepareJungle();}});
     async function warmJungleBuffers(views=[.40,.58,stopProgress()[0]]){
       root.dataset.gpuPreparation='warming';
       const target=new T.WebGLRenderTarget(32,32),probe=camera.clone();

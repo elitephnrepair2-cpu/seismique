@@ -11,6 +11,33 @@
   },
   "headers": [
     {
+      "source": "/assets/journey-entry.dcf13dcc41ed.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-jungle.9b8360a0632b.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-ui.42858e3246e1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/nebula-horizon-v1.webp",
       "headers": [
         {

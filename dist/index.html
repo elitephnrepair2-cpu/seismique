@@ -7,8 +7,10 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#600dff">
 <title>Seismique — Explore &amp; Plan Your Visit</title>
-<link rel="preload" href="/assets/three.min.js?v=160" as="script">
-<link rel="preload" href="/assets/journey-scene.js?v=tablet-budget-20261030" as="script">
+<!--journey:preloads-->
+<link rel="preload" href="/assets/three.min.js?v=160" as="script" fetchpriority="high">
+<link rel="preload" href="/assets/journey-entry.dcf13dcc41ed.js" as="script" fetchpriority="high">
+<!--/journey:preloads-->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%2311131b%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22%2300e6ed%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22m18%206-6%2011h6l-4%209%209-13h-7z%22%20fill%3D%22%23f5f5ff%22%2F%3E%3C%2Fsvg%3E">
 <style>
 html{height:100%;background:#10131b;color-scheme:dark;overflow:hidden}
@@ -88,9 +90,338 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
     #seismique-jungle-reveal .threshold-wash{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 49%,transparent 24%,rgba(60,171,255,.10) 57%,rgba(120,94,245,.43) 83%,rgba(92,225,255,.60));mix-blend-mode:screen}
     @media(max-height:580px){#seismique-jungle-reveal[data-phase="start"] .headline{top:auto;bottom:106px}#seismique-jungle-reveal[data-phase="start"] .headline h2{font-size:26px}}
   </style>
-<link rel="stylesheet" href="/assets/visitor.css?v=61">
-<link rel="stylesheet" href="/assets/journey-interface.css?v=controls-20261030">
-<link rel="stylesheet" href="/assets/navigation.css?v=58">
+<!--journey:styles-->
+<style data-journey-styles>
+/* Visitor navigation surrounds the existing 3D entrance. */
+html{background:#080d16;color-scheme:dark}body{color:#f5f7fb}main{max-width:1100px}
+#seismique-jungle-reveal{max-width:none}#seismique-jungle-reveal a{color:inherit}#seismique-jungle-reveal a:focus-visible,#seismique-jungle-reveal summary:focus-visible{outline:3px solid #600dff;outline-offset:3px}
+#seismique-jungle-reveal .site-header{flex:none;background:#101521;color:#f5f7fb;border-bottom:1px solid #ffffff24;z-index:8;padding-top:env(safe-area-inset-top)}
+#seismique-jungle-reveal .brand-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:12px}
+#seismique-jungle-reveal .brand{text-decoration:none;font-size:24px;letter-spacing:-1.2px}#seismique-jungle-reveal .portal-link{font-size:14px;text-decoration:none;border-bottom:1px solid #6d798d;padding:4px 0}
+#seismique-jungle-reveal .direct-nav{display:grid;grid-template-columns:.8fr .9fr 1.25fr 1.1fr;padding:0 6px 5px;gap:2px}
+#seismique-jungle-reveal .direct-nav a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:5px 4px;text-align:center;text-decoration:none;font-size:14px;line-height:1.2;border-radius:7px;color:#d6dfec;border:1px solid transparent}
+#seismique-jungle-reveal .direct-nav a:hover,#seismique-jungle-reveal .direct-nav a[aria-current]{background:#25304a;border-color:#52637c;color:#fff}
+#seismique-jungle-reveal .tour-view{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;background:#0b1018}
+#seismique-jungle-reveal .intro-copy{flex:none;text-align:center;padding:14px 18px 12px;background:#0b1018;z-index:2}
+#seismique-jungle-reveal .intro-copy h1{font-family:Impact,'Arial Narrow',Arial,sans-serif;text-transform:uppercase;font-size:clamp(27px,3.6vw,36px);line-height:1.05;letter-spacing:-.5px;margin:0 0 8px;color:#fff}
+#seismique-jungle-reveal .intro-copy p{font-size:16px;line-height:1.4;color:#d9e4ee;margin:0 auto;max-width:500px}
+#seismique-jungle-reveal .scene{min-height:260px;max-width:620px;width:100%;margin:0 auto;flex:1}
+#seismique-jungle-reveal .headline,#seismique-jungle-reveal .arrival-shade{display:none}
+#seismique-jungle-reveal .foot{padding:28px 14px 10px;background:linear-gradient(transparent,#080f19d9 70%)}
+#seismique-jungle-reveal .movehint{font-size:14px;margin-bottom:0}
+#seismique-jungle-reveal .tour-controls{flex:none;padding:10px 14px 4px;background:#101722;display:grid;gap:6px}
+#seismique-jungle-reveal .main-actions,#seismique-jungle-reveal .optional-actions{display:flex;gap:8px;align-items:center;justify-content:center}
+#seismique-jungle-reveal .main-actions>*{flex:1;max-width:300px}#seismique-jungle-reveal .button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 17px;border:1px solid transparent;border-radius:9px;text-decoration:none;font-family:inherit;font-weight:700;font-size:16px;line-height:1.25;text-align:center;cursor:pointer}
+#seismique-jungle-reveal .primary{background:#600dff;color:#fff}#seismique-jungle-reveal .secondary{background:#1a273a;border-color:#596b87;color:#f6f8fc}
+#seismique-jungle-reveal .optional-actions button{font:inherit;font-size:14px;background:transparent;border:0;color:#cad7e7;padding:8px 12px;min-height:40px;border-radius:6px;cursor:pointer}
+#seismique-jungle-reveal .optional-actions button:hover{background:#253149}#seismique-jungle-reveal .optional-actions button:disabled{opacity:.5}
+#seismique-jungle-reveal .global-ticketbar{flex:none;padding:9px 14px max(10px,env(safe-area-inset-bottom));background:#101722;border-top:1px solid #ffffff16;display:flex;justify-content:center;z-index:8}
+#seismique-jungle-reveal .global-ticketbar .button{width:100%;max-width:620px;border-radius:24px;background:#600dff;color:#fff;font-size:17px}
+#seismique-jungle-reveal .visitor-content{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;background:#0b101b;color:#edf4fc;scroll-behavior:auto}
+#seismique-jungle-reveal .content-inner{max-width:940px;margin:0 auto;padding:0 24px 32px}
+#seismique-jungle-reveal .content-section{padding:40px 0;border-bottom:1px solid #ffffff20;scroll-margin-top:20px;outline:none}
+#seismique-jungle-reveal .eyebrow{font-size:13px;font-weight:700;letter-spacing:1.5px;color:#c5a5ff;margin:0 0 10px}
+#seismique-jungle-reveal .content-section h2{font-size:clamp(30px,5vw,44px);line-height:1.08;letter-spacing:-1px;margin:0 0 16px;max-width:720px}
+#seismique-jungle-reveal .content-section p{font-size:16px;line-height:1.6;color:#bdcadd;max-width:740px;margin:10px 0 18px}
+#seismique-jungle-reveal .content-section h3{font-size:23px;line-height:1.2;margin:0 0 16px}#seismique-jungle-reveal .content-section h4{font-size:17px;margin:20px 0 12px}
+#seismique-jungle-reveal .destination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0}
+#seismique-jungle-reveal .destination-card{display:flex;flex-direction:column;min-height:236px;padding:22px 18px;border:1px solid #ffffff35;border-top:3px solid #a777ff;border-radius:12px;background:#161b2d;text-decoration:none;transition:background .15s}
+#seismique-jungle-reveal .destination-card:hover{background:#212943}#seismique-jungle-reveal .golf-card{border-top-color:#600dff}#seismique-jungle-reveal .events-card{border-top-color:#ff80aa}
+#seismique-jungle-reveal .destination-card>span{font-size:12px;letter-spacing:1px;color:#b2c5d9;margin-bottom:22px}#seismique-jungle-reveal .destination-card h3{margin-bottom:8px}#seismique-jungle-reveal .destination-card p{font-size:15px;margin:0 0 22px}#seismique-jungle-reveal .destination-card b{margin-top:auto;font-size:14px;color:#eef8ff}
+#seismique-jungle-reveal .text-link{display:inline-block;color:#74e7ee;text-underline-offset:4px;font-size:16px;line-height:1.5}
+#seismique-jungle-reveal .inline-prices{display:flex;gap:32px;flex-wrap:wrap;margin:24px 0 10px}#seismique-jungle-reveal .inline-prices span{font-size:14px;color:#bac8dc}#seismique-jungle-reveal .inline-prices strong{display:block;font-size:30px;color:#fff;margin-top:5px}
+#seismique-jungle-reveal .action-row{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+#seismique-jungle-reveal .event-options{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}#seismique-jungle-reveal .event-options span{padding:8px 12px;border:1px solid #72537b;border-radius:6px;font-size:14px}
+#seismique-jungle-reveal .inquiry-panel{padding:24px;background:#211930;border-left:3px solid #ee8bb4;border-radius:0 10px 10px 0;margin-top:24px}
+#seismique-jungle-reveal .small-copy{font-size:14px!important;line-height:1.6!important;color:#bdcadd}
+#seismique-jungle-reveal .section-links{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}#seismique-jungle-reveal .section-links a{padding:9px 12px;font-size:14px;text-decoration:none;border:1px solid #45546a;border-radius:6px}
+#seismique-jungle-reveal .info-block{padding:32px 0 12px;scroll-margin-top:20px;outline:none}#seismique-jungle-reveal .price-table-wrap{overflow-x:auto}#seismique-jungle-reveal .price-table{width:100%;border-collapse:collapse;font-size:16px;table-layout:fixed}#seismique-jungle-reveal .price-table caption{text-align:left;font-size:14px;color:#b7c5d8;margin-bottom:12px}
+#seismique-jungle-reveal .price-table th,#seismique-jungle-reveal .price-table td{padding:16px 10px;text-align:left;border-bottom:1px solid #344054;vertical-align:top}#seismique-jungle-reveal .price-table th:first-child{width:46%;padding-left:0}#seismique-jungle-reveal .price-table thead th{font-size:14px;color:#aebed3}#seismique-jungle-reveal .price-table th span{display:block;font-size:13px;font-weight:400;color:#acbcd1;margin-top:6px}#seismique-jungle-reveal .price-table td{white-space:nowrap;font-weight:700}#seismique-jungle-reveal .bundle{background:#133036}#seismique-jungle-reveal .bundle th:first-child{padding-left:10px}
+#seismique-jungle-reveal .planning-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:32px}#seismique-jungle-reveal .hours{margin:0}#seismique-jungle-reveal .hours div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #ffffff18;font-size:15px}#seismique-jungle-reveal .hours dd{margin:0;text-align:right;white-space:nowrap}#seismique-jungle-reveal address{font-style:normal;line-height:1.7;margin-bottom:12px}
+#seismique-jungle-reveal .source-note{font-size:12px!important;color:#a3b4c8!important}#seismique-jungle-reveal details{border-bottom:1px solid #354055}#seismique-jungle-reveal summary{cursor:pointer;font-size:16px;font-weight:700;padding:19px 24px 19px 0;line-height:1.4}#seismique-jungle-reveal details p{padding-bottom:12px;margin-top:0}
+#seismique-jungle-reveal .contact-strip{padding:28px 0 0;display:flex;flex-direction:column;gap:12px}#seismique-jungle-reveal .contact-strip h3{margin:0}#seismique-jungle-reveal .content-footer{display:flex;gap:18px;flex-wrap:wrap;padding-top:28px;font-size:14px;line-height:1.5}
+@media(min-width:700px){#seismique-jungle-reveal .site-header{display:flex;align-items:center;gap:24px;padding:4px 18px}#seismique-jungle-reveal .brand-row{padding:8px 0;gap:22px}#seismique-jungle-reveal .direct-nav{flex:1;padding:0;gap:6px}#seismique-jungle-reveal .direct-nav a{padding:8px;font-size:15px}#seismique-jungle-reveal .tour-view{overflow:hidden}#seismique-jungle-reveal .tour-controls{padding-top:8px;grid-template-columns:1fr auto;align-items:center;max-width:620px;width:100%;margin:0 auto}}
+@media(max-width:650px){#seismique-jungle-reveal .destination-grid,#seismique-jungle-reveal .planning-grid{grid-template-columns:1fr}#seismique-jungle-reveal .destination-card{min-height:0}#seismique-jungle-reveal .destination-card>span{margin-bottom:12px}#seismique-jungle-reveal .destination-card p{margin-bottom:18px}#seismique-jungle-reveal .content-inner{padding:0 20px 28px}#seismique-jungle-reveal .planning-grid{gap:8px}}
+@media(max-height:700px){#seismique-jungle-reveal .intro-copy{padding:9px 14px}#seismique-jungle-reveal .intro-copy h1{font-size:25px}#seismique-jungle-reveal .intro-copy p{font-size:15px}#seismique-jungle-reveal .tour-controls{padding-top:6px}#seismique-jungle-reveal .scene{min-height:220px}}
+@media(prefers-reduced-motion:reduce){#seismique-jungle-reveal *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Full-viewport walkthrough with compact controls over the scene. */
+html,body{width:100%;height:100%;overflow:hidden}
+main{width:100%;max-width:none;height:100vh;height:100dvh;margin:0}
+#seismique-jungle-reveal{position:relative;width:100%;max-width:none;height:100%;border-radius:0;overflow:hidden}
+#seismique-jungle-reveal .phone{position:relative;height:100%;border-radius:0}
+#seismique-jungle-reveal .tour-view{position:absolute;inset:0;overflow:hidden;display:block}
+#seismique-jungle-reveal .scene{position:absolute;inset:0;width:100%;height:100%;max-width:none;min-height:0;margin:0;aspect-ratio:auto}
+#seismique-jungle-reveal .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+#seismique-jungle-reveal .site-header{position:absolute;inset:0 0 auto;z-index:8;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:transparent;border:0;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));pointer-events:none}
+#seismique-jungle-reveal .site-header>*{pointer-events:auto}
+#seismique-jungle-reveal .menu-toggle,#seismique-jungle-reveal .skip-tour,#seismique-jungle-reveal .return-tour{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 16px;border:1px solid #ffffff55;border-radius:24px;background:#0d1829d9;backdrop-filter:blur(14px);color:#fff;text-decoration:none;font:inherit;font-size:14px;font-weight:700;line-height:1.3;cursor:pointer}
+#seismique-jungle-reveal .menu-toggle span{font-size:17px}
+#seismique-jungle-reveal[data-view="tour"] .return-tour,#seismique-jungle-reveal[data-view="info"] .skip-tour{display:none}
+#seismique-jungle-reveal .menu-panel{position:absolute;top:calc(max(16px,env(safe-area-inset-top)) + 54px);left:max(16px,env(safe-area-inset-left));width:min(288px,calc(100vw - 32px));max-height:calc(100dvh - 155px);overflow:auto;background:#101c2bf5;border:1px solid #62718b;border-radius:15px;box-shadow:0 16px 50px #0005;backdrop-filter:blur(16px);padding:10px}
+#seismique-jungle-reveal .direct-nav{display:flex;flex-direction:column;gap:3px;padding:0}
+#seismique-jungle-reveal .direct-nav a{justify-content:flex-start;text-align:left;font-size:16px;padding:12px;min-height:46px}
+#seismique-jungle-reveal .menu-settings{display:flex;flex-direction:column;gap:4px;border-top:1px solid #ffffff26;margin-top:8px;padding-top:8px}
+#seismique-jungle-reveal .menu-settings button{min-height:44px;border:0;border-radius:7px;background:transparent;color:#c9dce9;text-align:left;padding:10px 12px;font:inherit;font-size:14px;cursor:pointer}
+#seismique-jungle-reveal .menu-settings button:hover{background:#25334a}
+#seismique-jungle-reveal .tour-controls{position:absolute;z-index:5;left:50%;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 76px);transform:translateX(-50%);display:block;width:auto;max-width:none;padding:0;margin:0;background:transparent}
+#seismique-jungle-reveal .explore{min-width:148px;min-height:52px;padding:13px 28px;border-radius:30px;box-shadow:0 6px 28px #00151c44;font-size:18px}
+#seismique-jungle-reveal .global-ticketbar{position:absolute;z-index:7;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:auto;padding:0;border:0;background:none;pointer-events:none}
+#seismique-jungle-reveal .global-ticketbar .button{pointer-events:auto;width:auto;min-height:46px;height:auto;padding:12px 20px;font-size:15px;box-shadow:0 5px 25px #0004}
+#seismique-jungle-reveal .foot{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 66px);left:50%;right:auto;transform:translateX(-50%);width:min(560px,100%);padding:15px 16px 8px;background:none}
+#seismique-jungle-reveal .movehint{width:fit-content;max-width:100%;margin:0 auto 12px;padding:8px 14px;border-radius:22px;background:#071322c9;backdrop-filter:blur(8px);font-size:14px}
+#seismique-jungle-reveal .visitor-content{position:absolute;inset:0;width:100%;padding:80px 0 88px}
+#seismique-jungle-reveal[data-view="info"] .site-header{padding-bottom:10px;background:linear-gradient(#0b101bf5 70%,#0b101b00)}
+#seismique-jungle-reveal .content-section{scroll-margin-top:0}
+@media(max-height:500px){#seismique-jungle-reveal .tour-controls{bottom:max(16px,env(safe-area-inset-bottom))}#seismique-jungle-reveal .foot{bottom:68px}#seismique-jungle-reveal .menu-panel{max-height:calc(100dvh - 95px)}}
+
+/* Page markers stay attached to discovery posts as the visitor walks. */
+#seismique-jungle-reveal .jungle-page-stops{position:absolute;inset:0;z-index:4;pointer-events:none}
+#seismique-jungle-reveal .jungle-page-stop{position:absolute;left:0;top:0;will-change:transform;transform:translate(-50%,-50%);width:180px;min-height:94px;padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:auto;color:#f5f7ff;font:inherit;backdrop-filter:blur(6px)}
+#seismique-jungle-reveal .jungle-page-stop span{font-size:12px;line-height:1.4;letter-spacing:.7px;color:#d6c6ef}
+#seismique-jungle-reveal .jungle-page-stop strong{font-size:17px;line-height:1.25}
+#seismique-jungle-reveal .jungle-page-stop small{font-size:13px;color:#bbcada;line-height:1.4}
+#seismique-jungle-reveal .jungle-page-stop:hover,#seismique-jungle-reveal .jungle-page-stop:focus-visible{background:#28324a}
+@media(max-width:360px){#seismique-jungle-reveal .jungle-page-stop{width:160px}}
+
+@media(max-width:700px){#seismique-jungle-reveal .jungle-page-stop{width:164px;min-height:88px;padding:11px 12px;gap:5px}#seismique-jungle-reveal .jungle-page-stop strong{font-size:16px}#seismique-jungle-reveal .jungle-page-stop small{font-size:12px}}
+
+/* Destination panels catch the nearby Alien Grass light without becoming neon frames. */
+#seismique-jungle-reveal .jungle-page-stop{--grass-rgb:133,163,184;--grass-power:0;border:1px solid rgba(222,235,241,.16);border-radius:15px 17px 20px 13px;background:radial-gradient(ellipse at 12% 0%,rgba(var(--grass-rgb),.16),transparent 68%),linear-gradient(160deg,rgba(13,23,30,.61),rgba(6,13,22,.77));box-shadow:0 12px 22px -12px #000c,inset 0 1px rgba(234,248,255,.09),0 0 20px -14px rgba(var(--grass-rgb),.22);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);text-shadow:0 1px 5px #050910;transition:background 1.4s,border-color 1.2s,box-shadow 1.4s}
+#seismique-jungle-reveal .jungle-page-stop[data-grass-active="true"]{border-color:rgba(var(--grass-rgb),.27)}
+#seismique-jungle-reveal .jungle-page-stop span{color:#c7d4db;font-size:10px;letter-spacing:1.15px}
+#seismique-jungle-reveal .jungle-page-stop strong{color:#faf9ff}
+#seismique-jungle-reveal .jungle-page-stop small{color:#c4d2d9}
+#seismique-jungle-reveal .jungle-page-stop:hover{background:radial-gradient(ellipse at 12% 0%,rgba(var(--grass-rgb),.23),transparent 72%),linear-gradient(160deg,rgba(17,29,36,.86),rgba(6,13,22,.92));border-color:rgba(var(--grass-rgb),.48)}
+#seismique-jungle-reveal .jungle-page-stop:focus-visible{outline:2px solid #e5f9ff;outline-offset:4px;border-color:#cfe4ec}
+@media(prefers-reduced-motion:reduce){#seismique-jungle-reveal .jungle-page-stop{transition:none}}
+
+/* Seismique brand purple; pale purple keeps small text readable on dark scenes. */
+#seismique-jungle-reveal .primary:hover,#seismique-jungle-reveal .global-ticketbar .button:hover{background:#7430ff;color:#fff}
+#seismique-jungle-reveal :focus-visible{outline-color:#c5a5ff}
+
+/* Homepage only: the journey and the visit room are distinct interaction modes. */
+@font-face{font-family:"Seismique Exhibit";src:url("https://static.parastorage.com/fonts/v2/8d66eef6-4f84-41f5-b883-13414244ac90/v1/ccbiffbamboom-outline.latin.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+html:has(body.jungle-home),body.jungle-home{height:100%;min-height:0;overflow:hidden;overscroll-behavior:none;background:#08070b}
+body.jungle-home{position:fixed;inset:0;width:100%;--journey-safe-top:env(safe-area-inset-top,0px);--journey-safe-bottom:env(safe-area-inset-bottom,0px);--journey-safe-left:env(safe-area-inset-left,0px);--journey-safe-right:env(safe-area-inset-right,0px)}
+body.jungle-home main{height:100vh;height:100dvh;margin:0;max-width:none}
+body.jungle-home #seismique-jungle-reveal{touch-action:none;overscroll-behavior:none}
+body.jungle-home #seismique-jungle-reveal .scene,body.jungle-home #seismique-jungle-reveal .tour-view{touch-action:none;overscroll-behavior:none}
+body.jungle-home #seismique-jungle-reveal .site-header{position:absolute;padding:calc(var(--journey-safe-top) + 16px) calc(var(--journey-safe-right) + 16px) 0 calc(var(--journey-safe-left) + 16px)}
+body.jungle-home #seismique-jungle-reveal .menu-panel{top:calc(var(--journey-safe-top) + 72px);left:calc(var(--journey-safe-left) + 16px);width:min(320px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 32px));touch-action:pan-y;overscroll-behavior:contain;background:#111017f5;border:1px solid #b7aac66b;border-radius:4px 15px 5px 13px;max-height:calc(100dvh - var(--journey-safe-top) - var(--journey-safe-bottom) - 92px)}
+body.jungle-home #seismique-jungle-reveal .footer-shortcut{color:#fff;font-size:13px;min-height:44px;display:flex;align-items:center;text-decoration:none;padding:0 12px;background:#15121ddd;border:1px solid #bfa9d180;border-radius:3px 10px 3px 7px}
+body.jungle-home #seismique-jungle-reveal .menu-toggle{border-radius:3px 10px 4px 8px;background:#111018d9;border-color:#ffffffaa;box-shadow:inset 0 -2px #c0a3ed33;padding:10px 13px;font-size:13px;letter-spacing:.03em}
+body.jungle-home #seismique-jungle-reveal .journey-finish{position:absolute;z-index:6;bottom:calc(var(--journey-safe-bottom) + 62px);left:50%;transform:translateX(-50%);min-height:48px;padding:12px 24px;background:#600dff;border:1px solid #c9adff;border-radius:3px 13px 4px 10px;color:white;font:700 15px Arial,sans-serif;box-shadow:0 0 30px #a470cb22;white-space:nowrap}
+body.jungle-home .journey-cue{position:absolute;z-index:5;bottom:calc(var(--journey-safe-bottom) + 19px);left:50%;transform:translateX(-50%);color:white;text-shadow:0 1px 7px #000;pointer-events:none;text-align:center;font:12px/1.4 Arial,sans-serif;white-space:nowrap}
+body.jungle-home .journey-cue>span:first-child{display:block;font-size:18px;margin-bottom:3px;color:#cebbf3}
+body.jungle-home .journey-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:#100c1866;z-index:6;pointer-events:none}
+body.jungle-home .journey-progress span{display:block;width:100%;height:100%;transform:scaleX(var(--journey-progress,0));transform-origin:left;background:linear-gradient(90deg,#600dff,#9861ff,#c8aaff)}
+body.jungle-home #seismique-jungle-reveal [hidden],.visit-room [hidden]{display:none!important}
+body.jungle-home #seismique-jungle-reveal .journey-finish:focus-visible,.visit-room :focus-visible{outline:2px solid #c5a5ff;outline-offset:5px}
+body.jungle-home .enter-mobile-copy,body.jungle-home .enter-direction{display:none}
+/* Arrival identity is tied to the entrance control and clears when travel begins. */
+body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{gap:7px}
+body.jungle-home .ticket-mark{width:20px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round;transform:rotate(-9deg)}
+body.jungle-home .ticket-perforation{stroke-dasharray:1 3;opacity:.65}
+body.jungle-home .entrance-intro{position:absolute;bottom:calc(100% + 14px);left:50%;transform:translateX(-50%);width:max-content;max-width:90vw;margin:0;padding:7px 17px;text-align:center;font:500 15px/1.45 Arial,sans-serif;letter-spacing:.01em;color:#251d30;text-shadow:0 1px 5px #fff,0 0 12px #eee9e0;background:radial-gradient(ellipse,#e8e3dab8 25%,#e8e3da00 72%);pointer-events:none}
+body.jungle-home .entrance-intro span{display:block;font-weight:700;color:#482675}
+body.jungle-home .tour-controls:not(:has(.explore[data-entry-state="ready"])) .entrance-intro{display:none}
+@media(max-width:700px),(max-height:500px){
+ body.jungle-home #seismique-jungle-reveal .skip-tour,body.jungle-home #seismique-jungle-reveal .footer-shortcut,body.jungle-home #seismique-jungle-reveal .future-shortcut,body.jungle-home #seismique-jungle-reveal .movehint{display:none!important}
+ body.jungle-home #seismique-jungle-reveal .global-ticketbar{position:absolute;top:calc(var(--journey-safe-top) + 16px);right:calc(var(--journey-safe-right) + 16px);bottom:auto;z-index:9}
+ body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{min-height:44px;padding:10px 14px;font-size:12px;font-weight:600;letter-spacing:.025em;border:1px solid #b69ada66;border-top-color:#c7b4f08a;border-radius:3px 10px 3px 8px;background:linear-gradient(120deg,#779bcd14,transparent 48%,#9b48bb1c),#11101ce8;color:#f7f3ff;box-shadow:inset 0 1px #ffffff09,0 4px 18px #06051033;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background-color .2s,border-color .2s}
+ body.jungle-home #seismique-jungle-reveal .global-ticketbar .button:hover{background-color:#242033;border-color:#c4a2ed}
+ body.jungle-home #seismique-jungle-reveal .menu-toggle{position:relative;min-width:70px;min-height:44px;padding:10px 8px;gap:7px;font-size:12px;font-weight:500;letter-spacing:.025em;background:#0d0b1466;border:1px solid transparent;border-radius:2px;box-shadow:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#e7e3ed}
+ body.jungle-home #seismique-jungle-reveal .menu-toggle::after{content:"";position:absolute;left:9px;right:12px;bottom:6px;height:1px;transform:rotate(-1deg);background:linear-gradient(90deg,#cec1dd50,#a288c21a,transparent);pointer-events:none}
+ body.jungle-home #seismique-jungle-reveal .menu-toggle>span{font-size:0;width:14px;height:10px;position:relative;border-top:1px solid currentColor}
+ body.jungle-home #seismique-jungle-reveal .menu-toggle>span::after{content:"";position:absolute;left:0;top:6px;width:10px;border-top:1px solid currentColor}
+ body.jungle-home #seismique-jungle-reveal .menu-toggle:hover,body.jungle-home #seismique-jungle-reveal .menu-toggle[aria-expanded="true"]{background:#17122194;color:#fff}
+ body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 18px);z-index:7}
+ body.jungle-home .ticket-mark{width:18px;height:14px}
+ body.jungle-home .entrance-intro{font-size:13px;bottom:calc(100% + 12px);padding:5px 13px}
+ body.jungle-home #seismique-jungle-reveal .explore{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;padding:12px 24px;border:1px solid #ba98da75;border-radius:3px 14px 4px 12px;background:linear-gradient(115deg,#47326930,transparent 55%,#2072811a),#100c1dde;color:#fff;box-shadow:0 6px 24px #08041155,inset 0 1px #ffffff0c;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:14px;letter-spacing:.1em;transition:background-color .2s,border-color .2s}
+ body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{width:76vw;max-width:calc(100vw - var(--journey-safe-left) - var(--journey-safe-right) - 32px);min-height:78px;padding:15px 32px 14px;box-shadow:0 5px 30px #13092266,0 0 24px #9862c51c,inset 0 1px #f1e0ff12}
+ body.jungle-home #seismique-jungle-reveal .explore::before{content:"";position:absolute;inset:-1px;padding:1px;border-radius:inherit;background:linear-gradient(110deg,#9fdbed66 4%,#ba91ffb3 26%,#d6bbf4a6 49%,#e48bc066 68%,#9fdbed59 94%);background-size:200% 100%;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none}
+ body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]::before{animation:entrance-edge-drift 8s ease-in-out infinite alternate}
+ body.jungle-home #seismique-jungle-reveal .explore::after{content:"";position:absolute;left:17px;right:21px;bottom:5px;height:1px;transform:rotate(-.35deg);background:linear-gradient(90deg,transparent,#c9b8e82e,transparent);pointer-events:none}
+ body.jungle-home #seismique-jungle-reveal .explore:hover{background-color:#20142d;border-color:#d5b4f1}
+ body.jungle-home #seismique-jungle-reveal .explore:active{background-color:#2c1a3f}
+ body.jungle-home .enter-desktop-label{display:none}
+ body.jungle-home .enter-mobile-copy{display:flex;flex-direction:column;align-items:center;gap:7px}
+ body.jungle-home .enter-mobile-label{font:700 clamp(14px,4vw,18px)/1.2 Arial,sans-serif;letter-spacing:.115em;white-space:nowrap}
+ body.jungle-home .enter-support{font:400 11px/1.3 Arial,sans-serif;letter-spacing:.035em;color:#cfc4de}
+ body.jungle-home .enter-direction{position:absolute;right:17px;top:50%;transform:translateY(-50%);font:400 18px/1 Arial,sans-serif;color:#d5b9ed}
+ body.jungle-home .explore[data-entry-state="ready"] .enter-direction{display:none}
+ body.jungle-home .explore:not([data-entry-state="ready"]) .enter-support{display:none}
+ body.jungle-home #seismique-jungle-reveal .menu-toggle:focus-visible,body.jungle-home #seismique-jungle-reveal .global-ticketbar .button:focus-visible,body.jungle-home #seismique-jungle-reveal .explore:focus-visible{outline:2px solid #dfc9ff;outline-offset:4px}
+ body.jungle-home #seismique-jungle-reveal .foot{bottom:calc(var(--journey-safe-bottom) + 68px)}
+ body.jungle-home .journey-cue{bottom:calc(var(--journey-safe-bottom) + 19px)}
+}
+@media(max-width:700px) and (min-height:501px) and (max-height:650px){body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{min-height:64px;padding-top:9px;padding-bottom:9px}body.jungle-home .entrance-intro{font-size:11px;line-height:1.3;bottom:calc(100% + 7px);padding:0 6px}}
+@media(max-height:500px){body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 8px)}body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{min-height:52px;padding-top:7px;padding-bottom:7px}body.jungle-home .enter-mobile-copy{gap:4px}body.jungle-home .entrance-intro{left:0;transform:none;bottom:calc(100% + 14px);width:190px;max-width:24vw;font-size:12px;text-align:left;padding:0;background:none}}
+@media(prefers-reduced-motion:reduce){body.jungle-home #seismique-jungle-reveal .explore::before{animation:none!important}body.jungle-home #seismique-jungle-reveal .explore,body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{transition:none}}
+@keyframes entrance-edge-drift{from{background-position:0% 50%;opacity:.62}to{background-position:100% 50%;opacity:.95}}
+/* Calm final room: a scrolling surface inside a fixed environment, never page scroll. */
+.visit-room{--vr-white:#f4f1ec;--vr-muted:#c1bdc9;--vr-purple:#d2b7f7;box-sizing:border-box;position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100vh;height:100dvh;max-height:none;padding:0;border:0;color:var(--vr-white);background:radial-gradient(ellipse at 90% 12%,#292036dd,transparent 45%),radial-gradient(ellipse at 0 80%,#170c2fdd,transparent 45%),#09090eea;overflow:hidden;color-scheme:dark;isolation:isolate;font:16px/1.6 Arial,Helvetica,sans-serif}
+.visit-room[open]{display:flex;flex-direction:column;animation:visit-arrival .35s ease-out}
+.visit-room::backdrop{background:#03030899;backdrop-filter:blur(9px)}
+.visit-room *{box-sizing:border-box}.visit-room a{color:inherit;text-underline-offset:5px}.visit-room button{font:inherit;cursor:pointer}.visit-room a:hover{color:#c5abef}.visit-room a:active,.visit-room button:active{opacity:.8}
+.vr-atmosphere{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-1}.vr-orbit{position:absolute;top:14%;left:50%;width:140vw;height:140vw;max-width:1300px;max-height:1300px;transform:translateX(-50%) rotate(-14deg);border:1px solid #d9cae530;border-radius:48% 52% 49% 51%;box-shadow:0 0 0 12px #c4b2d908,0 0 0 35px #c4b2d909,0 0 70px #9b4ad90a;opacity:.7}.vr-illustration{position:absolute;width:460px;height:auto;right:-210px;top:100px;opacity:.13;filter:invert(1) grayscale(1);transform:rotate(-7deg)}.vr-wave{position:absolute;bottom:-70px;left:-10%;width:120%;opacity:.055;transform:rotate(-9deg)}
+.vr-header{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(var(--journey-safe-top) + 16px) calc(var(--journey-safe-right) + 18px) 12px calc(var(--journey-safe-left) + 18px);background:linear-gradient(#09090efa,#0d0c16e8);border-bottom:1px solid #b8a9c51f;flex:none}
+.vr-return,.vr-header-ticket{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:9px 12px;font:700 12px/1.3 Arial,sans-serif!important;letter-spacing:.015em;text-decoration:none;color:var(--vr-white);background:transparent;border:1px solid #a9a1b75e;border-radius:2px 9px 3px 7px}.vr-return span{font-size:20px}.vr-header-ticket{background:linear-gradient(120deg,#56517d33,#13101be8);color:#fff!important;border-color:#b69ada66;box-shadow:inset 0 1px #e2d0ff14}.vr-return:hover{background:#c5abef19}
+.vr-scroll{position:relative;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-color:#76618d transparent;scroll-padding-top:24px;-webkit-overflow-scrolling:touch;outline:none!important}
+.vr-content{width:min(100%,1020px);margin:auto;padding:40px max(calc(var(--journey-safe-right) + 22px),min(6vw,78px)) calc(var(--journey-safe-bottom) + 22px) max(calc(var(--journey-safe-left) + 22px),min(6vw,78px))}
+.visit-room h1,.visit-room h2,.visit-room h3,.visit-room p,.visit-room dl,.visit-room dd{margin:0}.vr-kicker,.vr-number{font:700 10px/1.5 Arial,sans-serif;letter-spacing:.18em;color:var(--vr-purple)}.vr-intro{position:relative;padding:4px 0 46px}.vr-intro h1{font-family:"Seismique Exhibit",Impact,sans-serif;font-weight:400;font-size:clamp(48px,10vw,96px);line-height:1.01;letter-spacing:-.025em;margin:22px 0 20px}.vr-intro h1 span{color:#fff}.vr-intro>p:last-of-type{font-size:17px;line-height:1.6;color:var(--vr-muted)}.vr-jumplinks{display:flex;flex-wrap:wrap;gap:12px 25px;margin-top:23px}.vr-jumplinks a{display:flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;border-bottom:1px solid #a297b55c;text-decoration:none}
+.vr-section{position:relative;padding:35px 0;border-top:1px solid #c8b7da42;scroll-margin-top:20px}.vr-section h2{font:700 clamp(23px,3vw,31px)/1.2 Arial,sans-serif;letter-spacing:-.035em;margin:12px 0 24px}.vr-section h3{font-size:16px;line-height:1.4}.vr-section p{color:var(--vr-muted)}.vr-section .vr-number{color:var(--vr-purple)}.vr-section address{font-style:normal;font-size:19px;line-height:1.6;color:var(--vr-white)}.vr-text-link{display:inline-flex;min-height:44px;align-items:center;gap:8px;font-size:13px;font-weight:700;text-decoration:underline}.vr-parking{margin-top:18px}.vr-parking p{margin-top:7px;font-size:14px}.vr-hours div{display:flex;justify-content:space-between;gap:18px;padding:8px 0;font-size:15px}.vr-hours dd{white-space:nowrap;color:#fff}.vr-note{font-size:12px;line-height:1.7;margin-top:16px!important;max-width:54ch}
+.vr-ticket-option{display:flex;justify-content:space-between;gap:24px;padding:23px 0;border-bottom:1px solid #c8b7da26}.vr-ticket-option h3{font-size:18px;max-width:20ch}.vr-ticket-option p{font-size:14px;margin-top:9px}.vr-ticket-option .vr-price{margin:0;text-align:right;color:var(--vr-muted);white-space:nowrap;font-size:13px}.vr-price strong{display:block;color:#fff;font-size:26px;line-height:1.2;font-weight:500;margin:4px 0 8px}.vr-price span{display:block;font-size:12px}.vr-bundle{border-bottom-color:#d8b7f880;background:radial-gradient(ellipse at 70% 60%,#9d67ce22,transparent 75%)}.vr-bundle-label{display:block;font:700 9px/1.5 Arial,sans-serif;letter-spacing:.16em;color:#c5a5ff;margin-bottom:9px}
+.vr-details details{border-bottom:1px solid #c8b7da30}.vr-details summary{display:flex;justify-content:space-between;align-items:center;gap:20px;list-style:none;padding:19px 0;min-height:60px;font-size:15px;font-weight:700;cursor:pointer}.vr-details summary::-webkit-details-marker{display:none}.vr-details summary span{font-size:21px;font-weight:400;color:var(--vr-purple)}.vr-details details[open] summary span{transform:rotate(45deg)}.vr-details details>div{padding:0 0 21px;font-size:15px;max-width:64ch}.vr-official{margin-top:20px}.vr-contact-links{display:flex;flex-direction:column;align-items:flex-start;gap:4px}.vr-contact-links a{display:flex;align-items:center;min-height:44px;font-size:15px;text-decoration:none}.vr-socials{display:flex;flex-wrap:wrap;gap:6px 24px;margin-top:21px}.vr-socials a{display:flex;align-items:center;min-height:44px;font-size:14px;text-decoration:none;color:#d9d0e4}
+.vr-finale{position:relative;padding:55px 0 65px;border-top:1px solid #c8b7da42}.vr-finale h2{font-family:"Seismique Exhibit",Impact,sans-serif;font-weight:400;font-size:clamp(47px,8vw,80px);line-height:1.02;margin:23px 0 30px}.vr-main-ticket{display:flex;align-items:center;justify-content:space-between;gap:30px;max-width:380px;min-height:58px;padding:14px 22px;border-radius:2px 13px 3px 10px;background:#600dff;color:#fff!important;border:1px solid #ba91ff;box-shadow:4px 4px 0 #71617888,0 0 30px #b373c917;text-decoration:none;font-size:15px;font-weight:700}.vr-main-ticket:hover,.vr-header-ticket:hover{background:#7430ff}.vr-main-ticket span{font-size:25px;font-weight:400}
+.vr-legal{padding-top:16px;border-top:1px solid #fff2;color:#aaa4b1;font-size:10px}.vr-legal>div{display:flex;align-items:center;gap:19px;flex-wrap:wrap}.vr-legal a,.vr-legal button{display:inline-flex;align-items:center;min-height:44px;font-size:11px;color:#bcb5c5;background:none;border:0;padding:0;text-decoration:none}.vr-legal>div>span{margin-left:auto;font-size:10px}.vr-legal details{margin-top:5px}.vr-legal details:not([open]){display:none}.vr-legal summary{font-size:12px;min-height:44px;padding:10px 0;cursor:pointer}.vr-legal details p{font-size:12px;line-height:1.7;max-width:65ch}.vr-legal details a{display:inline;text-decoration:underline;font-size:inherit}
+@media(min-width:760px){.vr-content{padding-top:70px}.vr-essential{display:grid;grid-template-columns:1fr 1fr;gap:56px}.vr-illustration{width:700px;right:2%;top:-90px;opacity:.14}.vr-intro{padding-bottom:66px}.vr-intro>p:last-of-type{font-size:20px}.vr-header{padding-left:max(30px,env(safe-area-inset-left));padding-right:max(30px,env(safe-area-inset-right))}}
+@media(max-width:359px){.vr-content{padding-left:calc(var(--journey-safe-left) + 20px);padding-right:calc(var(--journey-safe-right) + 20px)}.vr-header{padding-left:calc(var(--journey-safe-left) + 12px);padding-right:calc(var(--journey-safe-right) + 12px)}.vr-return,.vr-header-ticket{font-size:11px!important;padding:9px}.vr-ticket-option{gap:14px}.vr-ticket-option h3{font-size:16px}.vr-hours div{font-size:13px}.vr-legal>div{gap:14px}}
+.visit-room[data-effects-paused="true"]{animation:none}
+@media(prefers-reduced-motion:reduce){.visit-room[open]{animation:none}}
+@keyframes visit-arrival{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Let the final threshold breathe, with one visitor-information action. */
+body.jungle-home #seismique-jungle-reveal[data-ending="true"] .footer-shortcut,body.jungle-home #seismique-jungle-reveal[data-ending="true"] .skip-tour{display:none!important}
+body.jungle-home #seismique-jungle-reveal .journey-finish{bottom:calc(var(--journey-safe-bottom) + 28px)}
+
+/* Keep information readable on narrow phones and during text enlargement. */
+@media(max-width:700px){
+ .visit-room .vr-intro{padding-bottom:30px}.visit-room .vr-section{padding:28px 0}
+ .visit-room .vr-jumplinks{gap:8px 22px}.visit-room .vr-ticket-option{gap:16px}
+ .visit-room .vr-ticket-option>div{min-width:0}.visit-room .vr-return,.visit-room .vr-header-ticket{flex-shrink:0}
+ body.jungle-home #seismique-jungle-reveal .jungle-page-stop{max-width:calc(100vw - var(--journey-safe-left) - var(--journey-safe-right) - 40px);touch-action:none}
+ body.jungle-home #seismique-jungle-reveal .explore{touch-action:none}
+}
+@media(max-width:360px){.visit-room .vr-ticket-option{flex-wrap:wrap}.visit-room .vr-ticket-option .vr-price{text-align:left;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.visit-room .vr-price strong{margin:0}.visit-room .vr-price span{font-size:13px}}
+
+/* Rest the UI with its scene; no full-viewport blur behind the opaque visit room. */
+#seismique-jungle-reveal[data-effects-resting="true"] .explore::before{animation-play-state:paused}
+.visit-room::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}
+@media(max-width:700px){
+ body.jungle-home #seismique-jungle-reveal .menu-toggle{backdrop-filter:none;-webkit-backdrop-filter:none}
+ body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+ #seismique-jungle-reveal .menu-panel{backdrop-filter:none;-webkit-backdrop-filter:none}
+ #seismique-jungle-reveal .jungle-page-stop{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+}
+
+/* A single entrance stack: headline, identity, action; one shared cue beneath. */
+body.jungle-home #seismique-jungle-reveal .tour-controls{display:flex;flex-direction:column;align-items:center;gap:18px;bottom:calc(var(--journey-safe-bottom) + 78px);width:min(90vw,680px);pointer-events:none}
+body.jungle-home #seismique-jungle-reveal .tour-controls .explore{pointer-events:auto}
+body.jungle-home .entrance-copy{width:100%;text-align:center;pointer-events:none}
+body.jungle-home #seismique-jungle-reveal .entrance-title{font:900 clamp(28px,3vw,42px)/1.03 Impact,'Arial Narrow',Arial,sans-serif;letter-spacing:-.025em;color:#21192e;margin:0 0 12px;text-shadow:0 1px 5px #fff9}
+body.jungle-home .entrance-copy .entrance-intro{position:static;transform:none;bottom:auto;left:auto;width:auto;max-width:none;margin:0 auto;padding:0;max-width:520px;font:500 15px/1.4 Arial,sans-serif;color:#302438;background:none;text-shadow:0 1px 5px #fff,0 0 12px #eee9e0}
+body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{font-size:15px;letter-spacing:.09em;min-width:240px}
+body.jungle-home .journey-cue{font-size:11px;letter-spacing:.025em;color:#e9e3ee}
+body.jungle-home .journey-cue>span:first-child{font-size:14px;margin-bottom:3px;opacity:.65}
+@media(max-width:700px){
+ body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 61px);gap:12px;width:calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 32px)}
+ body.jungle-home #seismique-jungle-reveal .entrance-title{font-size:clamp(23px,6.7vw,31px);line-height:1.05;letter-spacing:-.035em;margin-bottom:7px}
+ body.jungle-home .entrance-copy .entrance-intro{font-size:13px;line-height:1.4;max-width:290px}
+ body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{width:76vw;min-width:0;min-height:56px;padding:15px 20px}
+}
+@media(max-width:700px) and (max-height:650px){
+ body.jungle-home #seismique-jungle-reveal .tour-controls{gap:8px;bottom:calc(var(--journey-safe-bottom) + 51px)}
+ body.jungle-home #seismique-jungle-reveal .entrance-title{font-size:23px;margin-bottom:5px}
+ body.jungle-home .entrance-copy .entrance-intro{font-size:12px;line-height:1.3;max-width:275px}
+ body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{min-height:48px;padding:11px 16px}
+ body.jungle-home .journey-cue{bottom:calc(var(--journey-safe-bottom) + 12px)}
+}
+@media(min-width:701px) and (max-height:500px){
+ body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 45px);gap:8px}
+ body.jungle-home #seismique-jungle-reveal .entrance-title{font-size:25px;margin-bottom:5px}
+ body.jungle-home .entrance-copy .entrance-intro{font-size:12px}
+ body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{min-height:44px;padding:10px 20px;width:270px}
+ body.jungle-home .journey-cue{bottom:calc(var(--journey-safe-bottom) + 8px)}
+}
+
+body.jungle-home .entrance-copy .entrance-intro span{display:inline;color:inherit;font-weight:500;white-space:nowrap}
+body.jungle-home #seismique-jungle-reveal:has(.explore[data-entry-state="ready"]) .journey-cue{color:#45394e;text-shadow:0 1px 4px #fff,0 0 8px #eee9e0}
+body.jungle-home #seismique-jungle-reveal:has(.explore[data-entry-state="ready"]) .journey-cue>span:first-child{color:#59396d}
+@media(max-width:700px){body.jungle-home .entrance-copy .entrance-intro span{display:block}}
+body.jungle-home #seismique-jungle-reveal:has(.explore[data-entry-state="ready"]) .journey-cue>span:first-child{display:none}
+@media(max-width:700px) and (max-height:650px){
+ body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 35px)}
+ body.jungle-home .entrance-copy .entrance-intro{font-size:12px;line-height:1.35;max-width:none}
+ body.jungle-home .entrance-copy .entrance-intro span{display:inline}
+}
+
+/* A resolved clearing, with the real-world invitation in the open center. */
+body.jungle-home #seismique-jungle-reveal .journey-finale{position:absolute;z-index:6;top:50%;left:50%;transform:translate(-50%,-46%);width:min(680px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 40px));text-align:center;color:#f7f3fb;pointer-events:none}
+body.jungle-home .journey-finale::before{content:"";position:absolute;inset:-80px -16%;z-index:-1;background:radial-gradient(ellipse,#090710d9 12%,#090710a8 42%,#09071000 72%);pointer-events:none}
+body.jungle-home .finale-kicker{margin:0 0 24px;font:700 11px/1.6 Arial,sans-serif;letter-spacing:.20em;color:#d4c1ed;text-wrap:balance}
+body.jungle-home #seismique-jungle-reveal .journey-finale h2{margin:0 0 34px;font:400 clamp(64px,7vw,96px)/1.03 "Seismique Exhibit",Impact,sans-serif;letter-spacing:-.025em;text-shadow:0 3px 22px #08050d}
+body.jungle-home #seismique-jungle-reveal .finale-ticket{display:flex;align-items:center;justify-content:center;pointer-events:auto;margin:auto;width:min(290px,80%);min-height:56px;padding:14px 24px;background:#600dff;color:#fff;border:1px solid #b99bff;border-radius:3px 12px 3px 9px;text-decoration:none;font:700 14px/1.4 Arial,sans-serif;letter-spacing:.10em;box-shadow:0 8px 28px #07030e55,inset 0 1px #e6d7ff30}
+body.jungle-home #seismique-jungle-reveal .finale-ticket:hover{background:#7530ff;border-color:#d6c1ff}
+body.jungle-home #seismique-jungle-reveal .journey-finale .journey-finish{position:static;transform:none;display:inline-flex;align-items:center;justify-content:center;pointer-events:auto;margin:16px auto 0;min-height:44px;padding:8px 16px;background:none;border:0;border-radius:2px;box-shadow:none;font:500 13px/1.4 Arial,sans-serif;color:#d7ccdf;text-decoration:underline;text-decoration-color:#d7ccdf66;text-underline-offset:6px}
+body.jungle-home #seismique-jungle-reveal .journey-finale .journey-finish:hover{color:#fff;text-decoration-color:#fff}
+body.jungle-home #seismique-jungle-reveal .finale-ticket:focus-visible{outline:2px solid #e0cbff;outline-offset:5px}
+@media(max-width:700px){
+ body.jungle-home #seismique-jungle-reveal .journey-finale{transform:translate(-50%,-38%)}
+ body.jungle-home .finale-kicker{font-size:10px;letter-spacing:.15em;max-width:28ch;margin:0 auto 23px}
+ body.jungle-home #seismique-jungle-reveal .journey-finale h2{font-size:clamp(49px,12vw,72px);margin-bottom:30px}
+}
+@media(max-height:500px){
+ body.jungle-home #seismique-jungle-reveal .journey-finale{top:53%;transform:translate(-50%,-50%)}
+ body.jungle-home .finale-kicker{margin-bottom:12px;font-size:9px}
+ body.jungle-home #seismique-jungle-reveal .journey-finale h2{font-size:44px;line-height:.98;margin-bottom:16px}
+ body.jungle-home #seismique-jungle-reveal .finale-ticket{min-height:44px;padding:10px 20px}
+ body.jungle-home #seismique-jungle-reveal .journey-finale .journey-finish{margin-top:5px}
+}
+
+/* Guided opening and one shared destination advance control. */
+body.jungle-home #seismique-jungle-reveal .explore{width:auto!important;min-width:0!important;min-height:44px!important;padding:10px 18px!important;border:1px solid #b8a3d04d;border-radius:3px 9px 3px 6px;background:#100c1bc9;color:#e9e2f1;font:600 11px/1.4 Arial,sans-serif;letter-spacing:.12em;box-shadow:none;backdrop-filter:none}
+body.jungle-home #seismique-jungle-reveal .explore::before,body.jungle-home #seismique-jungle-reveal .explore::after{display:none}
+body.jungle-home #seismique-jungle-reveal .explore .enter-mobile-label{font:inherit;letter-spacing:inherit}
+body.jungle-home #seismique-jungle-reveal .explore:hover{background:#251832;border-color:#d6b9ed88}
+body.jungle-home #seismique-jungle-reveal .explore:disabled{opacity:.65;cursor:wait}
+body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 30px)}
+body.jungle-home .destination-controls{position:absolute;z-index:7;left:50%;bottom:calc(var(--journey-safe-bottom) + 36px);transform:translateX(-50%);width:min(360px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 48px));text-align:center}
+body.jungle-home #seismique-jungle-reveal .destination-next{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:54px;padding:15px 19px;border:1px solid #ac8ece88;border-top-color:#c7d9e88c;border-radius:3px 12px 3px 8px;background:linear-gradient(110deg,#53377333,#142f3426),#100c1ee8;color:#f6f2ff;box-shadow:inset 0 1px #ffffff0d,0 8px 24px #0003;font:700 12px/1.4 Arial,sans-serif;letter-spacing:.06em;cursor:pointer;touch-action:manipulation}
+body.jungle-home .destination-next>span:last-child{font-size:22px;font-weight:400;color:#cbb8ee}
+body.jungle-home #seismique-jungle-reveal .destination-next:hover{background-color:#271b39;border-color:#d2b6f5}
+body.jungle-home #seismique-jungle-reveal .destination-next[aria-disabled="true"]{opacity:.55;cursor:default}
+body.jungle-home #seismique-jungle-reveal .destination-next:focus-visible{outline:2px solid #d7c0ff;outline-offset:5px}
+body.jungle-home #destination-gesture{display:block;margin:9px 0 0;font:400 11px/1.4 Arial,sans-serif;letter-spacing:.025em;color:#c5bacf;text-shadow:0 1px 5px #000}
+@media(max-height:500px){body.jungle-home .destination-controls{bottom:calc(var(--journey-safe-bottom) + 14px);width:300px}body.jungle-home #seismique-jungle-reveal .destination-next{min-height:44px;padding:9px 15px}body.jungle-home #destination-gesture{margin-top:5px}body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 15px)}}
+body.jungle-home #seismique-jungle-reveal .tour-controls .entrance-copy .entrance-intro{display:block}
+
+/* Five equal destinations; the persistent ticket control remains separate. */
+#seismique-jungle-reveal .menu-panel{background:#100d16f7;border:1px solid #ffffff2b;box-shadow:0 18px 60px #0008}
+#seismique-jungle-reveal .direct-nav{display:flex;flex-direction:column;gap:0;padding:0}
+#seismique-jungle-reveal .direct-nav a{display:flex;align-items:center;justify-content:flex-start;min-height:50px;padding:13px 12px;margin:0;border:0;border-bottom:1px solid #ffffff14;border-radius:0;background:transparent;box-shadow:none;color:#ede9f2;font:500 16px/1.4 Arial,Helvetica,sans-serif;text-align:left;text-decoration:none;letter-spacing:0;transition:background-color .18s,color .18s}
+#seismique-jungle-reveal .direct-nav a:last-child{border-bottom:0}
+#seismique-jungle-reveal .direct-nav a:hover{background:#ffffff08;color:#fff}
+#seismique-jungle-reveal .direct-nav a[aria-current="page"]{background:#ffffff06;color:#decfff;box-shadow:inset 2px 0 #a47aff}
+#seismique-jungle-reveal .direct-nav a:focus-visible{outline:2px solid #c5a5ff;outline-offset:-2px;background:#ffffff0b;color:#fff}
+#seismique-jungle-reveal .menu-home{display:flex;align-items:center;min-height:52px;width:160px;margin:0 12px 13px;padding:4px 0 12px;text-decoration:none}
+#seismique-jungle-reveal .menu-home img{display:block;width:100%;height:auto;filter:brightness(0) invert(1)}
+#seismique-jungle-reveal .menu-settings{margin-top:14px;padding-top:10px;border-top:1px solid #ffffff20}
+#seismique-jungle-reveal .menu-settings button{color:#aaa3b3;font-size:12px}
+.experience-header .brand img{filter:brightness(0) invert(1)}
+.experience-header{padding-top:calc(12px + env(safe-area-inset-top))}
+.experience-header .header-ticket svg{width:18px;height:18px;flex:none}
+.experience-header .header-ticket{display:inline-flex;align-items:center;gap:8px}
+@media(max-width:700px){#seismique-jungle-reveal .direct-nav a{font-size:15px;min-height:49px}.experience-header .menu-toggle{font-size:12px;gap:6px;padding:8px 0}.experience-header .menu-toggle span{font-size:15px}.experience-header .brand{width:112px}.experience-header .header-actions{gap:14px}.experience-header .header-ticket{font-size:10px;padding:10px;min-height:44px;gap:6px}.experience-header .menu-panel{max-height:calc(100dvh - 108px - env(safe-area-inset-top));overflow:auto}}
+@media(max-width:360px){.experience-header{padding-left:14px;padding-right:14px;gap:8px}.experience-header .brand{width:93px}.experience-header .header-actions{gap:10px}.experience-header .header-ticket svg{width:16px}}
+@media(prefers-reduced-motion:reduce){#seismique-jungle-reveal .direct-nav a{transition:none}}
+
+/* Shared mobile header: safe edges, quiet menu, separate glass ticket action. */
+@media(max-width:700px),(max-height:500px){
+ .experience-header,.golf-page .experience-header{padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 12px calc(16px + env(safe-area-inset-left));gap:12px}
+ .experience-header .header-actions{gap:12px;flex-shrink:0}
+ .experience-header .brand,.golf-page .experience-header .brand{width:clamp(84px,25vw,112px);min-width:0}
+ .experience-header .menu-toggle{min-width:44px;min-height:44px;padding:8px 2px;background:none;border:0;color:#ddd6e6;font-weight:500}
+ .experience-header .header-ticket,.golf-page .experience-header .header-ticket{min-height:44px;padding:10px 12px;font-size:11px;letter-spacing:.01em;border:1px solid #b69ada66;border-radius:3px 10px 3px 8px;background:linear-gradient(120deg,#56517d33,#13101be8);color:#fff;box-shadow:inset 0 1px #e2d0ff14}
+ .experience-header .header-ticket:hover{background:#292037;border-color:#c4a2ed}
+ .experience-header .menu-panel{right:calc(16px + env(safe-area-inset-right));width:min(340px,calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 32px));max-height:calc(100dvh - 108px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overscroll-behavior:contain}
+}
+@media(max-width:360px){.experience-header .header-actions{gap:8px}.experience-header .header-ticket,.golf-page .experience-header .header-ticket{padding:10px 9px}.experience-header .menu-toggle{gap:4px;font-size:11px}}
+
+</style>
+<!--/journey:styles-->
 </head>
 <body class="jungle-home"><main aria-label="Seismique interactive walkthrough">
 <div id="seismique-jungle-reveal" data-phase="start" data-view="tour">
@@ -138,27 +469,20 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
 
     <div class="global-ticketbar"><a class="tickets button primary" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener"><svg class="ticket-mark" viewBox="0 0 24 18" aria-hidden="true" focusable="false"><path d="M3 3h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V3Z"/><path class="ticket-perforation" d="M16 4v10"/></svg><span>Get tickets</span></a></div>
   </div>
-  <script src="/assets/visitor.js?v=58" defer></script>
+  <!--journey:ui-->
+<script src="/assets/journey-ui.42858e3246e1.js" defer fetchpriority="high"></script>
+<!--/journey:ui-->
 
 
-  <script src="/assets/three.min.js?v=160" defer></script>
-  <script src="/assets/journey-atmosphere.js?v=61" defer></script>
-  <script src="/assets/jungle-lighting.js?v=57" defer></script>
-  <script src="/assets/jungle-sky.js?v=prebuilt-20261030" defer></script>
-  <script src="/assets/ending-portal.js?v=64" defer></script>
-  <script src="/assets/destination-grass.js?v=61" defer></script>
-  <script src="/assets/entrance-mural.js?v=52" defer></script>
-  <script src="/assets/portal-energy.js?v=52" defer></script>
-  <script src="/assets/journey-guide.js?v=tablet-clock-20261030" defer></script>
-  <script src="/assets/static-scenery.js?v=spatial-20261030" defer></script>
-  <script src="/assets/journey-performance.js?v=tablet-budget-20261030" defer></script>
-  <script src="/assets/jungle-light-budget.js?v=2" defer></script>
-  <script src="/assets/journey-scene.js?v=tablet-budget-20261030" defer></script>
+  <!--journey:entry-->
+<script src="/assets/three.min.js?v=160" defer fetchpriority="high"></script>
+<script src="/assets/journey-entry.dcf13dcc41ed.js" defer fetchpriority="high"></script>
+<!--/journey:entry-->
 </div>
 
 </main><noscript>Enable JavaScript for the walkthrough, or <a href="/plan-your-visit/">plan your visit here</a>.</noscript>
 <!-- VISIT_ROOM_START --><dialog class="visit-room" id="visit-room" aria-labelledby="visit-room-title">
-  <div class="vr-atmosphere" aria-hidden="true"><div class="vr-orbit"></div><img class="vr-illustration" src="/assets/entrance-left-field.svg?v=48" alt=""><img class="vr-wave" src="/assets/seismique-optical-wave.svg" alt=""></div>
+  <div class="vr-atmosphere" aria-hidden="true"><div class="vr-orbit"></div><img class="vr-illustration" loading="lazy" fetchpriority="low" src="/assets/entrance-left-field.svg?v=48" alt=""><img class="vr-wave" loading="lazy" fetchpriority="low" src="/assets/seismique-optical-wave.svg" alt=""></div>
   <header class="vr-header"><button type="button" class="vr-return" data-close-visit><span aria-hidden="true">↶</span> Back to journey</button><a class="vr-header-ticket" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener noreferrer">Get Tickets <span aria-hidden="true">↗</span></a></header>
   <div class="vr-scroll" tabindex="0" aria-label="Visitor information">
     <div class="vr-content">
@@ -176,5 +500,5 @@ main{max-width:430px;margin:0 auto;height:100vh;height:100dvh}
   </div>
 </dialog>
 <!-- VISIT_ROOM_END -->
-<script src="/assets/journey-interface.js?v=progressive-20261030" defer></script></body>
+</body>
 </html>
