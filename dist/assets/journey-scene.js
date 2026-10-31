@@ -128,7 +128,7 @@
     function sidePathOpening(z,side){return jungleSidePaths.some(stop=>stop.side===side&&Math.abs(z-(stop.z+.9))<1.45);}
     function inSidePath(x,z,margin=0){return jungleSidePaths.some(stop=>stop.samples.some(v=>Math.hypot(x-v.x,z-v.z)<.96+margin));}
     function revealRandom(n){const v=Math.sin(n*127.13+53.7)*43758.5453;return v-Math.floor(v);}
-    function organicBranch(points,r0,r1,material,segments=36,parent=revealWorld){
+    function* organicBranch(points,r0,r1,material,segments=36,parent=revealWorld){
       const curve=new T.CatmullRomCurve3(points.map(v=>new T.Vector3(...v))),sculpted=!!material.userData.bark;
       // Phone-size silhouettes retain carved channels with fewer hidden triangles.
       if(quality.compact)segments=Math.max(12,Math.round(segments*.75));
@@ -143,6 +143,7 @@
         phase:revealRandom(k+seed*13+83)*Math.PI*2
       }));
       for(let i=0;i<=segments;i++){
+        if(sculpted&&i%4===0)yield;
         const u=i/segments,center=curve.getPointAt(u),knot=sculpted?1+.21*Math.exp(-Math.pow((u-.27)/.085,2))+.12*Math.exp(-Math.pow((u-.64)/.07,2)):1;
         const radius=T.MathUtils.lerp(r0,r1,Math.pow(u,.84))*knot*(1+.04*Math.sin(u*28+seed));
         for(let j=0;j<=radial;j++){
@@ -189,7 +190,7 @@
       const barkSize=256,barkCanvas=document.createElement('canvas'),barkColorCanvas=document.createElement('canvas');
       barkCanvas.width=barkCanvas.height=barkColorCanvas.width=barkColorCanvas.height=barkSize;
       const bc=barkCanvas.getContext('2d'),cc=barkColorCanvas.getContext('2d'),bp=bc.createImageData(barkSize,barkSize),cp=cc.createImageData(barkSize,barkSize);
-      for(let y=0;y<barkSize;y++){if(y%16===0)yield;for(let x=0;x<barkSize;x++){
+      for(let y=0;y<barkSize;y++){if(y%4===0)yield;for(let x=0;x<barkSize;x++){
         const pores=surfaceNoise(x/4,y/4,64,407),rough=surfaceNoise(x/16,y/16,16,211),mottle=surfaceNoise(x/64,y/64,4,819),k=(x+y*barkSize)*4;
         const height=.43+rough*.19+pores*.10,shade=.94+mottle*.06;
         bp.data[k]=bp.data[k+1]=bp.data[k+2]=height*255;bp.data[k+3]=255;
@@ -206,7 +207,7 @@
       const stemMaterial=new T.MeshStandardMaterial({color:0xb13a74,emissive:0x3d0926,emissiveIntensity:.35,roughness:.43});
       const stoneCanvas=document.createElement('canvas');stoneCanvas.width=stoneCanvas.height=128;
       const stoneContext=stoneCanvas.getContext('2d'),stonePixels=stoneContext.createImageData(128,128);
-      for(let y=0;y<128;y++){if(y%16===0)yield;for(let x=0;x<128;x++){
+      for(let y=0;y<128;y++){if(y%4===0)yield;for(let x=0;x<128;x++){
         const grain=.58*surfaceNoise(x/8,y/8,16,170)+.27*surfaceNoise(x/2,y/2,64,361)+.15*surfaceNoise(x/32,y/32,4,542),k=(y*128+x)*4;
         stonePixels.data[k]=stonePixels.data[k+1]=stonePixels.data[k+2]=grain*255;stonePixels.data[k+3]=255;
       }
@@ -218,7 +219,7 @@
       for(let k=0;k<3;k++){
         const z=mouthZ-portalDepth-.09-k*1.65,r=4.35+k*.26,points=[];
         for(let j=0;j<=56;j++){const a=-.22+(Math.PI+.44)*j/56;points.push([Math.cos(a)*r,3.55+Math.sin(a)*r,z]);}
-        organicBranch(points,.065,.065,tunnelMat,56);
+        yield* organicBranch(points,.065,.065,tunnelMat,56);
         const light=tube(points,.012,new T.MeshBasicMaterial({color:0x18bddd,transparent:true,opacity:.38-k*.10}),revealWorld);ledRings.push(light);
       }
       const groundUniforms={uTime:{value:0}};
@@ -232,7 +233,7 @@
       // Mottled teal floor, like the painted surface in the supplied Eden video.
       const floorCanvas=document.createElement('canvas');floorCanvas.width=floorCanvas.height=256;
       const fc=floorCanvas.getContext('2d'),pixels=fc.createImageData(256,256);
-      for(let y=0;y<256;y++){if(y%16===0)yield;for(let x=0;x<256;x++){
+      for(let y=0;y<256;y++){if(y%4===0)yield;for(let x=0;x<256;x++){
         const n=.52*surfaceNoise(x/64,y/64,4,8)+.27*surfaceNoise(x/16,y/16,16,72)+.15*surfaceNoise(x/4,y/4,64,201)+.06*revealRandom(x+y*256),k=(y*256+x)*4;
         pixels.data[k]=20+n*15;pixels.data[k+1]=56+n*27;pixels.data[k+2]=59+n*25;pixels.data[k+3]=255;
       }
@@ -310,7 +311,7 @@
       for(const [bi,bed] of plantingIslands.entries()){yield;
         const outline=new T.CatmullRomCurve3(Array.from({length:64},(_,j)=>{const p=bed.outline(j/64*Math.PI*2);return new T.Vector3(p.x,0,p.z);}),true),perimeter=outline.getLength();
         const bands=[0,.22,.48,.73,1.035];
-        for(let row=0;row<4;row++){
+        for(let row=0;row<4;row++){yield;
           const widths=[];let total=0;
           while(total<perimeter){const width=.48+revealRandom(bi*301+row*71+widths.length*11)*.64;widths.push(width);total+=width;}
           const normalization=perimeter/total,offset=(row*.37+bi*.13)%perimeter;let distance=offset;
@@ -412,8 +413,8 @@
       }
       yield;
       // Emerald and turquoise fern fans retain occasional warm coral accents in the planting.
-      plantingIslands.forEach((bed,bi)=>{
-        for(let cluster=0;cluster<3;cluster++){
+      for(const [bi,bed] of plantingIslands.entries()){
+        for(let cluster=0;cluster<3;cluster++){yield;
           const a=(bed.side<0?0:Math.PI)+(cluster-1)*.70,x=bed.x+Math.cos(a)*bed.rx*.47,z=bed.z+Math.sin(a)*bed.rz*.57;
           if(inSidePath(x,z,1.05))continue;
           for(let frond=0;frond<7;frond++){
@@ -429,7 +430,7 @@
           if(!foliageFits(broadGeometry,dummy.matrix))continue;
           broadLeaves.setMatrixAt(broadIndex,dummy.matrix);color.setHSL(.34+revealRandom(bi)*.085,.78,.33+revealRandom(leaf)*.09);broadLeaves.setColorAt(broadIndex,color);broadIndex++;
         }
-      });
+      }
       const vineMaterial=new T.MeshStandardMaterial({color:0x216448,roughness:.84});
       function hangingGreenery(anchor,seed,length){
         const curve=new T.CatmullRomCurve3([new T.Vector3(...anchor),new T.Vector3(anchor[0]+.12,anchor[1]-length*.35,anchor[2]+.08),new T.Vector3(anchor[0]-.08,anchor[1]-length*.72,anchor[2]+.16),new T.Vector3(anchor[0]+.02,anchor[1]-length,anchor[2]+.13)]);
@@ -453,13 +454,13 @@
         const side=baseX<0?-1:1,originalX=baseX+junglePathX(z),x=inSidePath(originalX,z,1.7)?side*8.2:originalX,mat=barkMaterials[i%4];
         const lean=-side*(.55+revealRandom(i+5)*.65),width=1.06+revealRandom(i+41)*.30;
         const spine=[[x,.12,z],[x+side*.10,.70,z+.10],[x+lean*.28,h*.28,z-.12],[x+lean*.55,h*.47,z+.17],[x+lean,h*.67,z-.13],[x+lean*1.35,h*.87,z+.25],[x+lean*1.55,h,z+.40]];
-        const trunk=organicBranch(spine,width,.035,mat,56);revealTrees++;
+        const trunk=yield* organicBranch(spine,width,.035,mat,56);revealTrees++;yield;
         // Buttress roots enter the trunk below its surface, then flatten into the bed.
-        for(let k=0;k<6;k++){
+        for(let k=0;k<6;k++){yield;
           const a=k/6*Math.PI*2+i*.73,length=1.25+revealRandom(i*19+k)*.85;
           const endX=x+Math.cos(a)*length,endZ=z+Math.sin(a)*length;
           const safeX=side<0?Math.min(endX,junglePathX(endZ)-2.65):Math.max(endX,junglePathX(endZ)+2.65);
-          const root=organicBranch([[x+lean*.05,1.3,z],[x+(safeX-x)*.28,.66,z+(endZ-z)*.28],[x+(safeX-x)*.67,.22,z+(endZ-z)*.67],[safeX,.055,endZ]],width*.43,.025,mat,22);
+          const root=yield* organicBranch([[x+lean*.05,1.3,z],[x+(safeX-x)*.28,.66,z+(endZ-z)*.28],[x+(safeX-x)*.67,.22,z+(endZ-z)*.67],[safeX,.055,endZ]],width*.43,.025,mat,22);
           const rp=root.branch.geometry.attributes.position;
           for(let n=0;n<rp.count;n++)rp.setY(n,Math.max(.035,rp.getY(n)));
           smoothBranchNormals(root.branch.geometry);
@@ -467,35 +468,35 @@
         // Roots descend visibly over the closest raised stone face.
         const bed=plantingIslands.filter(b=>b.side===side).sort((a,b)=>Math.hypot(x-a.x,z-a.z)-Math.hypot(x-b.x,z-b.z))[0];
         if(bed&&Math.hypot(x-bed.x,z-bed.z)<2.4){
-          for(let root=0;root<2;root++){
+          for(let root=0;root<2;root++){yield;
             const a=(side<0?0:Math.PI)+(root===0?-.34:.38),edge=bed.outline(a),endX=edge.x-side*.15,endZ=edge.z+.18;
             if(inSidePath(endX,endZ,.45)||Math.abs(endX-junglePathX(endZ))<2.5)continue;
-            organicBranch([[x,1.85,z],[x+(edge.x-x)*.55,bed.height+.25,z+(edge.z-z)*.55],[edge.x,bed.height+.08,edge.z],[endX,.58,endZ],[endX-side*.10,.07,endZ+.16]],.29,.025,mat,28);drapedRoots++;
+            yield* organicBranch([[x,1.85,z],[x+(edge.x-x)*.55,bed.height+.25,z+(edge.z-z)*.55],[edge.x,bed.height+.08,edge.z],[endX,.58,endZ],[endX-side*.10,.07,endZ+.16]],.29,.025,mat,28);drapedRoots++;
           }
         }
         // Staggered, attached boughs interlock at a lower overhead height.
         if([0,1,2,4,7,10].includes(i)){
           const base=trunk.curve.getPointAt(.56),path=junglePathX(z),ceiling=5.35+revealRandom(i+712)*.70+(i===13?1.35:0),drift=(i%2?1:-1)*1.1;
-          const arch=organicBranch([base.toArray(),[path+side*2.35,ceiling-.15,z+.25],[path+side*.45,ceiling+.30,z+drift*.50],[path-side*1.55,ceiling+.08,z+drift],[path-side*3.15,ceiling-.24,z+drift*1.15]],.43,.065,mat,48);crossingBoughs++;
+          const arch=yield* organicBranch([base.toArray(),[path+side*2.35,ceiling-.15,z+.25],[path+side*.45,ceiling+.30,z+drift*.50],[path-side*1.55,ceiling+.08,z+drift],[path-side*3.15,ceiling-.24,z+drift*1.15]],.43,.065,mat,48);crossingBoughs++;
           if(i%2===0)hangingGreenery(arch.curve.getPointAt(.14).toArray(),i+31,.72);
-          for(let fork=0;fork<2;fork++){
+          for(let fork=0;fork<2;fork++){yield;
             const start=arch.curve.getPointAt(.43+fork*.27),sign=fork?1:-1;
-            organicBranch([start.toArray(),[start.x-side*.45,start.y+.20,start.z+sign*.75],[start.x-side*1.10,start.y+.32,start.z+sign*1.65],[start.x-side*1.55,start.y+.59,start.z+sign*1.72]],.15,.016,mat,24);
+            yield* organicBranch([start.toArray(),[start.x-side*.45,start.y+.20,start.z+sign*.75],[start.x-side*1.10,start.y+.32,start.z+sign*1.65],[start.x-side*1.55,start.y+.59,start.z+sign*1.72]],.15,.016,mat,24);
           }
         }
         // Unequal forks grow out of the trunk and carry smaller lateral branches.
-        for(let limb=0;limb<3;limb++){
+        for(let limb=0;limb<3;limb++){yield;
           const startU=.43+limb*.125,base=trunk.curve.getPointAt(startU);
           const direction=limb===0?(side<0?0:Math.PI):i*.83+limb*2.35;
           const reach=(limb===0?3.4+revealRandom(i+8)*.7:2+revealRandom(i+limb*9)*1.2)*(i===13?.67:1);
           const dx=Math.cos(direction),dz=Math.sin(direction),top=Math.min(h+.12,base.y+2.25+revealRandom(i+limb)*.6);
           const points=[[base.x,base.y,base.z],[base.x+dx*reach*.23,base.y+.7,base.z+dz*reach*.19],[base.x+dx*reach*.64,top-.27,base.z+dz*reach*.64],[base.x+dx*reach,top,base.z+dz*reach]];
-          const bough=organicBranch(points,width*(.39-limb*.065),.022,mat,32);
+          const bough=yield* organicBranch(points,width*(.39-limb*.065),.022,mat,32);
           if(limb===0){const anchor=bough.curve.getPointAt(.79);treePodAnchors.push(anchor.toArray());if(i<12)makeHangingPod(anchor.toArray(),i,stemMaterial);}
-          for(let fork=0;fork<2;fork++){
+          for(let fork=0;fork<2;fork++){yield;
             const start=bough.curve.getPointAt(.48+fork*.23),angle=direction+(fork===0?-.8:.72),spread=.95+revealRandom(i*11+limb*3+fork)*.75;
             const tip=[start.x+Math.cos(angle)*spread,Math.min(h-.35,start.y+.8+revealRandom(i+fork)*.4),start.z+Math.sin(angle)*spread];
-            organicBranch([start.toArray(),[start.x+Math.cos(angle)*spread*.43,start.y+.46,start.z+Math.sin(angle)*spread*.42],tip],.13-fork*.035,.008,mat,18);
+            yield* organicBranch([start.toArray(),[start.x+Math.cos(angle)*spread*.43,start.y+.46,start.z+Math.sin(angle)*spread*.42],tip],.13-fork*.035,.008,mat,18);
             // Sparse foliage at twig tips keeps the sculptural branch silhouette visible.
             for(let leaf=0;leaf<12;leaf++){
               const a=leaf*2.399+i+limb,scale=.38+revealRandom(crownIndex+51)*.34;
@@ -525,8 +526,8 @@
         const side=i%2?1:-1,z=jungleZ(-29-Math.floor(i/2)*6.3),x=side*(8.6+revealRandom(i+1900));
         if(inSidePath(x,z,1.4))continue;
         const mat=barkMaterials[(i+2)%4],h=6.1+revealRandom(i+1901)*1.2;
-        const trunk=organicBranch([[x,.1,z],[x-side*.25,2,z+.2],[x-side*.7,4.1,z-.3],[x-side*1.1,h,z+.3]],.67,.07,mat,30);
-        for(let k=0;k<2;k++){const base=trunk.curve.getPointAt(.55+k*.18);organicBranch([base.toArray(),[base.x-side*1.1,base.y+.8,z+(k?1:-1)],[base.x-side*2.3,base.y+1.3,z+(k?2:-2)]],.26,.035,mat,22);}
+        const trunk=yield* organicBranch([[x,.1,z],[x-side*.25,2,z+.2],[x-side*.7,4.1,z-.3],[x-side*1.1,h,z+.3]],.67,.07,mat,30);
+        for(let k=0;k<2;k++){const base=trunk.curve.getPointAt(.55+k*.18);yield* organicBranch([base.toArray(),[base.x-side*1.1,base.y+.8,z+(k?1:-1)],[base.x-side*2.3,base.y+1.3,z+(k?2:-2)]],.26,.035,mat,22);}
       }
       yield;
       // Residual portal light settles into an open, conclusive jungle clearing.
@@ -578,7 +579,7 @@
       const pivot=new T.Group();pivot.position.set(...anchor);revealWorld.add(pivot);
       const drop=i>=90?.22:.30+revealRandom(i+3)*1.0,scale=(.38+revealRandom(i+10)*.46)*(i===40||i===41?1.16:1);
       const podColor=[0xff47cf,0xffca35,0x66f246,0x40deff,0xff7934,0xb480ff][i%6];
-      organicBranch([[0,0,0],[.15,-.28,0],[.13,-drop+.1,.03],[-.12,-drop-.11,.06]],.031,.022,stemMaterial,24,pivot);
+      const stem=organicBranch([[0,0,0],[.15,-.28,0],[.13,-drop+.1,.03],[-.12,-drop-.11,.06]],.031,.022,stemMaterial,24,pivot);while(!stem.next().done){}
       const profile=[[.015,0],[.19,.06],[.31,.24],[.33,.47],[.25,.74],[.11,.93],[.022,1.05]];
       const geo=new T.LatheGeometry(profile.map(([r,y])=>new T.Vector2(r,y)),24);
       const mat=new T.ShaderMaterial({uniforms:{uColor:{value:new T.Color(podColor)},uTime:{value:0},uPhase:{value:i},uBloom:{value:1}},
@@ -628,7 +629,7 @@
     const entranceCameraZ=artHeight*worldScale*.5/Math.tan(37*Math.PI/180);
     const arrivalCameraZ=entranceCameraZ/1.20;
     const machineLift=.60,apertureY=(groundPixel-980)*worldScale+machineLift;
-    let machineTime=0,machineRunning=!reducedMotion,portalReady=false,formation=0;
+    let machineTime=0,machineRunning=!reducedMotion,portalReady=false,entrancePrepared=false,formation=0;
     // Power-up has its own clock. It never advances the visitor's camera.
     const portalEnergy=window.createPortalEnergyTimeline({reducedMotion});
     const powerUpDuration=portalEnergy.duration;
@@ -1050,7 +1051,7 @@
       curve.add(new T.LineCurve3(last,points[points.length-1]));return curve;
     }
 
-    function buildReference(){
+    async function buildReference(){
       // Paper wall and logo are behind the machine; no duplicate machine remains.
       const bc=document.createElement('canvas');bc.width=artWidth;bc.height=artHeight;const bg=bc.getContext('2d');
       bg.fillStyle='#fff7e7';bg.fillRect(0,0,artWidth,artHeight);
@@ -1062,18 +1063,25 @@
       entranceWallMaterials.push(wallMat);
       buildConstruction();buildMachineWall();buildPortal();
       entranceMural=window.createEntranceMural({THREE:T,scene,wallMaterials:entranceWallMaterials,apertureY,reducedMotion});
+      root.dataset.entrancePreparation='compiling';
+      try{await renderer.compileAsync(scene,camera);}
+      catch(error){root.dataset.entrancePreparation='failed';root.querySelector('.error').hidden=false;return;}
       portalReady=true;root.dataset.portalReady='true';
+      entrancePrepared=true;root.dataset.entrancePreparation='ready';
       // Paint the entrance first; construct the next world in bounded idle slices.
       requestAnimationFrame(()=>requestAnimationFrame(()=>prepareJungle()));
     }
     let preparation=null,preparationHandle=null,preparing=false;
     function queuePreparation(){
-      if(preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true')return;
+      if(preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
       const task=deadline=>{
         preparationHandle=null;
-        if(document.hidden||root.dataset.visitOpen==='true')return;
+        if(document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
         const start=performance.now();let done=false;
-        do{done=preparation.next().done;}while(!done&&performance.now()-start<5&&(!deadline||deadline.timeRemaining()>2));
+        do{
+          const sliceStart=performance.now();done=preparation.next().done;
+          root.dataset.prepMaxSliceMs=Math.max(Number(root.dataset.prepMaxSliceMs||0),performance.now()-sliceStart).toFixed(2);
+        }while(!done&&performance.now()-start<3&&(!deadline||deadline.timeRemaining()>3));
         if(done){preparation=null;finishPreparation();}else queuePreparation();
       };
       preparationHandle=window.requestIdleCallback?requestIdleCallback(task,{timeout:100}):setTimeout(()=>task(null),16);
@@ -1131,7 +1139,7 @@
       }
       freezeScenery(revealWorld);
       revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';let pointLights=0;scene.traverse(node=>{if(node.isPointLight)pointLights++;});root.dataset.shaderPointLights=String(pointLights);
-      renderer.shadowMap.needsUpdate=true;lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();applyQuality();journeyLoop?.wake();
+      lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();applyQuality();journeyLoop?.wake();
     }
     let energyTime=0,scrollEnergy=0,lastProgress=0,charge=0,portalLip,energyParticles,energyTrails;
     let electricalField,fieldUniforms,opening=0,channelUniforms,channelEdges;
@@ -1445,7 +1453,7 @@
     // Overlay/tab visibility suspends the existing loop, preserving the in-flight transition.
     function pauseJourney(){dragY=null;root.wakeJourney?.();}
     function updateJourney(dt){
-      guideState=guide.tick(dt,{sceneReady:revealReady,introPlaying:machineRunning||reducedMotion});
+      guideState=guide.tick(dt,{sceneReady:revealReady,introPlaying:(machineRunning||reducedMotion)&&entrancePrepared});
       p=guideState.progress;target=guideState.target;auto=guideState.mode==='intro';
     }
     function requestDestination(direction=1){
@@ -1528,7 +1536,7 @@
     root.navigationState=()=>({progress:p,target,auto,mode:guideState.mode,destinationIndex:guideState.index,camera:camera.position.toArray(),visiblePageStops:pageStops.filter(stop=>!stop.button.hidden).map(stop=>stop.id)});
     // JOURNEY_NAV_END
     function applyQuality(){
-      renderer.setPixelRatio(quality.ratio);
+      if(renderer.getPixelRatio()!==quality.ratio)renderer.setPixelRatio(quality.ratio);
       portalDust?.geometry.setDrawRange(0,Math.ceil(dustCount*quality.density));
       energyParticles?.geometry.setDrawRange(0,Math.ceil(particleCount*quality.density));
       energyTrails?.geometry.setDrawRange(0,Math.ceil(particleCount*quality.density)*2);
@@ -1572,7 +1580,7 @@
       if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();}
       const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);
       if(machineRunning||changed||lastEffectTime<0){
-        updateMachine(dt);
+        updateMachine(entrancePrepared?dt:0);
         const jungleActive=revealReady&&p>.27;
         // Camera remains at display cadence. Movement does not bypass this budget.
         if(effectDelta!==null){

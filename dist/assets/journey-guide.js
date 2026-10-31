@@ -11,6 +11,8 @@
     let mode=index<0?'intro':'idle',ready=false,skipPending=false,transition=null;
     let introFrom=progress,introElapsed=0,motionVeil=0;
     const introDuration=Math.max(1,11/introSpeed*(first-progress)/first);
+    const chargeEnd=progress;
+    const chargeDuration=progress<.005?Math.min(introDuration,2.6):0;
     function state(){return {progress,target:mode==='intro'?stops()[0]:points()[index],index,mode,busy:mode!=='idle',skipPending,ready,motionVeil};}
     function settle(i){index=i;progress=points()[i];mode='idle';transition=null;skipPending=false;motionVeil=0;}
     return {
@@ -42,11 +44,20 @@
             return state();
           }
           if(introPlaying&&!skipPending){
-            const nextElapsed=Math.min(introDuration,introElapsed+dt);
-            const next=introFrom+(stops()[0]-introFrom)*ease(nextElapsed/introDuration);
-            // Wait before the tunnel crossing until geometry and shaders are warm.
-            if(ready||next<=.26){introElapsed=nextElapsed;progress=next;}
-            if(introElapsed===introDuration&&ready)settle(0);
+            let remaining=dt;
+            if(introElapsed<chargeDuration){
+              const step=Math.min(remaining,chargeDuration-introElapsed);
+              introElapsed+=step;remaining-=step;
+              progress=introFrom+(chargeEnd-introFrom)*ease(introElapsed/chargeDuration);
+              if(introElapsed<chargeDuration)return state();
+            }
+            // Keep the camera anchored during charge-up. A slower
+            // phone can prepare here without freezing halfway through a move.
+            if(!ready)return state();
+            introElapsed=Math.min(introDuration,introElapsed+remaining);
+            const travelDuration=Math.max(.001,introDuration-chargeDuration);
+            progress=chargeEnd+(stops()[0]-chargeEnd)*ease((introElapsed-chargeDuration)/travelDuration);
+            if(introElapsed===introDuration)settle(0);
           }
         }else if(mode==='transition'&&ready){
           transition.elapsed=Math.min(transition.duration,transition.elapsed+dt);

@@ -44,3 +44,9 @@ assert(html.includes("document.addEventListener('DOMContentLoaded'"),'Constructi
 assert([...html.matchAll(/<script src=[^>]+>/g)].every(m=>m[0].includes('defer')),'Dependencies must not block the loading UI parser');
 assert(html.includes('[data-first-frame="true"] .loading-portal'),'Loading cover remains until the first actual render');
 console.log('PASS: faster intro independent of original destination pace, calm reduced-motion dissolves, stall protection and visible loading handoff.');
+
+g=make();run(g,20,{sceneReady:false});assert(Math.abs(g.state().progress)<1e-8,'Slow loading keeps the camera anchored during charge-up');
+const checkpoint=g.state().progress;g.tick(1/60,{sceneReady:true});assert(g.state().progress>checkpoint&&g.state().progress-checkpoint<.00005,'Ready handoff accelerates gently rather than jumping back into motion');run(g,8);assert.equal(g.state().index,0);
+assert(html.includes('introPlaying:(machineRunning||reducedMotion)&&entrancePrepared'),'Entrance shader preparation must gate cinematic movement');
+assert(html.includes('if(renderer.getPixelRatio()!==quality.ratio)'),'An unchanged quality setting must not clear the opening canvas');
+console.log('PASS: smooth readiness checkpoint and restart; entrance preparation before motion; no redundant canvas resize.');
