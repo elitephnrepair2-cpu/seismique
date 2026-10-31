@@ -1484,23 +1484,17 @@
 
     // JOURNEY_NAV_START
     let p=0,target=0,auto=false,lastTime=performance.now(),currentKey='',dragY=null;
-    const pageStops=jungleSidePaths.map(stop=>({...stop,point:stop.curve.getPointAt(.28).setY(2.35),button:root.querySelector('[data-jungle-page="'+stop.id+'"]')}));
-    const projectedStop=new T.Vector3();
+    const pageStops=jungleSidePaths.map(stop=>({...stop,button:root.querySelector('[data-jungle-page="'+stop.id+'"]')}));
     // A card occupies 3.8m of each 7.49m stretch. Every stop ends before the next reveal.
     function pageStopVisible(stop){
       const distance=camera.position.z-stop.z;
       return p>=.58&&distance<=10&&distance>6.2;
     }
     function updatePageStops(){
-      const width=viewportWidth,height=viewportHeight;
       pageStops.forEach(stop=>{
         const visible=pageStopVisible(stop);
         stop.button.inert=guide.state().busy;
         if(stop.button.hidden===visible)stop.button.hidden=!visible;if(!visible)return;
-        projectedStop.copy(stop.point).project(camera);
-        const x=T.MathUtils.clamp((projectedStop.x*.5+.5)*width,100,width-100);
-        const y=T.MathUtils.clamp((-.5*projectedStop.y+.5)*height,120,Math.max(120,height-230));
-        stop.button.style.transform=`translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) translate(-50%,-50%)`;
       });
     }
     pageStops.forEach(stop=>stop.button.addEventListener('click',()=>{if(guide.state().busy)return;pauseJourney();root.visitorNavigation.open(stop.id);}));

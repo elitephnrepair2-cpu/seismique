@@ -185,3 +185,11 @@ body.jungle-home #seismique-jungle-reveal .destination-next:focus-visible{outlin
 body.jungle-home #destination-gesture{display:block;margin:9px 0 0;font:400 11px/1.4 Arial,sans-serif;letter-spacing:.025em;color:#c5bacf;text-shadow:0 1px 5px #000}
 @media(max-height:500px){body.jungle-home .destination-controls{bottom:calc(var(--journey-safe-bottom) + 14px);width:300px}body.jungle-home #seismique-jungle-reveal .destination-next{min-height:44px;padding:9px 15px}body.jungle-home #destination-gesture{margin-top:5px}body.jungle-home #seismique-jungle-reveal .tour-controls{bottom:calc(var(--journey-safe-bottom) + 15px)}}
 body.jungle-home #seismique-jungle-reveal .tour-controls .entrance-copy .entrance-intro{display:block}
+
+/* The current destination is the clear central action; travel stays below it. */
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop{left:50%;top:48%;transform:translate(-50%,-50%);width:min(320px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 48px));min-height:154px;padding:22px 24px;gap:11px;text-align:center;background:radial-gradient(ellipse at 12% 0%,rgba(var(--grass-rgb),.15),transparent 68%),linear-gradient(160deg,rgba(13,23,30,.86),rgba(6,13,22,.92));border-color:rgba(222,235,241,.25);box-shadow:0 16px 35px -18px #000e,inset 0 1px rgba(234,248,255,.10)}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop span{font-size:10px;letter-spacing:1.7px}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop strong{font-size:clamp(23px,5.6vw,28px);line-height:1.16;max-width:100%}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{display:flex;align-items:center;justify-content:center;gap:12px;align-self:stretch;margin-top:3px;padding-top:12px;border-top:1px solid rgba(222,235,241,.18);font-size:12px;font-weight:700;line-height:1.4;color:#f3f5ff}
+body.jungle-home #seismique-jungle-reveal .jungle-page-stop small .destination-open-mark{font-size:18px;font-weight:400;line-height:1;letter-spacing:0;color:inherit}
+@media(max-height:500px){body.jungle-home #seismique-jungle-reveal .jungle-page-stop{width:min(300px,calc(100% - 48px));min-height:0;padding:13px 20px;gap:7px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop strong{font-size:23px}body.jungle-home #seismique-jungle-reveal .jungle-page-stop small{padding-top:8px;margin-top:0}}
