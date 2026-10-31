@@ -5,7 +5,7 @@ const read=name=>fs.readFileSync(path.join(assets,name),'utf8');
 const groups={
  ui:['visitor.js','journey-interface.js'],
  jungle:['journey-atmosphere.js','jungle-lighting.js','jungle-sky.js','destination-grass.js'],
- entry:['ending-portal.js','entrance-mural.js','portal-energy.js','journey-guide.js','static-scenery.js','journey-performance.js','jungle-light-budget.js','journey-scene.js']
+ entry:['portal-noise.js','ending-portal.js','entrance-mural.js','portal-energy.js','journey-guide.js','static-scenery.js','journey-performance.js','jungle-light-budget.js','journey-scene.js']
 };
 (async()=>{
  const bundles={};

@@ -1153,7 +1153,7 @@
       }
     }
     window.addEventListener('online',()=>{if(root.dataset.scenePreparation==='download-interrupted'){root.querySelector('.error').hidden=true;prepareJungle();}});
-    async function warmJungleBuffers(views=[.40,.58,stopProgress()[0]]){
+    async function warmJungleBuffers(views=[.40,.58,stopProgress()[0]],settledOnly=false){
       root.dataset.gpuPreparation='warming';
       const target=new T.WebGLRenderTarget(32,32),probe=camera.clone();
       const previousTarget=renderer.getRenderTarget(),previousVisibility=revealWorld.visible;
@@ -1162,7 +1162,7 @@
         // The visible camera and canvas are never changed by this preparation.
         for(const progress of views){
           await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:32}):setTimeout(resolve,16));
-          while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'){
+          while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'||(settledOnly&&guide.state().mode!=='idle')){
             await new Promise(resolve=>setTimeout(resolve,200));
           }
           const view=pose(progress);probe.position.set(...view.pos);probe.lookAt(...view.look);probe.updateMatrixWorld();
@@ -1229,7 +1229,7 @@
       }
     }
     async function finishDistantPreparation(){
-      await warmJungleBuffers([...stopProgress().slice(1),1]);
+      await warmJungleBuffers([...stopProgress().slice(1),1],true);
       root.dataset.distantPreparation='ready';root.dataset.distantReadyMs=performance.now().toFixed(0);
       lastVisualProgress=-1;journeyLoop?.wake();
     }
@@ -1240,9 +1240,10 @@
     const fieldRadius=3.445,fieldZ=-.65,fieldBend=.24,mouthZ=fieldZ-fieldBend,portalDepth=10.5;
     const particleCount=76,particlePositions=new Float32Array(particleCount*3),trailPositions=new Float32Array(particleCount*6);
     const upAxis=new T.Vector3(0,1,0);
+    const portalNoise=window.createPortalNoise(T);
     const electricNoiseGLSL=`
-      float eHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-      float eNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(eHash(i),eHash(i+vec2(1.,0.)),f.x),mix(eHash(i+vec2(0.,1.)),eHash(i+vec2(1.)),f.x),f.y);}
+      uniform sampler2D uPortalNoise;
+      float eNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);vec4 h=texture2D(uPortalNoise,(mod(i,64.)+.5)/64.);return mix(mix(h.r,h.g,f.x),mix(h.b,h.a,f.x),f.y);}
       float eFbm(vec2 p){return .57*eNoise(p)+.28*eNoise(p*2.07+13.1)+.15*eNoise(p*4.31-7.4);}
     `;
     function electricHash(n){const x=Math.sin(n*127.13+311.7)*43758.5453;return (x-Math.floor(x))*2-1;}
@@ -1283,7 +1284,7 @@
     }
     function vortexRadius(u){return 3.445+.90*u-.12*Math.sin(Math.PI*u);}
     function buildPortal(){
-      portalUniforms={uTime:{value:0},uColor:{value:new T.Color(0x24bfff)},uCharge:{value:0},uTravel:{value:0},uOpening:{value:0},uPower:{value:0},uSurge:{value:0},uInstability:{value:0},uClarity:{value:0}};
+      portalUniforms={uPortalNoise:{value:portalNoise},uTime:{value:0},uColor:{value:new T.Color(0x24bfff)},uCharge:{value:0},uTravel:{value:0},uOpening:{value:0},uPower:{value:0},uSurge:{value:0},uInstability:{value:0},uClarity:{value:0}};
       const radial=quality.compact?64:80,longitudinal=quality.compact?40:64,positions=[],uvs=[],indices=[];
       for(let j=0;j<=longitudinal;j++)for(let i=0;i<=radial;i++){
         const u=j/longitudinal,a=i/radial*Math.PI*2,r=vortexRadius(u);
@@ -1310,7 +1311,7 @@
           }`});
       portalSurface=mesh(geometry,material,0,apertureY,0,machine);
       const hitCount=quality.compact?2:3;
-      fieldUniforms={uTime:portalUniforms.uTime,uColor:portalUniforms.uColor,uCharge:portalUniforms.uCharge,uOpening:portalUniforms.uOpening,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uInstability:portalUniforms.uInstability,uClarity:portalUniforms.uClarity,uHits:{value:Array.from({length:hitCount},()=>new T.Vector4())}};
+      fieldUniforms={uPortalNoise:portalUniforms.uPortalNoise,uTime:portalUniforms.uTime,uColor:portalUniforms.uColor,uCharge:portalUniforms.uCharge,uOpening:portalUniforms.uOpening,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uInstability:portalUniforms.uInstability,uClarity:portalUniforms.uClarity,uHits:{value:Array.from({length:hitCount},()=>new T.Vector4())}};
       const fieldMaterial=new T.ShaderMaterial({uniforms:fieldUniforms,side:T.DoubleSide,transparent:true,depthWrite:false,
         vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;vec2 q=uv*2.-1.;float r=clamp(length(q),0.,1.);p.z-=.24*dot(q,q);p.z+=(.025+uInstability*.07)*(1.-r)*sin(uv.x*17.+uv.y*13.-uTime*.8);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
         fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uOpening;uniform float uPower,uSurge,uInstability,uClarity;uniform vec4 uHits[${hitCount}];

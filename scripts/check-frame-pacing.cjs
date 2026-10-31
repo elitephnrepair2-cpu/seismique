@@ -22,3 +22,10 @@ async function checkWarmup(fail=false){
  assert.equal(target,'original','Visible render target is always restored');assert.equal(ctx.revealWorld.visible,false);assert.equal(disposed,1,'Warmup target must not leak GPU memory');
 }
 (async()=>{await checkWarmup();await checkWarmup(true);console.log('PASS: camera-independent 30Hz effects at 30/60/90/120Hz; elapsed-time preservation; settled quality changes; GPU warmup before reveal; render state and resources restored on success/failure.');})().catch(error=>{console.error(error);process.exitCode=1;});
+async function checkDeferredWarmup(){
+ let mode='intro',draws=0,waits=0,target=null;
+ const ctx={performance:{now:()=>0},root:{dataset:{}},document:{hidden:false},T:{WebGLRenderTarget:class{dispose(){}}},camera:{clone:()=>({position:{set(){}},lookAt(){},updateMatrixWorld(){}})},lightBudget:{capture:()=>[],restore(){},sync(){}},revealWorld:{visible:true},scene:{},stopProgress:()=>[.625],pose:()=>({pos:[0,0,0],look:[0,0,-1]}),guide:{state:()=>({mode})},window:{requestIdleCallback:true},requestIdleCallback:fn=>fn(),setTimeout(fn){assert.equal(draws,0,'Future-destination warming must not draw during the moving intro');waits++;mode='idle';fn();},renderer:{getRenderTarget:()=>target,setRenderTarget:v=>target=v,render(){assert.equal(mode,'idle');draws++;}}};
+ vm.createContext(ctx);vm.runInContext(source,ctx);await ctx.warmJungleBuffers([.8],true);assert.equal(waits,1);assert.equal(draws,1);assert.equal(target,null);
+ console.log('PASS: future-view GPU warming waits until the opening camera settles.');
+}
+checkDeferredWarmup().catch(e=>{console.error(e);process.exitCode=1;});
