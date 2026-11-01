@@ -11,7 +11,25 @@
   },
   "headers": [
     {
-      "source": "/assets/journey-entry.0448bfd9b6eb.js",
+      "source": "/assets/journey-ui.42858e3246e1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-ui.08975a96f5b6.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-jungle.9ebd209a2c1e.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -29,7 +47,52 @@
       ]
     },
     {
-      "source": "/assets/journey-ui.08975a96f5b6.js",
+      "source": "/assets/journey-entry.eece44fdc5b1.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-entry.dcf13dcc41ed.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-entry.dc464fb3f8f7.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-entry.a8e0a19db709.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-entry.6a193fa5d347.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/journey-entry.0448bfd9b6eb.js",
       "headers": [
         {
           "key": "Cache-Control",

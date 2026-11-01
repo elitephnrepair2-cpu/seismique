@@ -1105,6 +1105,7 @@
       // Paint the entrance first; construct the next world in bounded idle slices.
       requestAnimationFrame(()=>requestAnimationFrame(()=>prepareJungle()));
     }
+    const preparationScheduler=window.createPreparationScheduler();
     let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0,preparationWaiting=false;
     function queuePreparation(){
       if(preparationWaiting||preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
@@ -1113,7 +1114,8 @@
         if(document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
         const start=performance.now(),budget=deadline?.didTimeout?1.5:3;let done=false;
         do{
-          const sliceStart=performance.now(),step=preparation.next();done=step.done;
+          const sliceStart=performance.now();let step;
+          try{step=preparation.next();}catch(error){failPreparation(error);return;}done=step.done;
           if(step.value?.warm){
             preparationWaiting=true;
             warmDistantGroup(step.value.warm).then(()=>{preparationWaiting=false;queuePreparation();}).catch(error=>{preparationWaiting=false;root.dataset.distantPreparation='failed';console.error('Distant jungle preparation failed',error);});
@@ -1122,9 +1124,15 @@
           const sliceMs=performance.now()-sliceStart;
           if(profileFrames&&sliceMs>maxPrepSlice){maxPrepSlice=sliceMs;root.dataset.prepMaxSliceMs=sliceMs.toFixed(2);}
         }while(!done&&performance.now()-start<budget&&(!deadline||deadline.didTimeout||deadline.timeRemaining()>.25));
-        if(done){preparation=null;if(revealReady)finishDistantPreparation();else finishPreparation();}else queuePreparation();
+        if(done){preparation=null;if(revealReady)finishDistantPreparation().catch(failPreparation);else finishPreparation().catch(failPreparation);}else queuePreparation();
       };
-      preparationHandle=window.requestIdleCallback?requestIdleCallback(task,{timeout:32}):setTimeout(()=>task(null),16);
+      preparationHandle=preparationScheduler.schedule(task);
+    }
+    function failPreparation(error){
+      preparationScheduler.cancel();preparationHandle=null;preparation=null;preparing=false;
+      root.dataset.scenePreparation='failed';root.dataset.preparationError=String(error?.message||error).slice(0,160);
+      const notice=root.querySelector('.error');notice.textContent='The tour could not finish preparing on this device. You can still open the pages using Menu or get tickets.';notice.hidden=false;
+      updateLabels();journeyLoop?.wake();console.error('Tour preparation failed',error);
     }
     function* prepareResources(){
       // Allocate every shader light before compilation, including future bulbs.
@@ -1161,7 +1169,7 @@
         // A tiny offscreen draw uploads geometry as well as compiling shaders.
         // The visible camera and canvas are never changed by this preparation.
         for(const progress of views){
-          await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:32}):setTimeout(resolve,16));
+          await window.waitForPreparationSlot();
           while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'||(settledOnly&&guide.state().mode!=='idle')){
             await new Promise(resolve=>setTimeout(resolve,200));
           }
@@ -1220,7 +1228,7 @@
       const target=new T.WebGLRenderTarget(16,16);
       try{
         await renderer.compileAsync(staging,probe);
-        await new Promise(resolve=>window.requestIdleCallback?requestIdleCallback(resolve,{timeout:32}):setTimeout(resolve,16));
+        await window.waitForPreparationSlot();
         while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true')await new Promise(resolve=>setTimeout(resolve,200));
         const previous=renderer.getRenderTarget();
         try{renderer.setRenderTarget(target);renderer.render(staging,probe);}finally{renderer.setRenderTarget(previous);}
@@ -1590,13 +1598,14 @@
       root.dataset.destination=guideState.mode==='idle'&&guideState.index<pageStops.length?pageStops[guideState.index].id:'';
       root.journeyInterface?.update(p,atJourneyEnd(),{...guideState,waitingForScenery:!!pendingDestination});
       const skip=root.querySelector('.explore');skip.hidden=guideState.mode!=='intro';
-      skip.disabled=guideState.skipPending;
-      const skipLabel=guideState.skipPending?'PREPARING JUNGLE…':'SKIP INTRO';
+      const failed=['failed','download-interrupted'].includes(root.dataset.scenePreparation);
+      skip.disabled=!failed&&guideState.skipPending;
+      const skipLabel=failed?'OPEN SITE MENU':guideState.skipPending?'PREPARING JUNGLE…':'SKIP INTRO';
       if(skip.querySelector('.enter-desktop-label').textContent!==skipLabel){
         skip.querySelector('.enter-desktop-label').textContent=skipLabel;
         skip.querySelector('.enter-mobile-label').textContent=skipLabel;
       }
-      skip.setAttribute('aria-label',guideState.skipPending?'Preparing jungle':'Skip intro');
+      skip.setAttribute('aria-label',failed?'Open site menu':guideState.skipPending?'Preparing jungle':'Skip intro');
       skip.dataset.entryState='moving';
       entranceCopy.hidden=p>.075;
     }
@@ -1644,7 +1653,7 @@
       const direction={ArrowDown:1,ArrowUp:-1,PageDown:1,PageUp:-1,' ':1}[e.key];
       if(direction){e.preventDefault();if(!e.repeat)requestDestination(direction);}
     });
-    function skipIntro(){guide.skip();root.wakeJourney?.();updateLabels();stage.focus({preventScroll:true});}
+    function skipIntro(){if(['failed','download-interrupted'].includes(root.dataset.scenePreparation)){root.querySelector('.menu-toggle').click();return;}guide.skip();root.wakeJourney?.();updateLabels();stage.focus({preventScroll:true});}
     root.querySelector('.explore').addEventListener('click',skipIntro);
     root.querySelector('.destination-next').addEventListener('click',()=>{if(requestDestination(1)&&guide.state().index===pageStops.length){root.focusFinaleOnArrival=true;stage.focus({preventScroll:true});}});
     root.tourControls={pause:pauseJourney,explore:skipIntro};
@@ -1738,13 +1747,14 @@
     function syncVisibility(){
       const visible=pageActive&&!document.hidden&&sceneInView&&root.dataset.view!=='info'&&root.dataset.visitOpen!=='true'&&root.dataset.menuOpen!=='true';
       root.dataset.effectsResting=String(!visible);journeyLoop.setVisible(visible);performanceBudget.reset();
+      if(!visible){preparationScheduler.cancel();preparationHandle=null;}
       if(visible&&preparation)queuePreparation();
     }
     document.addEventListener('visibilitychange',syncVisibility);
     const viewObserver=new IntersectionObserver(entries=>{sceneInView=entries[0].isIntersecting;syncVisibility();},{threshold:0});viewObserver.observe(stage);
     const modeObserver=new MutationObserver(syncVisibility);modeObserver.observe(root,{attributes:true,attributeFilter:['data-view','data-visit-open','data-menu-open']});
     window.addEventListener('pagehide',event=>{pageActive=false;syncVisibility();if(!event.persisted){journeyLoop.dispose();viewObserver.disconnect();modeObserver.disconnect();sceneResize.disconnect();headerResize.disconnect();document.removeEventListener('visibilitychange',syncVisibility);}});
-    window.addEventListener('pageshow',()=>{pageActive=true;syncVisibility();});
+    window.addEventListener('pageshow',()=>{pageActive=true;sceneInView=true;preparationScheduler.cancel();preparationHandle=null;syncVisibility();});
     syncVisibility();applyQuality();
     root.dataset.ready='true';
     root.electricState=()=>({opening,fieldVisible:electricalField.visible,tunnelVisible:portalSurface.visible,arcs:activeHeads.map(h=>({power:h.power,start:h.start.toArray(),end:h.end.toArray(),tip:h.cap.localToWorld(new T.Vector3(0,0,.057)).toArray(),mid:h.arc.points[12].toArray()})),time:energyTime});

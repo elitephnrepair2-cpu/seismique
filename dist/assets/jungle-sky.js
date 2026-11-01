@@ -73,12 +73,27 @@ window.createJungleSky=({THREE:T,scene,reducedMotion,pixelRatio=Math.min(deviceP
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`});
-      dome.material=cachedMaterial;skyMaterial.dispose();
+      const previous=dome.material;dome.material=cachedMaterial;previous.dispose();
   }
   async function prepare(renderer){
     if(cachedTargets)return preparationMode;
     if(mapsReady){
-      try{const maps=await mapsReady;if(maps){useMaps(maps);cachedTargets=[];preparationMode='prebuilt';return preparationMode;}}catch(error){}
+      // Sky decoration must never hold the entire jungle at the portal.
+      let timer,maps=null;
+      try{maps=await Promise.race([mapsReady,new Promise(resolve=>{timer=setTimeout(()=>resolve(null),1500);})]);}catch(error){}
+      finally{clearTimeout(timer);}
+      if(maps){useMaps(maps);cachedTargets=[];preparationMode='prebuilt';return preparationMode;}
+      const makeFallback=ending=>{
+        const width=32,height=16,data=new Uint8Array(width*height*4);
+        for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+          const u=x/width,v=y/height,ribbon=Math.exp(-Math.pow((v-.55-.10*Math.sin(u*Math.PI*2))/.18,2)),cloud=.45+.55*(.5+.5*Math.sin(u*17+y*.6));
+          const k=(y*width+x)*4;data[k]=Math.round(1+17*ribbon*cloud);data[k+1]=Math.round(2+(ending?7:10)*ribbon*cloud);data[k+2]=Math.round(5+26*ribbon*cloud);data[k+3]=255;
+        }
+        const texture=new T.DataTexture(data,width,height,T.RGBAFormat);texture.colorSpace=T.SRGBColorSpace;texture.wrapS=T.RepeatWrapping;texture.minFilter=texture.magFilter=T.LinearFilter;texture.generateMipmaps=false;texture.needsUpdate=true;return texture;
+      };
+      const fallback=[makeFallback(false),makeFallback(true)];useMaps(fallback);cachedTargets=[];preparationMode='lightweight-fallback';
+      Promise.resolve(mapsReady).then(late=>{if(late){useMaps(late);fallback.forEach(texture=>texture.dispose());preparationMode='prebuilt';}}).catch(()=>{});
+      return preparationMode;
     }
     const previous=renderer.getRenderTarget(),targets=[];
     const bakeScene=new T.Scene(),bakeCamera=new T.OrthographicCamera(-1,1,1,-1,0,1);

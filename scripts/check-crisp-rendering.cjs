@@ -17,7 +17,7 @@ async function verifyBake(fail=false){
 }
 (async()=>{await verifyBake();await verifyBake(true);console.log('PASS: sharper protected mobile resolution; antialiasing; small cacheable first document; two one-time nebula bakes; live stars preserved; render state restored.');})().catch(e=>{console.error(e);process.exitCode=1;});
 async function verifyPrebuilt(){
- const context={window:{},setTimeout};vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../dist/assets/jungle-sky.js'),'utf8'),context);
+ const context={window:{},setTimeout,clearTimeout};vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../dist/assets/jungle-sky.js'),'utf8'),context);
  const maps=[new T.Texture(),new T.Texture()];maps.forEach(map=>map.colorSpace=T.SRGBColorSpace);
  const world=new T.Scene(),sky=context.window.createJungleSky({THREE:T,scene:world,reducedMotion:false,pixelRatio:1.5,mapsReady:Promise.resolve(maps)});
  const mode=await sky.prepare({getRenderTarget(){throw Error('A prebuilt sky must not allocate or render bake targets');}});assert.equal(mode,'prebuilt');assert.equal(await sky.prepare({}),'prebuilt');assert.equal(world.children[0].children[0].material.uniforms.uCanopy.value,maps[0]);

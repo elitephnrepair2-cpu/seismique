@@ -5,7 +5,7 @@ const read=name=>fs.readFileSync(path.join(assets,name),'utf8');
 const groups={
  ui:['visitor.js','journey-interface.js'],
  jungle:['journey-atmosphere.js','jungle-lighting.js','jungle-sky.js','destination-grass.js'],
- entry:['portal-noise.js','ending-portal.js','entrance-mural.js','portal-energy.js','journey-guide.js','static-scenery.js','journey-performance.js','jungle-light-budget.js','journey-scene.js']
+ entry:['journey-preparation.js','portal-noise.js','ending-portal.js','entrance-mural.js','portal-energy.js','journey-guide.js','static-scenery.js','journey-performance.js','jungle-light-budget.js','journey-scene.js']
 };
 (async()=>{
  const bundles={};
@@ -35,11 +35,12 @@ const groups={
  html=html.replace(/(class="vr-(?:illustration|wave)" loading="lazy" fetchpriority="low" )(?:loading="lazy" fetchpriority="low" )+/g,'$1');
  fs.writeFileSync(path.join(root,'dist/index.html'),html);
  const manifest={bundles,htmlBytes:Buffer.byteLength(html),htmlGzipBytes:zlib.gzipSync(html).length};fs.writeFileSync(path.join(assets,'journey-loading.json'),JSON.stringify(manifest,null,2)+'\n');
- // Keep only content-addressed outputs referenced by this build.
- for(const file of fs.readdirSync(assets))if(/^journey-(ui|entry|jungle)\.[a-f0-9]{12}\.js$/.test(file)&&!Object.values(bundles).some(b=>b.file===file))fs.unlinkSync(path.join(assets,file));
+ // Published content-addressed files must remain available to cached HTML,
+ // Safari back/forward restores, and in-flight visits from older deployments.
+ const retainedBundles=fs.readdirSync(assets).filter(file=>/^journey-(ui|entry|jungle)\.[a-f0-9]{12}\.js$/.test(file)).sort();
  const configPath=path.join(root,'vercel.json'),config=JSON.parse(fs.readFileSync(configPath,'utf8'));
  config.headers=config.headers.filter(rule=>!/^\/assets\/journey-(ui|entry|jungle)\.[a-f0-9]{12}\.js$/.test(rule.source));
- for(const b of Object.values(bundles))config.headers.unshift({source:'/assets/'+b.file,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'}]});
+ for(const file of retainedBundles)config.headers.unshift({source:'/assets/'+file,headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'}]});
  fs.writeFileSync(configPath,JSON.stringify(config,null,2)+'\n');
  console.log(JSON.stringify(manifest,null,2));
 })().catch(error=>{console.error(error);process.exitCode=1;});

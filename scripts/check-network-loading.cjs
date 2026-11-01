@@ -14,3 +14,9 @@ async function loaders(){
  console.log('PASS: three startup scripts; styled first response under 20 KB gzip; UI independent of 3D; small content-addressed cacheable bundles; delayed jungle factories; single-flight loading and interruption recovery.');
 }
 loaders().catch(e=>{console.error(e);process.exitCode=1;});
+// A returned Safari tab can still reference an older content-addressed entry.
+// All published entries and their deferred dependencies must stay available.
+const retained=fs.readdirSync(path.join(base,'assets')).filter(file=>/^journey-(ui|entry|jungle)\.[a-f0-9]{12}\.js$/.test(file));
+for(const file of retained){const bytes=fs.readFileSync(path.join(base,'assets',file));assert(file.includes(crypto.createHash('sha256').update(bytes).digest('hex').slice(0,12)),'Retained files must keep their original immutable contents');assert(config.headers.some(h=>h.source==='/assets/'+file&&h.headers.some(v=>v.value.includes('immutable'))),'Retained assets need stable cache headers');for(const dependency of bytes.toString().matchAll(/\/assets\/(journey-jungle\.[a-f0-9]{12}\.js)/g))assert(fs.existsSync(path.join(base,'assets',dependency[1])),'A cached entry must still be able to load its jungle dependency');}
+assert(fs.existsSync(path.join(base,'assets/journey-entry.0448bfd9b6eb.js')));assert(fs.existsSync(path.join(base,'assets/journey-jungle.9b8360a0632b.js')));
+console.log(`PASS: ${retained.length} immutable published bundles retained; older entry-to-jungle dependencies remain available without adding startup requests.`);
