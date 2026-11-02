@@ -8,6 +8,7 @@
 - A UI-bundle watchdog offers native links to Museum, Mini Golf and Plan Your Visit after 30 foreground seconds without preparation/progress milestones. It does not count reading time at a settled destination, open menus or time in another app. It also watches a requested transition waiting for distant scenery.
 - Script errors, preparation failures and graphics-context loss expose the same links immediately. A context loss suspends the scene; Retry tour restarts it cleanly. No forced reload, no camera jump into an unprepared world.
 - Published content-addressed scripts are retained for cached pages and Safari restores.
+- Tree-groove centers are calculated once per mesh row, with wrapped angular distances replacing repeated trigonometry. Golden checks cover unchanged position, UV and normal buffers for trunks, boughs and twigs at both detail levels. Browsers without idle callbacks use browser-clamped zero-delay scheduling rather than an extra 16 ms pause per bounded preparation slice. Camera timing, tree counts and rendering resolution are unchanged by this optimization.
 
 ## Diagnostics
 

@@ -149,6 +149,10 @@
         if(sculpted&&i%(quality.compact?2:4)===0)yield;
         const u=i/segments,center=curve.getPointAt(u),knot=sculpted?1+.21*Math.exp(-Math.pow((u-.27)/.085,2))+.12*Math.exp(-Math.pow((u-.64)/.07,2)):1;
         const radius=T.MathUtils.lerp(r0,r1,Math.pow(u,.84))*knot*(1+.04*Math.sin(u*28+seed));
+        // Groove centers and taper are constant around this complete row.
+        // Wrapped angles replace atan2(sin(d),cos(d)) without changing relief.
+        const relief=sculpted?T.MathUtils.smoothstep(radius,.035,.22):0;
+        if(sculpted)for(const channel of channels)channel.rowAngle=channel.angle+.12*Math.sin(u*4.3+channel.phase)+.045*Math.sin(u*9+channel.phase);
         for(let j=0;j<=radial;j++){
           const index=i*(radial+1)+j,a=j/radial*Math.PI*2;
           if(sculpted)barkUV.setXY(index,u*barkLength+seed*.13,j/radial);
@@ -156,10 +160,9 @@
           if(sculpted){
             let recess=0;
             for(const channel of channels){
-              const angle=channel.angle+.12*Math.sin(u*4.3+channel.phase)+.045*Math.sin(u*9+channel.phase),d=Math.atan2(Math.sin(a-angle),Math.cos(a-angle));
+              const d=(a-channel.rowAngle+Math.PI*3)%(Math.PI*2)-Math.PI;
               recess+=channel.depth*Math.exp(-.5*(d/channel.width)**2);
             }
-            const relief=T.MathUtils.smoothstep(radius,.035,.22);
             ridges=1+relief*(.045+.030*Math.sin(a*3+u*1.8+seed)-recess);
           }
           positions.setXYZ(index,center.x+(positions.getX(index)-center.x)*radius*ridges,center.y+(positions.getY(index)-center.y)*radius*ridges,center.z+(positions.getZ(index)-center.z)*radius*ridges);

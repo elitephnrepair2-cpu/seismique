@@ -7,7 +7,9 @@
       if(pending)return pending;
       const work={idle:null,timer:null};pending=work;
       function run(deadline){if(pending!==work)return;stop();task(deadline);}
-      work.timer=schedule(()=>run({didTimeout:true,timeRemaining:()=>0}),16);
+      // Without requestIdleCallback, Safari already clamps repeated timers.
+      // Do not add a further 16 ms sleep to every small preparation slice.
+      work.timer=schedule(()=>run({didTimeout:true,timeRemaining:()=>0}),idle?16:0);
       if(idle)work.idle=idle(run,{timeout:32});
       return work;
     }};
