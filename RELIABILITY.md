@@ -9,6 +9,7 @@
 - Script errors, preparation failures and graphics-context loss expose the same links immediately. A context loss suspends the scene; Retry tour restarts it cleanly. No forced reload, no camera jump into an unprepared world.
 - Published content-addressed scripts are retained for cached pages and Safari restores.
 - Tree-groove centers are calculated once per mesh row, with wrapped angular distances replacing repeated trigonometry. Golden checks cover unchanged position, UV and normal buffers for trunks, boughs and twigs at both detail levels. Browsers without idle callbacks use browser-clamped zero-delay scheduling rather than an extra 16 ms pause per bounded preparation slice. Camera timing, tree counts and rendering resolution are unchanged by this optimization.
+- After the entrance canopy is ready, future-tree construction, batching and uploads wait until the first destination settles. The eight-tree opening still fully prepares and warms before crossing. Early Next intent remains queued until the farther scenery is ready; background work also rests during later camera transitions.
 
 ## Diagnostics
 

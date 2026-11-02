@@ -1112,9 +1112,17 @@
     let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0,preparationWaiting=false;
     function queuePreparation(){
       if(root.dataset.graphicsState||preparationWaiting||preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
+      // Once the entrance canopy is ready, protect the entire camera crossing
+      // from future-tree construction, batching, compilation and GPU uploads.
+      if(root.dataset.scenePreparation==='ready'&&root.dataset.journeyMode!=='idle')return;
+      if(root.dataset.scenePreparation==='ready'){
+        root.dataset.distantPreparation='building';
+        if(!root.dataset.distantStartedMs)root.dataset.distantStartedMs=performance.now().toFixed(0);
+      }
       const task=deadline=>{
         preparationHandle=null;
         if(root.dataset.graphicsState||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
+        if(root.dataset.scenePreparation==='ready'&&root.dataset.journeyMode!=='idle')return;
         const start=performance.now(),budget=deadline?.didTimeout?1.5:3;let done=false;
         do{
           const sliceStart=performance.now();let step;
@@ -1208,7 +1216,7 @@
       revealReady=true;revealWorld.visible=true;root.dataset.scenePreparation='ready';let pointLights=0;scene.traverse(node=>{if(node.isPointLight)pointLights++;});root.dataset.shaderPointLights=String(pointLights);
       lastVisualProgress=-1;lastEffectTime=-1;performanceBudget.reset();qualityPending=true;journeyLoop?.wake();
       root.dataset.entranceJungleReadyMs=performance.now().toFixed(0);root.dataset.entranceTrees=String(revealTrees);
-      root.dataset.distantPreparation='building';preparation=prepareDistantScenery();queuePreparation();
+      root.dataset.distantPreparation='waiting-for-arrival';preparation=prepareDistantScenery();queuePreparation();
     }
     function* prepareDistantScenery(){
       for(const create of distantSceneryJobs){
@@ -1738,6 +1746,10 @@
         const lens=74+pull*3;if(Math.abs(camera.fov-lens)>.01){camera.fov=lens;camera.updateProjectionMatrix();}
       }
       if((changed&&now-lastLabelUpdate>=66)||modeChanged||lastVisualProgress<0){updateLabels();lastLabelUpdate=now;}
+      if(modeChanged&&guideState.mode==='idle'&&preparation){
+        if(!root.dataset.firstDestinationSettledMs)root.dataset.firstDestinationSettledMs=performance.now().toFixed(0);
+        queuePreparation();
+      }
       if(changed||modeChanged||lastVisualProgress<0)updatePageStops();
       if(revealReady&&effectDelta!==null)destinationGrass?.update(p,energyTime,effectDelta,machineRunning);
       if(effectDelta!==null)lightBudget.sync(camera,effectDelta,{enabled:p>.27});

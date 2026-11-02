@@ -92,6 +92,15 @@
       ]
     },
     {
+      "source": "/assets/journey-entry.ad24ce135fe0.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/journey-entry.a8e0a19db709.js",
       "headers": [
         {

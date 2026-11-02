@@ -26,7 +26,19 @@ async function queueTest(){
  work.queuePreparation();jobs.shift()({timeRemaining:()=>10});assert.equal(calls,1);work.queuePreparation();assert.equal(jobs.length,0,'Overlay/visibility wake cannot create a duplicate build while an upload is pending');
  resume();await Promise.resolve();assert.equal(jobs.length,1);jobs.shift()({timeRemaining:()=>10});assert.equal(calls,2);assert.equal(finished,1);
 }
-(async()=>{await warmTest(false);await warmTest(true);await queueTest();console.log('PASS: distant scenery stays detached until complete/uploaded; one build; static freezing preserves animation; isolated warmup preserves visible lights, target, culling and resources on success/failure; pending GPU work cannot duplicate the preparation loop.');})().catch(e=>{console.error(e);process.exitCode=1;});
+async function crossingTest(){
+ let calls=0,finished=0;const jobs=[];
+ const work={preparationWaiting:false,preparationHandle:null,maxPrepSlice:0,profileFrames:false,document:{hidden:false},root:{dataset:{scenePreparation:'ready',journeyMode:'intro'}},performance:{now:()=>0},revealReady:true,preparation:{next(){calls++;return {done:true};}},preparationScheduler:{schedule(fn){jobs.push(fn);return {};},cancel(){}},finishDistantPreparation(){finished++;return Promise.resolve();}};
+ vm.createContext(work);vm.runInContext(source.slice(source.indexOf('    function queuePreparation(){'),source.indexOf('    function* prepareResources(){')),work);
+ work.queuePreparation();assert.equal(jobs.length,0,'Future trees must not compete with the opening camera');
+ work.root.dataset.journeyMode='transition';work.queuePreparation();assert.equal(jobs.length,0,'Background generation rests during other travel too');
+ work.root.dataset.journeyMode='idle';work.queuePreparation();assert.equal(jobs.length,1);assert.equal(work.root.dataset.distantPreparation,'building');
+ work.root.dataset.journeyMode='intro';jobs.shift()({timeRemaining:()=>5});assert.equal(calls,0,'A queued task must recheck travel before doing any work');
+ work.root.dataset.journeyMode='idle';work.queuePreparation();jobs.shift()({timeRemaining:()=>5});assert.equal(calls,1);assert.equal(finished,1,'Arrival resumes the single existing generator');
+ // Startup itself is still allowed to prepare the entrance while it approaches.
+ work.preparationHandle=null;work.preparation={next(){calls++;return {done:true};}};work.root.dataset.scenePreparation='building';work.root.dataset.journeyMode='intro';work.revealReady=false;work.finishPreparation=()=>Promise.resolve();work.queuePreparation();jobs.shift()({timeRemaining:()=>5});assert.equal(calls,2,'Do not accidentally deadlock the critical entrance canopy');
+}
+(async()=>{await warmTest(false);await warmTest(true);await queueTest();await crossingTest();console.log('PASS: distant scenery stays detached until complete/uploaded; one build; static freezing preserves animation; isolated warmup preserves visible lights, target, culling and resources on success/failure; pending GPU work cannot duplicate the preparation loop; crossing suspends future work and arrival resumes it without blocking startup.');})().catch(e=>{console.error(e);process.exitCode=1;});
 const requestSource=source.slice(source.indexOf('    function requestDestination('),source.indexOf('    function applyJourneyCamera('));
 let advances=0;const navigation={pendingDestination:0,guideState:{mode:'idle'},root:{dataset:{distantPreparation:'building'},wakeJourney(){}},atJourneyEnd:()=>false,guide:{advance(){advances++;return true;},state(){return {mode:'transition',target:.7};}},updateLabels(){}};
 vm.createContext(navigation);vm.runInContext(requestSource,navigation);assert.equal(navigation.requestDestination(1),true);assert.equal(advances,0,'Early Next queues the intent rather than entering unfinished scenery');assert.equal(navigation.pendingDestination,1);
