@@ -1,0 +1,25 @@
+const assert=require('node:assert/strict');
+const {createJourneyHealth}=require('../dist/assets/journey-health.js');
+const {createJourneyPerformance,createJourneyCadence}=require('../dist/assets/journey-performance.js');
+let clock=0,recoveries=[],samples=[];
+const health=createJourneyHealth({now:()=>clock,onRecovery:code=>recoveries.push(code),onSample:s=>samples.push(s)});
+const state={stage:'compiling',progress:.26,complete:false};
+function tick(seconds,changes={}){Object.assign(state,changes);for(let i=0;i<seconds;i++){clock+=1000;health.tick(state);}}
+tick(20);assert.equal(recoveries.length,0,'Slow preparation gets time to finish');
+tick(300,{active:false});assert.equal(recoveries.length,0,'A hidden tab or open menu must not trigger recovery');
+tick(12,{active:true});assert.deepEqual(recoveries,['stalled'],'A hung compile or download must offer usable direct pages');
+tick(40);assert.equal(recoveries.length,1,'A stalled scene must not repeatedly recreate the recovery controls');
+tick(1,{stage:'ready',progress:.63,complete:true});assert.equal(health.snapshot().recovering,false,'Late loading may complete safely without a forced reload or teleport');
+tick(120);assert.equal(recoveries.length,1,'Reading an idle destination is not a stall');
+tick(32,{waiting:true});assert.equal(recoveries.length,2,'Waiting for distant scenery also has recovery');
+health.fail('graphics');health.fail('preparation');tick(2,{waiting:false});assert.equal(health.snapshot().reason,'graphics','A lost GPU context needs a clean restart, even after old promises settle');
+for(let i=0;i<120;i++)health.frame(1/60);assert(samples.length===0||samples[0].fps===60);health.frame(1/60);assert.equal(samples[0].fps,60);
+health.frame(90);for(let i=0;i<61;i++)health.frame(1/30);assert.equal(samples.at(-1).fps,30,'Tab suspension is excluded from animation measurements');
+for(let i=0;i<2000;i++)health.frame(1/30);assert(health.snapshot().samples.length<=12);assert(health.snapshot().events.length<=24,'Diagnostics stay bounded');
+const external=health.snapshot();external.events.length=0;assert(health.snapshot().events.length>0,'Reports cannot mutate watchdog state');
+const device=createJourneyPerformance({compact:true,pixelRatio:3}),original=device.budget.ratio;
+for(let i=0;i<50;i++)device.sample(1/30);
+assert.equal(device.budget.ratio,original,'First response to sustained pressure preserves crispness');assert.equal(device.budget.effectsLevel,1);assert(device.budget.density<.65);
+for(let i=0;i<300;i++)device.sample(1/30);assert.equal(device.budget.effectsLevel,2);assert(device.budget.ratio>=1.25);
+const cadence=createJourneyCadence(30);cadence.setHz(device.budget.effectsHz);let updates=0;for(let i=0;i<120;i++)if(cadence.consume(1/60)!==null)updates++;assert.equal(updates,40,'A struggling phone updates background effects at 20Hz while the camera stays at display cadence');
+console.log('PASS: active-time startup/distant watchdog, overlay/background exclusion, late recovery, graphics-loss safety, bounded local diagnostics, effect-first adaptation and independent effect cadence.');

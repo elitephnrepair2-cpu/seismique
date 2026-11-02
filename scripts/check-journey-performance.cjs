@@ -43,7 +43,8 @@ console.log('PASS: frame-bound viewport resizing, coalesced browser-chrome chang
 for(const [width,height] of [[768,1024],[820,1180],[1024,1366],[1366,1024]]){
  const tablet=createJourneyPerformance({touch:true,compact:false,width,height,pixelRatio:2});assert(tablet.budget.compact,'Touch tablets must receive the bounded light/effect profile even with a desktop-width viewport');
  assert(width*height*tablet.budget.ratio**2<=1200001,'Initial tablet work is capped at 1.2 megapixels');
- sample(tablet,2,.1);assert(width*height*tablet.budget.ratio**2<=1000001,'Severe startup pressure must shed GPU work before reaching a destination');
+ sample(tablet,2,.1);assert(tablet.budget.effectsLevel>0,'Severe startup pressure first sheds decorative work');
+ sample(tablet,8,.1);assert(width*height*tablet.budget.ratio**2<=1000001,'Sustained pressure also reduces pixel work before reaching a destination');
  sample(tablet,160,1/60);assert(width*height*tablet.budget.ratio**2<=1600001,'Recovery cannot exceed the tablet pixel ceiling');
  tablet.resize(width*2,height*2);assert(width*height*4*tablet.budget.ratio**2<=1600001,'Orientation/window changes recalculate the pixel cap');
 }

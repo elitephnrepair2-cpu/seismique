@@ -9,7 +9,8 @@
     "test": "node --test tests/*.test.mjs",
     "dev:checkout": "node scripts/checkout-dev.mjs",
     "db:migrate": "node scripts/checkout-migrate.mjs",
-    "build:journey": "node scripts/build-journey-loading.cjs"
+    "build:journey": "node scripts/build-journey-loading.cjs",
+    "check:journey": "node scripts/check-journey-release.cjs"
   },
   "dependencies": {
     "pg": "8.23.1",

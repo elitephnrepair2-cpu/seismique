@@ -7,3 +7,5 @@ After changing homepage scripts, CSS, or HTML, run `npm run build:journey` befor
 Run `node scripts/check-network-loading.cjs` alongside the relevant journey tests. The other test scripts still inspect the readable original sources via `scripts/read-journey-source.cjs`.
 
 Never delete previously published content-addressed journey bundles during builds. Returning Safari pages may still request them. Retained bundles do not download unless an older page references them.
+
+Use `npm run check:journey` as the journey release gate. Follow `RELIABILITY.md` for browser and actual-device checks. Local diagnostics are not remote visitor monitoring; do not claim physical-device verification from viewport emulation.

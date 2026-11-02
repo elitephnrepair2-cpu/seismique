@@ -3,7 +3,7 @@
   (()=>{
     const root=document.getElementById('seismique-jungle-reveal');
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
-    if(!window.THREE){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
+    if(!window.THREE){root.journeyHealth?.fail('download');root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
     let skyMaps=null;
     const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
@@ -11,7 +11,7 @@
     let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
     const performanceBudget=window.createJourneyPerformance({width:viewportWidth,height:viewportHeight,touch:navigator.maxTouchPoints>0,compact:matchMedia('(pointer:coarse)').matches||innerWidth<700,cores:navigator.hardwareConcurrency||8,memory:navigator.deviceMemory||8,pixelRatio:devicePixelRatio});
     const quality=performanceBudget.budget;
-    let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
+    let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:false});}catch(e){root.journeyHealth?.fail('graphics');root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     root.dataset.antialias=String(renderer.getContext().getContextAttributes().antialias);
     renderer.setPixelRatio(quality.ratio);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(0x080c16);stage.prepend(renderer.domElement);
     const scene=new T.Scene();scene.fog=new T.Fog(0x171328,24,70);
@@ -1099,7 +1099,7 @@
       await preparePortalScenery();
       root.dataset.entrancePreparation='compiling';
       try{await renderer.compileAsync(scene,camera);}
-      catch(error){root.dataset.entrancePreparation='failed';root.querySelector('.error').hidden=false;return;}
+      catch(error){root.dataset.entrancePreparation='failed';root.journeyHealth?.fail('preparation');root.querySelector('.error').hidden=false;return;}
       portalReady=true;root.dataset.portalReady='true';
       entrancePrepared=true;root.dataset.entrancePreparation='ready';
       // Paint the entrance first; construct the next world in bounded idle slices.
@@ -1108,17 +1108,17 @@
     const preparationScheduler=window.createPreparationScheduler();
     let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0,preparationWaiting=false;
     function queuePreparation(){
-      if(preparationWaiting||preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
+      if(root.dataset.graphicsState||preparationWaiting||preparationHandle!==null||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
       const task=deadline=>{
         preparationHandle=null;
-        if(document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
+        if(root.dataset.graphicsState||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
         const start=performance.now(),budget=deadline?.didTimeout?1.5:3;let done=false;
         do{
           const sliceStart=performance.now();let step;
           try{step=preparation.next();}catch(error){failPreparation(error);return;}done=step.done;
           if(step.value?.warm){
             preparationWaiting=true;
-            warmDistantGroup(step.value.warm).then(()=>{preparationWaiting=false;queuePreparation();}).catch(error=>{preparationWaiting=false;root.dataset.distantPreparation='failed';console.error('Distant jungle preparation failed',error);});
+            warmDistantGroup(step.value.warm).then(()=>{preparationWaiting=false;queuePreparation();}).catch(error=>{preparationWaiting=false;root.dataset.distantPreparation='failed';root.journeyHealth?.fail('preparation');console.error('Distant jungle preparation failed',error);});
             return;
           }
           const sliceMs=performance.now()-sliceStart;
@@ -1132,6 +1132,7 @@
       preparationScheduler.cancel();preparationHandle=null;preparation=null;preparing=false;
       root.dataset.scenePreparation='failed';root.dataset.preparationError=String(error?.message||error).slice(0,160);
       const notice=root.querySelector('.error');notice.textContent='The tour could not finish preparing on this device. You can still open the pages using Menu or get tickets.';notice.hidden=false;
+      root.journeyHealth?.fail('preparation');
       updateLabels();journeyLoop?.wake();console.error('Tour preparation failed',error);
     }
     function* prepareResources(){
@@ -1158,6 +1159,7 @@
       }catch(error){
         preparing=false;root.dataset.scenePreparation='download-interrupted';
         const notice=root.querySelector('.error');notice.textContent='The connection interrupted the tour download. Tickets and navigation are still available. Reload to try again.';notice.hidden=false;
+        root.journeyHealth?.fail('download');
       }
     }
     window.addEventListener('online',()=>{if(root.dataset.scenePreparation==='download-interrupted'){root.querySelector('.error').hidden=true;prepareJungle();}});
@@ -1488,7 +1490,7 @@
       energyParticles.geometry.attributes.position.needsUpdate=true;energyTrails.geometry.attributes.position.needsUpdate=true;
     }
 
-    requestAnimationFrame(buildReference);
+    requestAnimationFrame(()=>buildReference().catch(failPreparation));
 
     // JOURNEY_NAV_START
     let p=0,target=0,auto=false,lastTime=performance.now(),currentKey='',dragY=null;
@@ -1576,6 +1578,7 @@
       p=guideState.progress;target=guideState.target;auto=guideState.mode==='intro';
     }
     function requestDestination(direction=1){
+      if(root.dataset.graphicsState)return false;
       if(root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return false;
       if(atJourneyEnd()&&direction>0){root.visitRoom?.open();return true;}
       if(direction>0&&guideState.mode==='idle'&&root.dataset.distantPreparation!=='ready'){
@@ -1596,6 +1599,7 @@
       root.dataset.phase=key;
       root.dataset.journeyMode=guideState.mode;
       root.dataset.destination=guideState.mode==='idle'&&guideState.index<pageStops.length?pageStops[guideState.index].id:'';
+      root.dataset.waitingForScenery=String(!!pendingDestination);
       root.journeyInterface?.update(p,atJourneyEnd(),{...guideState,waitingForScenery:!!pendingDestination});
       const skip=root.querySelector('.explore');skip.hidden=guideState.mode!=='intro';
       const failed=['failed','download-interrupted'].includes(root.dataset.scenePreparation);
@@ -1668,6 +1672,7 @@
       jungleSky?.setPixelRatio(quality.ratio);
       root.dataset.renderScale=quality.ratio.toFixed(2);
       root.dataset.renderPixels=String(Math.round(viewportWidth*viewportHeight*quality.ratio*quality.ratio));
+      root.dataset.effectsLevel=String(quality.effectsLevel||0);
     }
     // Mobile browser chrome can resize dvh repeatedly. Coalesce changes and resize
     // only inside the next draw, so a cleared WebGL buffer is never presented.
@@ -1689,7 +1694,7 @@
     const sceneResize=new ResizeObserver(resize),headerResize=new ResizeObserver(fitEntranceWordmark);
     sceneResize.observe(stage);headerResize.observe(root.querySelector('.site-header'));resize();
     let lastLabelUpdate=-Infinity,lastVisualProgress=-1,lastEffectTime=-1,qualityPending=false;
-    const effectsCadence=window.createJourneyCadence(quality.compact?30:60);
+    const effectsCadence=window.createJourneyCadence(quality.effectsHz);
     const profileFrames=new URLSearchParams(location.search).has('profile');
     let sampleFrames=0,sampleSeconds=0,totalFrames=0,frameCosts=[];
     function frame(dt,now,elapsed){
@@ -1705,6 +1710,8 @@
       if(qualityPending&&(quality.ratio<renderer.getPixelRatio()||guideState.mode==='idle')){applyQuality();qualityPending=false;}
       const changed=p!==lastVisualProgress;
       if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();}
+      if(root.dataset.effectsLevel!==String(quality.effectsLevel))applyQuality();
+      effectsCadence.setHz(quality.effectsHz);
       const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);
       if(machineRunning||changed||lastEffectTime<0){
         updateMachine(entrancePrepared?dt:0);
@@ -1733,6 +1740,7 @@
       if(effectDelta!==null)lightBudget.sync(camera,effectDelta,{enabled:p>.27});
       const veil=String(guideState.motionVeil||0);if(motionVeil.style.opacity!==veil)motionVeil.style.opacity=veil;
       renderer.render(scene,camera);lastVisualProgress=p;
+      root.journeyHealth?.frame(elapsed,p,guideState.mode);
       if(root.dataset.firstFrame!=='true'){root.dataset.firstFrame='true';root.dataset.firstFrameMs=performance.now().toFixed(0);}
       if(profileFrames){
         totalFrames++;sampleFrames++;sampleSeconds+=elapsed;frameCosts.push(performance.now()-frameStarted);
@@ -1743,14 +1751,18 @@
     }
     journeyLoop=window.createJourneyLoop({request:callback=>requestAnimationFrame(callback),cancel:id=>cancelAnimationFrame(id),render:frame});
     root.wakeJourney=()=>{lastVisualProgress=-1;journeyLoop.wake();};
-    let sceneInView=true,pageActive=true;
+    let sceneInView=true,pageActive=true,contextLost=false;
     function syncVisibility(){
-      const visible=pageActive&&!document.hidden&&sceneInView&&root.dataset.view!=='info'&&root.dataset.visitOpen!=='true'&&root.dataset.menuOpen!=='true';
+      const visible=!contextLost&&pageActive&&!document.hidden&&sceneInView&&root.dataset.view!=='info'&&root.dataset.visitOpen!=='true'&&root.dataset.menuOpen!=='true';
       root.dataset.effectsResting=String(!visible);journeyLoop.setVisible(visible);performanceBudget.reset();
       if(!visible){preparationScheduler.cancel();preparationHandle=null;}
       if(visible&&preparation)queuePreparation();
     }
     document.addEventListener('visibilitychange',syncVisibility);
+    renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;root.dataset.graphicsState='lost';syncVisibility();root.journeyHealth?.fail('graphics');});
+    // Old compilation/warmup promises are not resumed against a replaced GPU
+    // context. Keep direct pages usable; Retry tour performs a clean restart.
+    renderer.domElement.addEventListener('webglcontextrestored',()=>{root.dataset.graphicsState='restored-restart-required';root.journeyHealth?.fail('graphics');});
     const viewObserver=new IntersectionObserver(entries=>{sceneInView=entries[0].isIntersecting;syncVisibility();},{threshold:0});viewObserver.observe(stage);
     const modeObserver=new MutationObserver(syncVisibility);modeObserver.observe(root,{attributes:true,attributeFilter:['data-view','data-visit-open','data-menu-open']});
     window.addEventListener('pagehide',event=>{pageActive=false;syncVisibility();if(!event.persisted){journeyLoop.dispose();viewObserver.disconnect();modeObserver.disconnect();sceneResize.disconnect();headerResize.disconnect();document.removeEventListener('visibilitychange',syncVisibility);}});

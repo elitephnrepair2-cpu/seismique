@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const root=path.join(__dirname,'..'),assets=path.join(root,'dist/assets');
 const read=name=>fs.readFileSync(path.join(assets,name),'utf8');
 const groups={
- ui:['visitor.js','journey-interface.js'],
+ ui:['visitor.js','journey-interface.js','journey-health.js'],
  jungle:['journey-atmosphere.js','jungle-lighting.js','jungle-sky.js','destination-grass.js'],
  entry:['journey-preparation.js','portal-noise.js','ending-portal.js','entrance-mural.js','portal-energy.js','journey-guide.js','static-scenery.js','journey-performance.js','jungle-light-budget.js','journey-scene.js']
 };
