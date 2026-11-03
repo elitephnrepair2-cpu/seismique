@@ -28,3 +28,22 @@
     const legacy=location.hash.slice(1);if(legacy&&legacy!=='tour'&&legacy!=='visit-room'&&legacy!=='site-footer'){const url=urlFor(legacy);if(url)location.replace(url);}
   }
 })();
+
+/* Owner-supplied closure, inclusive of Nov 13 in Houston (CST). */
+(()=>{
+  const root=document.getElementById('seismique-jungle-reveal');if(!root)return;
+  const expires=Date.parse('2026-11-14T00:00:00-06:00');let timer=null,notice=null,details=[];
+  function sync(){
+    clearTimeout(timer);
+    if(Date.now()>=expires){notice?.remove();details.forEach(node=>node.remove());notice=null;details=[];return;}
+    if(!notice){
+      notice=document.createElement('aside');notice.className='seismique-closure';notice.setAttribute('aria-label','Seismique closure: November 8 through November 13, 2026');
+      const label=document.createElement('span');label.textContent='CLOSED';const dates=document.createElement('strong');dates.textContent='NOV 8–13';notice.append(label,dates);root.append(notice);
+      for(const holder of [document.querySelector('#visit-room .vr-intro'),document.querySelector('#hours-location')].filter(Boolean)){
+        const line=document.createElement('p');line.className='closure-details';line.textContent='Temporary closure: November 8–13, 2026.';holder.append(line);details.push(line);
+      }
+    }
+    timer=setTimeout(sync,Math.min(expires-Date.now(),2147483647));
+  }
+  sync();window.addEventListener('pageshow',sync);
+})();

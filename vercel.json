@@ -11,6 +11,15 @@
   },
   "headers": [
     {
+      "source": "/assets/journey-ui.e4be5d6bf15d.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/journey-ui.71afc4582fec.js",
       "headers": [
         {
