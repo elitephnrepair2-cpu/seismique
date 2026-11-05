@@ -2,6 +2,9 @@
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
   (()=>{
     const root=document.getElementById('seismique-jungle-reveal');
+    const startupProfiling=new URLSearchParams(location.search).has('profile');
+    const startupMark=name=>{if(startupProfiling)root.dataset[name+'Ms']=performance.now().toFixed(1);};
+    startupMark('startupScript');
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
     if(!window.THREE){root.journeyHealth?.fail('download');root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
@@ -69,6 +72,7 @@
       floorCtx.strokeStyle='#343138';floorCtx.lineWidth=2.4;floorCtx.strokeRect(x+1.5,y+1.5,plankLength-3,plankWidth-3);
       floorCtx.strokeStyle='#f4f0e7';floorCtx.lineWidth=1;floorCtx.beginPath();floorCtx.moveTo(x+4,y+4);floorCtx.lineTo(x+plankLength-4,y+4);floorCtx.stroke();
     }
+    startupMark('startupFloor');
     const floorTex=new T.CanvasTexture(floorCanvas);floorTex.wrapS=floorTex.wrapT=T.RepeatWrapping;floorTex.repeat.set(56/6,100/6);floorTex.colorSpace=T.SRGBColorSpace;floorTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
     // Neutral printed surface; the existing portal lights supply the shifting color and sheen.
     const floor=mesh(new T.PlaneGeometry(56,100),new T.MeshPhysicalMaterial({map:floorTex,emissiveMap:floorTex,emissive:0xe9e6e2,emissiveIntensity:.045,roughness:.46,metalness:0,clearcoat:.20,clearcoatRoughness:.40}),0,-.006,-16);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.renderOrder=-3;window.fadeEndingFloor(floor.material,'museum');
@@ -1045,7 +1049,7 @@
           const work=window.batchStaticScenery(T,parent,parent===machine?moving:new Set());let step;
           do{
             step=work.next();
-            if(!step.done&&performance.now()-start>3){await new Promise(resolve=>requestAnimationFrame(resolve));start=performance.now();}
+            if(!step.done&&performance.now()-start>6){await window.waitForPreparationSlot({urgent:true});start=performance.now();}
           }while(!step.done);
           before+=step.value.before;after+=step.value.after;
         }
@@ -1062,16 +1066,17 @@
       const mask=bc.getContext('2d');mask.clearRect(0,groundPixel,artWidth,artHeight-groundPixel);mask.globalCompositeOperation='destination-out';mask.beginPath();mask.arc(470,groundPixel-apertureY/worldScale,249,0,Math.PI*2);mask.fill();mask.fillRect(250,980,440,340);mask.globalCompositeOperation='source-over';wallMat.transparent=true;wallMat.alphaTest=.02;wallTex.needsUpdate=true;
       const wall=mesh(panelGeo,wallMat,0,entranceCameraY,-.7,scene);wall.receiveShadow=true;
       entranceWallMaterials.push(wallMat);
-      buildConstruction();buildMachineWall();buildPortal();
+      startupMark('startupEntranceBuild');
+      buildConstruction();buildMachineWall();buildPortal();startupMark('startupEntranceBuilt');
       entranceMural=window.createEntranceMural({THREE:T,scene,wallMaterials:entranceWallMaterials,apertureY,reducedMotion});
-      await preparePortalScenery();
+      await preparePortalScenery();startupMark('startupEntranceBatched');
       root.dataset.entrancePreparation='compiling';
       try{await renderer.compileAsync(scene,camera);}
       catch(error){root.dataset.entrancePreparation='failed';root.journeyHealth?.fail('preparation');root.querySelector('.error').hidden=false;return;}
       portalReady=true;root.dataset.portalReady='true';
-      entrancePrepared=true;root.dataset.entrancePreparation='ready';
-      // Paint the entrance first; construct the next world in bounded idle slices.
-      requestAnimationFrame(()=>requestAnimationFrame(()=>prepareJungle()));
+      entrancePrepared=true;root.dataset.entrancePreparation='ready';startupMark('startupEntranceCompiled');
+      // The loading cover is still visible, so begin the remaining work now.
+      prepareJungle();
     }
     const preparationScheduler=window.createPreparationScheduler();
     let preparation=null,preparationHandle=null,preparing=false,maxPrepSlice=0,preparationWaiting=false;
@@ -1088,7 +1093,8 @@
         preparationHandle=null;
         if(root.dataset.graphicsState||document.hidden||root.dataset.visitOpen==='true'||root.dataset.menuOpen==='true')return;
         if(root.dataset.scenePreparation==='ready'&&root.dataset.journeyMode!=='idle')return;
-        const start=performance.now(),budget=deadline?.didTimeout?1.5:3;let done=false;
+        const startup=root.dataset.openingReady!=='true';
+        const start=performance.now(),budget=startup?6:deadline?.didTimeout?1.5:3;let done=false;
         do{
           const sliceStart=performance.now();let step;
           try{step=preparation.next();}catch(error){failPreparation(error);return;}done=step.done;
@@ -1098,11 +1104,12 @@
             return;
           }
           const sliceMs=performance.now()-sliceStart;
+          if(profileFrames&&root.dataset.scenePreparation!=='ready')root.dataset.startupWorkMs=(Number(root.dataset.startupWorkMs||0)+sliceMs).toFixed(2);
           if(profileFrames&&sliceMs>maxPrepSlice){maxPrepSlice=sliceMs;root.dataset.prepMaxSliceMs=sliceMs.toFixed(2);}
-        }while(!done&&performance.now()-start<budget&&(!deadline||deadline.didTimeout||deadline.timeRemaining()>.25));
+        }while(!done&&performance.now()-start<budget&&(startup||!deadline||deadline.didTimeout||deadline.timeRemaining()>.25));
         if(done){preparation=null;if(revealReady)finishDistantPreparation().catch(failPreparation);else finishPreparation().catch(failPreparation);}else queuePreparation();
       };
-      preparationHandle=preparationScheduler.schedule(task);
+      preparationHandle=preparationScheduler.schedule(task,{urgent:root.dataset.openingReady!=='true'});
     }
     function failPreparation(error){
       preparationScheduler.cancel();preparationHandle=null;preparation=null;preparing=false;
@@ -1114,9 +1121,9 @@
     function* prepareResources(){
       // Allocate every shader light before compilation, including future bulbs.
       for(const i of [0,5,10]){const light=jungleLight([0xff47cf,0xffca35,0x66f246,0x40deff,0xff7934,0xb480ff][i%6],18,6.5);light.userData.pendingGroup=revealWorld;bulbLights.set(i,light);revealLights.push({light,intensity:18});}
-      yield* buildRevealWorld();
+      startupMark('startupJungleBuild');yield* buildRevealWorld();startupMark('startupJungleBuilt');
       const batching=yield* window.batchStaticScenery(T,revealWorld,new Set([...hangingPods.map(pod=>pod.pivot),revealWorld.getObjectByName('Alien Grass destination accents')]));
-      root.dataset.sceneryDraws=String(batching.after)+'/'+String(batching.before);
+      root.dataset.sceneryDraws=String(batching.after)+'/'+String(batching.before);startupMark('startupJungleBatched');
       journeyAtmosphere=window.createJourneyAtmosphere({THREE:T,scene,machine,revealWorld,apertureY,mouthZ,portalDepth,vortexRadius,softMap,reducedMotion,mapJungleZ:jungleZ,light:jungleLight(0x32b9a2,0,11)});yield;
       jungleSky=window.createJungleSky({THREE:T,scene,reducedMotion,pixelRatio:quality.ratio,mapsReady:skyMaps});yield;
       // Upload each small procedural map before the first jungle frame needs it.
@@ -1125,7 +1132,7 @@
         for(const value of Object.values(material))if(value?.isTexture)textures.add(value);
         for(const uniform of Object.values(material.uniforms||{}))if(uniform.value?.isTexture)textures.add(uniform.value);
       }});
-      for(const texture of textures){renderer.initTexture(texture);yield;}
+      for(const texture of textures){renderer.initTexture(texture);yield;}startupMark('startupTexturesUploaded');
     }
     async function prepareJungle(){
       if(preparing)return;preparing=true;root.dataset.scenePreparation='downloading';
@@ -1142,13 +1149,15 @@
     window.addEventListener('online',()=>{if(root.dataset.scenePreparation==='download-interrupted'){root.querySelector('.error').hidden=true;prepareJungle();}});
     async function warmJungleBuffers(views=[.40,.58,stopProgress()[0]],settledOnly=false){
       root.dataset.gpuPreparation='warming';
-      const target=new T.WebGLRenderTarget(32,32),probe=camera.clone();
+      const covered=!settledOnly&&root.dataset.openingReady!=='true';
+      const target=covered?null:new T.WebGLRenderTarget(32,32),probe=camera.clone();
       const previousTarget=renderer.getRenderTarget(),previousVisibility=revealWorld.visible;
       try{
-        // A tiny offscreen draw uploads geometry as well as compiling shaders.
-        // The visible camera and canvas are never changed by this preparation.
+        // Under the opaque loading cover, warm the actual output format so
+        // Three does not compile a second set of linear offscreen shaders.
+        // Later warmups stay offscreen and never replace the visible frame.
         for(const progress of views){
-          await window.waitForPreparationSlot();
+          await window.waitForPreparationSlot({urgent:!settledOnly});
           while(document.hidden||root.dataset.menuOpen==='true'||root.dataset.visitOpen==='true'||(settledOnly&&guide.state().mode!=='idle')){
             await new Promise(resolve=>setTimeout(resolve,200));
           }
@@ -1161,16 +1170,16 @@
           }
         }
       }finally{
-        renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;target.dispose();
+        renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;target?.dispose();
       }
       root.dataset.gpuPreparation='ready';root.dataset.gpuReadyMs=performance.now().toFixed(0);
     }
     async function finishPreparation(){
       root.dataset.scenePreparation='compiling';
       // compileAsync uses parallel shader compilation where the GPU supports it.
-      root.dataset.skyMode=await jungleSky?.prepare(renderer)||'cached';
-      await renderer.compileAsync(scene,camera);
-      await warmJungleBuffers();
+      root.dataset.skyMode=await jungleSky?.prepare(renderer)||'cached';startupMark('startupSkyReady');
+      await renderer.compileAsync(scene,camera);startupMark('startupJungleCompiled');
+      await warmJungleBuffers();startupMark('startupGpuReady');
       const dynamicRoots=new Set(hangingPods.map(pod=>pod.pivot));
       function freezeScenery(node){
         if(dynamicRoots.has(node)||node.name==='Alien Grass destination accents')return;
@@ -1677,7 +1686,10 @@
     function frame(dt,now,elapsed){
       const frameStarted=profileFrames?performance.now():0;
       const viewportChanged=applyViewport();
-      if(!portalReady)return true;
+      // Loading is drawn in CSS. Do not spend GPU/frame time rendering the
+      // concealed scene or compete with construction for scarce idle slots.
+      // finishPreparation and visibility changes wake this one existing loop.
+      if(!portalReady||!revealReady)return false;
       // Resizing the drawing buffer clears it: adjust quality before this frame's draw.
       if(performanceBudget.sample(elapsed)||viewportChanged)qualityPending=true;
       const previousMode=guideState.mode;updateJourney(guideState.mode==='intro'?elapsed:dt);

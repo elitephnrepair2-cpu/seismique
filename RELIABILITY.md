@@ -42,6 +42,12 @@ The previous controller reproduced 4.65 seconds of almost-stopped camera movemen
 
 On the local in-app browser at 414 × 896, the prepared opening became visible at 0.77 seconds and reached the first destination at 9.93 seconds; its maximum recorded moving-frame interval was 25.1 ms. With the jungle script deliberately delayed 12 seconds by a separate local HTTP server, it became visible at 12.62 seconds and reached the first destination at 21.78 seconds; maximum moving-frame interval was 9.3 ms. These are measurements on this computer, not iPhone performance claims. iPhone 11 and iPhone 17 Pro Max Safari acceptance remains outstanding.
 
+## November 4 startup-speed follow-up
+
+Covered startup now uses bounded six-millisecond preparation slices with immediate timer scheduling, rather than waiting for background idle frames. The hidden animation loop sleeps until the complete scene is ready. Initial GPU warmup uses the covered canvas in its real output format, avoiding a second set of linear offscreen shader programs; all later warmups remain offscreen. Surface and sky image downloads start from low-priority HTML preloads. Visual assets, tree counts, rendering resolution and the full opening readiness gate are preserved.
+
+At 414 × 896 in the local in-app browser, the instrumented baseline became visible at 1,136 ms on the first load and 930 ms on repeat. The final build measured 702 ms and 623 ms (25–33% less than the repeat baseline). Maximum moving-frame intervals in those final runs were 15.7 and 16.7 ms. These are small-sample measurements on this computer, not iPhone/Safari or mobile-network results. The complete journey release gate passes, including cancelled urgent work, covered rendering suspension, and successful/failed GPU warmup with render-state restoration.
+
 ## Remaining limits
 
 - Scene generation and some GPU uploads still execute on the main thread. Cooperative yields reduce stalls but cannot preempt one expensive browser/GPU operation.
