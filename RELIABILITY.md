@@ -2,6 +2,8 @@
 
 ## Implemented controls
 
+- Touch tablets (including desktop-mode iPad Safari) and constrained four-core devices start at an 800k-pixel ceiling, can reduce to 450k under sustained pressure, and only recover after sustained healthy frames. Phone and desktop detail remains unchanged. The tablet branch meshes use at least 40% fewer triangles while retaining the same tree count, branch curves, textures and smooth seams. DOM text retains native resolution.
+- Entrance and jungle lighting share four fixed physical lights on compact devices, down from eight; logical lights hand over by camera position without changing shader-light counts. Forward and reverse crossings are covered by the release tests. Physical 7th-generation iPad acceptance remains required; desktop browser measurements do not prove iPad performance.
 - The initial loading state now covers complete entrance/jungle preparation and GPU warmup. Camera travel and portal power-up start together only when that preparation is ready. The old .26-progress readiness brake is removed: slow loading cannot start the opening, stop it halfway, then restart it. Menus, tickets and recovery links remain accessible during loading. Restoring a farther destination waits for its scenery before revealing the canvas.
 - Bark, stone and path surface pixels are generated during `build:journey`, then loaded as four immutable PNGs totaling 98,210 bytes. Decoded pixels are verified against the original procedural maps. Failed/stalled image requests use stable lightweight maps; late images are disposed, avoiding surprise texture uploads during travel.
 - The deferred jungle script is preloaded at low priority alongside the entrance download, while remaining outside the parser-blocking dependency chain.

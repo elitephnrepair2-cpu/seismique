@@ -4,15 +4,17 @@
     const sources=[],slots=compact?Array.from({length:4},()=>{
       const light=new T.PointLight(0xffffff,0,1,2);scene.add(light);return {light,source:null};
     }):[];
-    function create(color,intensity,distance,priority=1){
-      const light=new T.PointLight(color,intensity,distance,2);light.userData.budgetPriority=priority;sources.push(light);
+    function create(color,intensity,distance,priority=1,region='jungle'){
+      const light=new T.PointLight(color,intensity,distance,2);light.userData.budgetPriority=priority;light.userData.budgetRegion=region;sources.push(light);
       if(!compact)scene.add(light);return light;
     }
-    function sync(camera,seconds,{enabled=true,snap=false}={}){
+    function sync(camera,seconds,{enabled=true,snap=false,progress=1}={}){
       if(!compact)return;
       const dt=Math.max(0,Math.min(.1,seconds));
       if(!enabled){for(const slot of slots){slot.light.intensity=0;slot.source=null;}return;}
-      const ranked=sources.filter(source=>source.intensity>.005).map(source=>{
+      // Entrance and jungle share these four physical lights. Even a zero-
+      // intensity PointLight otherwise stays in Three's per-pixel shader loop.
+      const ranked=sources.filter(source=>source.intensity>.005&&(source.userData.budgetRegion==='entrance'?progress<=.58:progress>.27)).map(source=>{
         const distance=source.position.distanceTo(camera.position),behind=source.position.z>camera.position.z+4;
         const retained=slots.some(slot=>slot.source===source)?1.2:1;
         return {source,score:distance>source.distance+18?0:source.intensity/(4+distance*distance)*(behind?.2:1)*retained};

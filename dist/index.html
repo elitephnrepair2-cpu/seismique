@@ -9,7 +9,7 @@
 <title>Seismique — Explore &amp; Plan Your Visit</title>
 <!--journey:preloads-->
 <link rel="preload" href="/assets/three.min.js?v=160" as="script" fetchpriority="high">
-<link rel="preload" href="/assets/journey-entry.544b1afa4253.js" as="script" fetchpriority="high">
+<link rel="preload" href="/assets/journey-entry.24abb1ac46cc.js" as="script" fetchpriority="high">
 <link rel="preload" href="/assets/journey-jungle.9ebd209a2c1e.js" as="script" fetchpriority="low">
 <link rel="preload" href="/assets/jungle-bark.6996ffb59e0b.png" as="image" fetchpriority="low">
 <link rel="preload" href="/assets/jungle-barkColor.588ffb109154.png" as="image" fetchpriority="low">
@@ -246,9 +246,6 @@ body.jungle-home .entrance-intro span{display:block;font-weight:700;color:#48267
 body.jungle-home .tour-controls:not(:has(.explore[data-entry-state="ready"])) .entrance-intro{display:none}
 @media(max-width:700px),(max-height:500px){
  body.jungle-home #seismique-jungle-reveal .skip-tour,body.jungle-home #seismique-jungle-reveal .footer-shortcut,body.jungle-home #seismique-jungle-reveal .future-shortcut,body.jungle-home #seismique-jungle-reveal .movehint{display:none!important}
- body.jungle-home #seismique-jungle-reveal .global-ticketbar{position:absolute;top:calc(var(--journey-safe-top) + 16px);right:calc(var(--journey-safe-right) + 16px);bottom:auto;z-index:9}
- body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{min-height:44px;padding:10px 14px;font-size:12px;font-weight:600;letter-spacing:.025em;border:1px solid #b69ada66;border-top-color:#c7b4f08a;border-radius:3px 10px 3px 8px;background:linear-gradient(120deg,#779bcd14,transparent 48%,#9b48bb1c),#11101ce8;color:#f7f3ff;box-shadow:inset 0 1px #ffffff09,0 4px 18px #06051033;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background-color .2s,border-color .2s}
- body.jungle-home #seismique-jungle-reveal .global-ticketbar .button:hover{background-color:#242033;border-color:#c4a2ed}
  body.jungle-home #seismique-jungle-reveal .menu-toggle{position:relative;min-width:70px;min-height:44px;padding:10px 8px;gap:7px;font-size:12px;font-weight:500;letter-spacing:.025em;background:#0d0b1466;border:1px solid transparent;border-radius:2px;box-shadow:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#e7e3ed}
  body.jungle-home #seismique-jungle-reveal .menu-toggle::after{content:"";position:absolute;left:9px;right:12px;bottom:6px;height:1px;transform:rotate(-1deg);background:linear-gradient(90deg,#cec1dd50,#a288c21a,transparent);pointer-events:none}
  body.jungle-home #seismique-jungle-reveal .menu-toggle>span{font-size:0;width:14px;height:10px;position:relative;border-top:1px solid currentColor}
@@ -320,7 +317,6 @@ body.jungle-home #seismique-jungle-reveal .journey-finish{bottom:calc(var(--jour
 .visit-room::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}
 @media(max-width:700px){
  body.jungle-home #seismique-jungle-reveal .menu-toggle{backdrop-filter:none;-webkit-backdrop-filter:none}
- body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
  #seismique-jungle-reveal .menu-panel{backdrop-filter:none;-webkit-backdrop-filter:none}
  #seismique-jungle-reveal .jungle-page-stop{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 }
@@ -440,13 +436,32 @@ body.jungle-home #seismique-jungle-reveal .destination-open strong{font:900 clam
 body.jungle-home #seismique-jungle-reveal .destination-open .destination-summary{max-width:29ch;font:400 clamp(14px,1.5vw,17px)/1.5 Arial,sans-serif;color:#ece8f3}
 body.jungle-home #seismique-jungle-reveal .destination-open small{align-self:center;min-width:230px;min-height:54px;margin-top:8px;padding:14px 24px;gap:19px;border-color:#bc94ffb3;box-shadow:0 6px 24px #12002966;text-shadow:none;transition:background .15s,border-color .15s,transform .15s}
 body.jungle-home #seismique-jungle-reveal .destination-open .destination-open-label{font-size:12px;letter-spacing:.065em}
-body.jungle-home #seismique-jungle-reveal .destination-open .destination-open-mark{font-family:Arial,sans-serif;font-variant-emoji:text}
 body.jungle-home #seismique-jungle-reveal .destination-open:active small{transform:scale(.98)}
 body.jungle-home #seismique-jungle-reveal .destination-open:focus-visible small{outline:2px solid #fff;outline-offset:5px}
 body.jungle-home #seismique-jungle-reveal[data-phase="jungle"] .destination-next{background:rgba(10,12,22,.65);border-color:rgba(222,218,239,.25);box-shadow:none;font-size:11px}
 @media(max-width:500px){body.jungle-home #seismique-jungle-reveal .destination-open{gap:15px}body.jungle-home #seismique-jungle-reveal .destination-open::before{inset:-55px -30px}body.jungle-home #seismique-jungle-reveal .destination-open strong{font-size:clamp(40px,11.8vw,58px)}body.jungle-home #seismique-jungle-reveal .destination-open small{min-width:225px}}
 @media(max-height:500px){body.jungle-home #seismique-jungle-reveal .destination-open{top:45%;gap:8px}body.jungle-home #seismique-jungle-reveal .destination-open strong{font-size:32px;line-height:.95}body.jungle-home #seismique-jungle-reveal .destination-open .destination-summary{font-size:12px;max-width:38ch}body.jungle-home #seismique-jungle-reveal .destination-open small{min-height:44px;margin-top:3px;padding:10px 20px}}
 @media(prefers-reduced-motion:reduce){body.jungle-home #seismique-jungle-reveal .destination-open small{transition:none}body.jungle-home #seismique-jungle-reveal .destination-open:active small{transform:none}}
+
+/* Destination actions share one centered stack, with tickets below Explore. */
+body.jungle-home #seismique-jungle-reveal .jungle-page-stops{inset:auto;left:50%;top:46%;width:min(680px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 48px));transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:14px}
+body.jungle-home #seismique-jungle-reveal .destination-open,
+body.jungle-home #seismique-jungle-reveal .destination-open:hover,
+body.jungle-home #seismique-jungle-reveal .destination-open:focus-visible,
+body.jungle-home #seismique-jungle-reveal .destination-open:active{position:relative;top:auto;left:auto;width:100%;transform:none}
+body.jungle-home #seismique-jungle-reveal .destination-open-mark{display:inline-flex;width:20px;height:20px;flex:none}
+body.jungle-home #seismique-jungle-reveal .destination-open-mark svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+body.jungle-home #seismique-jungle-reveal .global-ticketbar{position:static;inset:auto;display:none;padding:0;margin:0;transform:none}
+body.jungle-home #seismique-jungle-reveal[data-destination]:not([data-destination=""]) .global-ticketbar{display:flex}
+body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:230px;min-height:48px;padding:12px 24px;border:1px solid #d4c3ee66;border-radius:3px 10px 3px 8px;background:#100e1ee8;backdrop-filter:none;-webkit-backdrop-filter:none;color:#fff;font:600 12px/1.4 Arial,sans-serif;letter-spacing:.065em;text-transform:uppercase;box-shadow:none}
+body.jungle-home #seismique-jungle-reveal .global-ticketbar .button:hover{background:#291b3c;border-color:#d9bbff}
+body.jungle-home #seismique-jungle-reveal .menu-toggle{min-width:86px;min-height:48px;padding:12px 14px;font-size:14px;gap:9px}
+body.jungle-home #seismique-jungle-reveal .menu-panel{width:min(360px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 32px));padding:16px}
+body.jungle-home #seismique-jungle-reveal .direct-nav a{min-height:56px;padding:15px 14px;font-size:17px}
+body.jungle-home #seismique-jungle-reveal .menu-tickets{display:flex;align-items:center;justify-content:center;min-height:48px;margin:14px 0 0;padding:12px 16px;border:1px solid #ac8ece66;border-radius:4px;background:#251636;color:#fff;font:700 14px/1.4 Arial,sans-serif;text-decoration:none}
+body.jungle-home #seismique-jungle-reveal .menu-tickets:focus-visible{outline:2px solid #d7c0ff;outline-offset:3px}
+@media(max-width:500px){body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{min-width:225px}}
+@media(max-height:500px){body.jungle-home #seismique-jungle-reveal .jungle-page-stops{top:45%;gap:8px}body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{min-height:44px;padding:9px 20px}body.jungle-home #seismique-jungle-reveal .destination-open{gap:6px}}
 
 /* Five equal destinations; the persistent ticket control remains separate. */
 #seismique-jungle-reveal .menu-panel{background:#100d16f7;border:1px solid #ffffff2b;box-shadow:0 18px 60px #0008}
@@ -498,7 +513,7 @@ body.jungle-home #seismique-jungle-reveal .seismique-closure{top:calc(env(safe-a
     <header class="site-header">
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span aria-hidden="true">☰</span> Menu</button>
       <div id="site-navigation" class="menu-panel" hidden>
-        <a class="menu-home" href="/" aria-label="Seismique — home"><img class="brand-image" src="https://static.wixstatic.com/media/51d719_1a8dbfba7f3c4153bf21afae44b1c128~mv2.png/v1/fill/w_506,h_126,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SEISMIQUE%20LOGO%20%20no%20squiggle.png" alt="Seismique" width="506" height="126" loading="lazy" decoding="async"></a><nav class="direct-nav" aria-label="Main navigation"><a href="/exhibits/">Immersive Museum</a><a href="/mini-golf/">Glow Mini Golf</a><a href="/parties/">Parties &amp; Events</a><a href="/whats-happening/">What’s Happening</a><a href="#visit-room">Plan Your Visit</a></nav>
+        <a class="menu-home" href="/" aria-label="Seismique — home"><img class="brand-image" src="https://static.wixstatic.com/media/51d719_1a8dbfba7f3c4153bf21afae44b1c128~mv2.png/v1/fill/w_506,h_126,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SEISMIQUE%20LOGO%20%20no%20squiggle.png" alt="Seismique" width="506" height="126" loading="lazy" decoding="async"></a><nav class="direct-nav" aria-label="Main navigation"><a href="/exhibits/">Immersive Museum</a><a href="/mini-golf/">Glow Mini Golf</a><a href="/parties/">Parties &amp; Events</a><a href="/whats-happening/">What’s Happening</a><a href="#visit-room">Plan Your Visit</a></nav><a class="menu-tickets" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener noreferrer">Get tickets</a>
       </div>
       <a class="footer-shortcut" href="#visit-room">Plan Your Visit <span aria-hidden="true">↗</span></a><a class="return-tour" href="#tour">Back to tour</a>
     </header>
@@ -506,10 +521,11 @@ body.jungle-home #seismique-jungle-reveal .seismique-closure{top:calc(env(safe-a
       <h1 class="visually-hidden">Explore Seismique</h1>
     <div class="scene" role="group" tabindex="0" aria-label="Seismique immersive journey">
       <div class="jungle-page-stops" aria-label="Discover more along the jungle path">
-        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="exhibits" aria-label="Explore the Immersive Museum page" hidden><span>01 / DISCOVER</span><strong>Immersive<br>Museum</strong><em class="destination-summary">Step inside worlds of art, light and interaction.</em><small><span class="destination-open-label">EXPLORE THE MUSEUM</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
-        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="mini-golf" aria-label="Explore the Glow Mini Golf page" hidden><span>02 / PLAY</span><strong>Glow<br>Mini Golf</strong><em class="destination-summary">An indoor glow course, arcade and more.</em><small><span class="destination-open-label">EXPLORE MINI GOLF</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
-        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="parties" aria-label="Explore the Parties and Events page" hidden><span>03 / CELEBRATE</span><strong>Parties<br>&amp; Events</strong><em class="destination-summary">Make your next celebration extraordinary.</em><small><span class="destination-open-label">PLAN YOUR EVENT</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
-        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="whats-happening" aria-label="Explore the What’s Happening page" hidden><span>04 / THE LATEST</span><strong>What’s<br>Happening</strong><em class="destination-summary">Find events, offers and new discoveries.</em><small><span class="destination-open-label">SEE WHAT’S HAPPENING</span><span class="destination-open-mark" aria-hidden="true">↗</span></small></button>
+        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="exhibits" aria-label="Explore the Immersive Museum page" hidden><span>01 / DISCOVER</span><strong>Immersive<br>Museum</strong><em class="destination-summary">Step inside worlds of art, light and interaction.</em><small><span class="destination-open-label">EXPLORE THE MUSEUM</span><span class="destination-open-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></small></button>
+        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="mini-golf" aria-label="Explore the Glow Mini Golf page" hidden><span>02 / PLAY</span><strong>Glow<br>Mini Golf</strong><em class="destination-summary">An indoor glow course, arcade and more.</em><small><span class="destination-open-label">EXPLORE MINI GOLF</span><span class="destination-open-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></small></button>
+        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="parties" aria-label="Explore the Parties and Events page" hidden><span>03 / CELEBRATE</span><strong>Parties<br>&amp; Events</strong><em class="destination-summary">Make your next celebration extraordinary.</em><small><span class="destination-open-label">PLAN YOUR EVENT</span><span class="destination-open-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></small></button>
+        <button type="button" class="jungle-page-stop destination-open" data-jungle-page="whats-happening" aria-label="Explore the What’s Happening page" hidden><span>04 / THE LATEST</span><strong>What’s<br>Happening</strong><em class="destination-summary">Find events, offers and new discoveries.</em><small><span class="destination-open-label">SEE WHAT’S HAPPENING</span><span class="destination-open-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></small></button>
+        <div class="global-ticketbar"><a class="tickets button primary" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener"><svg class="ticket-mark" viewBox="0 0 24 18" aria-hidden="true" focusable="false"><path d="M3 3h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V3Z"/><path class="ticket-perforation" d="M16 4v10"/></svg><span>Get tickets</span></a></div>
       </div>
       <div class="arrival-shade" aria-hidden="true"></div>
       <div class="threshold-wash" aria-hidden="true"></div>
@@ -535,7 +551,7 @@ body.jungle-home #seismique-jungle-reveal .seismique-closure{top:calc(env(safe-a
     </section><div class="journey-cue" aria-hidden="true" hidden><span>↑</span><span data-cue-text>Scroll to explore</span></div><div class="journey-progress" role="progressbar" aria-label="Journey progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
 
 
-    <div class="global-ticketbar"><a class="tickets button primary" href="https://order.toasttab.com/online/onlinetickets" target="_blank" rel="noopener"><svg class="ticket-mark" viewBox="0 0 24 18" aria-hidden="true" focusable="false"><path d="M3 3h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V3Z"/><path class="ticket-perforation" d="M16 4v10"/></svg><span>Get tickets</span></a></div>
+
   </div>
   <!--journey:ui-->
 <script src="/assets/journey-ui.e4be5d6bf15d.js" defer fetchpriority="high"></script>
@@ -544,7 +560,7 @@ body.jungle-home #seismique-jungle-reveal .seismique-closure{top:calc(env(safe-a
 
   <!--journey:entry-->
 <script src="/assets/three.min.js?v=160" defer fetchpriority="high"></script>
-<script src="/assets/journey-entry.544b1afa4253.js" defer fetchpriority="high"></script>
+<script src="/assets/journey-entry.24abb1ac46cc.js" defer fetchpriority="high"></script>
 <!--/journey:entry-->
 </div>
 

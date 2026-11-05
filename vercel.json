@@ -282,6 +282,15 @@
           "value": "default-src 'self'; script-src 'self' https://js.stripe.com; connect-src 'self' https://*.stripe.com https://*.link.com; frame-src https://*.stripe.com https://*.link.com https://*.stripe.network; img-src 'self' data: blob: https://*.stripe.com; style-src 'self' 'unsafe-inline'; font-src 'self' https://*.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self' https://*.stripe.com; frame-ancestors 'self'"
         }
       ]
+    },
+    {
+      "source": "/assets/journey-entry.24abb1ac46cc.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

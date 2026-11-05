@@ -101,12 +101,13 @@
     }
 
     const ledRings=[],tunnelMat=new T.MeshStandardMaterial({color:0x092534,emissive:0x053349,emissiveIntensity:.32,metalness:.46,roughness:.40,side:T.DoubleSide});
-    const glow=new T.PointLight(0x00dfff,2,15);glow.position.set(0,3,-4);scene.add(glow);
     const revealWorld=new T.Group();revealWorld.visible=false;scene.add(revealWorld);
-    // Four reusable mobile lights replace eleven simultaneous shader sources.
+    // Entrance and jungle share four mobile lights for the entire camera route.
     // The desktop lighting and every logical source retain their original values.
     const lightBudget=window.createJungleLightBudget(T,scene,{compact:quality.compact});
     const jungleLight=(color,intensity,distance,priority=1)=>lightBudget.create(color,intensity,distance,priority);
+    const entranceLight=(color,intensity,distance)=>lightBudget.create(color,intensity,distance,1,'entrance');
+    const glow=entranceLight(0x00dfff,2,15);glow.position.set(0,3,-4);
     root.dataset.jungleShaderLights=String(lightBudget.physicalCount);
     const hangingPods=[],revealLights=[],revealPools=[],revealPlants=[];
     const distantSceneryJobs=[];
@@ -139,8 +140,8 @@
     function* organicBranch(points,r0,r1,material,segments=36,parent=revealWorld){
       const curve=new T.CatmullRomCurve3(points.map(v=>new T.Vector3(...v))),sculpted=!!material.userData.bark;
       // Phone-size silhouettes retain carved channels with fewer hidden triangles.
-      if(quality.compact)segments=Math.max(12,Math.round(segments*.75));
-      const radial=sculpted?(r0>.65?(quality.compact?48:64):r0>.28?(quality.compact?32:48):24):9,geometry=new T.TubeGeometry(curve,segments,1,radial,false),positions=geometry.attributes.position;
+      if(quality.compact)segments=Math.max(12,Math.round(segments*(quality.economy?.6:.75)));
+      const radial=sculpted?(r0>.65?(quality.economy?32:quality.compact?48:64):r0>.28?(quality.economy?20:quality.compact?32:48):(quality.economy?12:24)):9,geometry=new T.TubeGeometry(curve,segments,1,radial,false),positions=geometry.attributes.position;
       const seed=points[0][0]*.7+points[0][2]*.21;
       const barkUV=geometry.attributes.uv,barkLength=curve.getLength()/3.5;
       // Broad channels are carved into the mesh; the color texture adds no lines.
@@ -1163,7 +1164,7 @@
           }
           const view=pose(progress);probe.position.set(...view.pos);probe.lookAt(...view.look);probe.updateMatrixWorld();
           const lights=lightBudget.capture();
-          lightBudget.sync(probe,0,{snap:true});
+          lightBudget.sync(probe,0,{snap:true,progress});
           revealWorld.visible=true;renderer.setRenderTarget(target);
           try{renderer.render(scene,probe);}finally{
             renderer.setRenderTarget(previousTarget);revealWorld.visible=previousVisibility;lightBudget.restore(lights);
@@ -1352,12 +1353,12 @@
       washMat=new T.MeshBasicMaterial({map:softMap,color:0x00ddff,transparent:true,opacity:.32,depthWrite:false,blending:T.AdditiveBlending});
       const wash=mesh(new T.PlaneGeometry(9.5,13),washMat,0,.012,2.8,scene);wash.rotation.x=-Math.PI/2;
       wallWash=mesh(new T.PlaneGeometry(12,12),new T.MeshBasicMaterial({map:softMap,color:0x00ddff,transparent:true,opacity:.18,depthWrite:false}),0,apertureY,-.65,scene);
-      machineGlow=new T.PointLight(0x38ddff,20,13,2);machineGlow.position.set(0,apertureY,.95);scene.add(machineGlow);
+      machineGlow=entranceLight(0x38ddff,20,13);machineGlow.position.set(0,apertureY,.95);
       // A low bounce illuminates the actual sill, shoes and nearby floor geometry.
-      portalFloorLight=new T.PointLight(0x51cfff,6.3,10.5,2);portalFloorLight.position.set(0,.90,1.3);scene.add(portalFloorLight);
+      portalFloorLight=entranceLight(0x51cfff,6.3,10.5);portalFloorLight.position.set(0,.90,1.3);
       const dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3).setUsage(T.DynamicDrawUsage));
       portalDust=new T.Points(dustGeometry,new T.PointsMaterial({color:0x9fe6ff,size:.037,map:softMap,transparent:true,opacity:.35,depthWrite:false,blending:T.AdditiveBlending}));portalDust.frustumCulled=false;scene.add(portalDust);
-      thresholdLight=new T.PointLight(0x38ddff,9,9,2);thresholdLight.position.set(0,apertureY,-3.5);scene.add(thresholdLight);
+      thresholdLight=entranceLight(0x38ddff,9,9);thresholdLight.position.set(0,apertureY,-3.5);
       const particleGeo=new T.BufferGeometry();particleGeo.setAttribute('position',new T.BufferAttribute(particlePositions,3).setUsage(T.DynamicDrawUsage));
       energyParticles=new T.Points(particleGeo,new T.PointsMaterial({color:0xbaf7ff,size:.065,map:softMap,transparent:true,opacity:.65,depthWrite:false,blending:T.AdditiveBlending}));energyParticles.frustumCulled=false;scene.add(energyParticles);
       const trailGeo=new T.BufferGeometry();trailGeo.setAttribute('position',new T.BufferAttribute(trailPositions,3).setUsage(T.DynamicDrawUsage));
@@ -1731,7 +1732,7 @@
       }
       if(changed||modeChanged||lastVisualProgress<0)updatePageStops();
       if(revealReady&&effectDelta!==null)destinationGrass?.update(p,energyTime,effectDelta,machineRunning);
-      if(effectDelta!==null)lightBudget.sync(camera,effectDelta,{enabled:p>.27});
+      if(effectDelta!==null)lightBudget.sync(camera,effectDelta,{progress:p});
       const veil=String(guideState.motionVeil||0);if(motionVeil.style.opacity!==veil)motionVeil.style.opacity=veil;
       renderer.render(scene,camera);lastVisualProgress=p;
       root.journeyHealth?.frame(elapsed,p,guideState.mode);
