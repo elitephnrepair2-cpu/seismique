@@ -56,7 +56,7 @@ for id,title in pages.items():
   html='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>'''+escape(title)+''' | Seismique</title><meta name="description" content="'''+description+'''"><link rel="stylesheet" href="/assets/exhibits-experience.css?v=49"><link rel="stylesheet" href="/assets/consolidated-pages.css?v=55"></head><body class="hub-page"><div id="seismique-jungle-reveal" data-view="info"><a class="skip-link" href="#main-content">Skip to content</a>'''+header+'''<main id="main-content">'''+content+'''</main></div><script src="/assets/visitor.js?v=58" defer></script>'''+('<script src="/assets/calendar.js?v=55" defer></script>' if id=='whats-happening' else '')+'''</body></html>'''
   html=navigation(shared_footer(links(html,id)),id)
   if id=="parties":
-   html=html.replace("</head>",'<link rel="stylesheet" href="/assets/events-experience.css?v=1">\n</head>')
+   html=html.replace("</head>",'<link rel="stylesheet" href="/assets/events-experience.css?v=2">\n</head>')
    html=html.replace("</body>",'<script src="/assets/events-inquiry.js?v=1" defer></script>\n</body>')
  path=Path('dist')/id/'index.html';path.parent.mkdir(exist_ok=True);path.write_text(html)
 # Legacy URLs only forward visitors; they no longer expose extra pages or menus.

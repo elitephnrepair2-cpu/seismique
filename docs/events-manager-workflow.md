@@ -53,4 +53,4 @@ Alternative outcomes: closed without booking, cancelled, or hold expired. Confir
 
 ## Public content / image provenance
 
-Event categories and possibilities were checked against the official private-events and corporate-events pages above. The Gallery photograph is the public image linked there (51d719_4dd2916158ae4ec8882aedf061815097~mv2.png). The mini-golf photo is an existing local website asset. Page content uses original concise copy; no new capacities or package guarantees are asserted.
+Event categories and possibilities were checked against the official private-events and corporate-events pages above. The Gallery hero photograph was removed at the user’s request. The mini-golf photo is an existing local website asset. Page content uses original concise copy; no new capacities or package guarantees are asserted.
