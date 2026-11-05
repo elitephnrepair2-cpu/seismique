@@ -2,6 +2,9 @@
 
 ## Implemented controls
 
+- The initial loading state now covers complete entrance/jungle preparation and GPU warmup. Camera travel and portal power-up start together only when that preparation is ready. The old .26-progress readiness brake is removed: slow loading cannot start the opening, stop it halfway, then restart it. Menus, tickets and recovery links remain accessible during loading. Restoring a farther destination waits for its scenery before revealing the canvas.
+- Bark, stone and path surface pixels are generated during `build:journey`, then loaded as four immutable PNGs totaling 98,210 bytes. Decoded pixels are verified against the original procedural maps. Failed/stalled image requests use stable lightweight maps; late images are disposed, avoiding surprise texture uploads during travel.
+- The deferred jungle script is preloaded at low priority alongside the entrance download, while remaining outside the parser-blocking dependency chain.
 - One animation loop and progress owner; hidden tabs, menus and visitor information suspend rendering.
 - Bounded cooperative preparation, idle-timer recovery and optional sky-image fallback. The camera does not enter unfinished scenery.
 - Adaptive effects first: fewer decorative particles/arcs and 20–24 Hz secondary updates under sustained pressure. Camera timing remains independent. Pixel scaling remains bounded and never changes DOM text resolution. Shader-light counts stay fixed to avoid recompilation during travel.
@@ -32,6 +35,12 @@ DOM diagnostics on `#seismique-jungle-reveal`: `data-health-status`, `data-healt
 Use iPhone 11 Safari, a current iPhone Safari, an iPad, a budget Android Chrome, and desktop Safari/Chrome/Firefox. Test a first uncached visit, repeat visit, slow connection, portrait/landscape and switching apps. Browser viewport testing is **not** physical-device verification. Compare stage completion and animation measurements, not only a visual screenshot.
 
 Proposed acceptance targets: useful visible content within 2.5 seconds on normal mobile connections; full intro completes rather than silently stalls; sustained animation at least 30 FPS on older supported hardware with no repeated long freezes; navigation and tickets available even when WebGL fails. These are targets, not certified results or guarantees on every device/network.
+
+## November 4 opening verification
+
+The previous controller reproduced 4.65 seconds of almost-stopped camera movement with a 12-second readiness delay. Regression checks now cover 0/3/6/12/25-second readiness delays and require the same uninterrupted 9.17-second visible opening after each delay, plus existing skip, reduced-motion, reverse, pause and return behavior.
+
+On the local in-app browser at 414 × 896, the prepared opening became visible at 0.77 seconds and reached the first destination at 9.93 seconds; its maximum recorded moving-frame interval was 25.1 ms. With the jungle script deliberately delayed 12 seconds by a separate local HTTP server, it became visible at 12.62 seconds and reached the first destination at 21.78 seconds; maximum moving-frame interval was 9.3 ms. These are measurements on this computer, not iPhone performance claims. iPhone 11 and iPhone 17 Pro Max Safari acceptance remains outstanding.
 
 ## Remaining limits
 

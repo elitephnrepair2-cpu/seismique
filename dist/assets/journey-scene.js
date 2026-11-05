@@ -5,7 +5,8 @@
     const stage=root.querySelector('.scene'),entranceCopy=root.querySelector('.entrance-copy');
     if(!window.THREE){root.journeyHealth?.fail('download');root.querySelector('.error').hidden=false;root.querySelector('.loading-portal').hidden=true;root.querySelector('.explore').disabled=true;return;}
     const T=window.THREE;
-    let skyMaps=null;
+    let skyMaps=null,surfaceMaps=null;
+    const surfacesReady=window.preloadJungleSurfaces(T);
     const arrivalShade=root.querySelector('.arrival-shade'),thresholdWash=root.querySelector('.threshold-wash'),motionVeil=root.querySelector('.motion-veil');
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let viewportWidth=stage.clientWidth,viewportHeight=stage.clientHeight,journeyLoop;
@@ -179,12 +180,6 @@
       }
       n.needsUpdate=true;
     }
-    // Seamless value noise for subdued, non-directional surface texture.
-    function surfaceNoise(x,y,cells,seed=0){
-      const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
-      const sample=(a,b)=>revealRandom(((a%cells+cells)%cells)+((b%cells+cells)%cells)*cells+seed);
-      return T.MathUtils.lerp(T.MathUtils.lerp(sample(ix,iy),sample(ix+1,iy),ux),T.MathUtils.lerp(sample(ix,iy+1),sample(ix+1,iy+1),ux),uy);
-    }
     function pathRibbon(from,to,width,material,height=.03){
       const positions=[],uv=[],indices=[],steps=150;
       for(let i=0;i<=steps;i++){const z=T.MathUtils.lerp(from,to,i/steps),x=junglePathX(z);positions.push(x-width,height,z,x+width,height,z);uv.push(0,(from-z)/4,1,(from-z)/4);if(i<steps){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}}
@@ -192,33 +187,12 @@
     }
     function* buildRevealWorld(){
       if(revealReady)return;
-      // Subtle granular surface only; broad groove relief lives in the geometry.
-      const barkSize=256,barkCanvas=document.createElement('canvas'),barkColorCanvas=document.createElement('canvas');
-      barkCanvas.width=barkCanvas.height=barkColorCanvas.width=barkColorCanvas.height=barkSize;
-      const bc=barkCanvas.getContext('2d'),cc=barkColorCanvas.getContext('2d'),bp=bc.createImageData(barkSize,barkSize),cp=cc.createImageData(barkSize,barkSize);
-      for(let y=0;y<barkSize;y++){if(y%(quality.compact?2:4)===0)yield;for(let x=0;x<barkSize;x++){
-        const pores=surfaceNoise(x/4,y/4,64,407),rough=surfaceNoise(x/16,y/16,16,211),mottle=surfaceNoise(x/64,y/64,4,819),k=(x+y*barkSize)*4;
-        const height=.43+rough*.19+pores*.10,shade=.94+mottle*.06;
-        bp.data[k]=bp.data[k+1]=bp.data[k+2]=height*255;bp.data[k+3]=255;
-        cp.data[k]=cp.data[k+1]=cp.data[k+2]=shade*255;cp.data[k+3]=255;
-      }
-      }
-      bc.putImageData(bp,0,0);cc.putImageData(cp,0,0);
-      const barkMap=new T.CanvasTexture(barkCanvas),barkColorMap=new T.CanvasTexture(barkColorCanvas);
-      for(const map of [barkMap,barkColorMap]){map.wrapS=map.wrapT=T.RepeatWrapping;map.anisotropy=4;}
-      barkColorMap.colorSpace=T.SRGBColorSpace;
+      // Exact original pixels are baked at build time, then decoded by the browser.
+      const {bark:barkMap,barkColor:barkColorMap,stone:stoneBump,path:floorMap}=surfaceMaps;
       const barkMaterials=[0x754470,0x865377,0x60365f,0x794b70].map(color=>{
         const mat=new T.MeshStandardMaterial({color,map:barkColorMap,roughness:.77,metalness:0,bumpMap:barkMap,bumpScale:.065});mat.userData.bark=true;return mat;
       });
       const stemMaterial=new T.MeshStandardMaterial({color:0xb13a74,emissive:0x3d0926,emissiveIntensity:.35,roughness:.43});
-      const stoneCanvas=document.createElement('canvas');stoneCanvas.width=stoneCanvas.height=128;
-      const stoneContext=stoneCanvas.getContext('2d'),stonePixels=stoneContext.createImageData(128,128);
-      for(let y=0;y<128;y++){if(y%(quality.compact?2:4)===0)yield;for(let x=0;x<128;x++){
-        const grain=.58*surfaceNoise(x/8,y/8,16,170)+.27*surfaceNoise(x/2,y/2,64,361)+.15*surfaceNoise(x/32,y/32,4,542),k=(y*128+x)*4;
-        stonePixels.data[k]=stonePixels.data[k+1]=stonePixels.data[k+2]=grain*255;stonePixels.data[k+3]=255;
-      }
-      }
-      stoneContext.putImageData(stonePixels,0,0);const stoneBump=new T.CanvasTexture(stoneCanvas);stoneBump.wrapS=stoneBump.wrapT=T.RepeatWrapping;
       const stoneMaterial=new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.93,metalness:0,bumpMap:stoneBump,bumpScale:.035});
       yield;
       // A flared arch lets the electrical tunnel dissolve into the canopy.
@@ -236,15 +210,6 @@
           #include <colorspace_fragment>
         }`});
       const ground=mesh(new T.PlaneGeometry(45,76),groundMaterial,0,.011,-38.7,revealWorld);ground.rotation.x=-Math.PI/2;
-      // Mottled teal floor, like the painted surface in the supplied Eden video.
-      const floorCanvas=document.createElement('canvas');floorCanvas.width=floorCanvas.height=256;
-      const fc=floorCanvas.getContext('2d'),pixels=fc.createImageData(256,256);
-      for(let y=0;y<256;y++){if(y%(quality.compact?2:4)===0)yield;for(let x=0;x<256;x++){
-        const n=.52*surfaceNoise(x/64,y/64,4,8)+.27*surfaceNoise(x/16,y/16,16,72)+.15*surfaceNoise(x/4,y/4,64,201)+.06*revealRandom(x+y*256),k=(y*256+x)*4;
-        pixels.data[k]=20+n*15;pixels.data[k+1]=56+n*27;pixels.data[k+2]=59+n*25;pixels.data[k+3]=255;
-      }
-      }
-      fc.putImageData(pixels,0,0);const floorMap=new T.CanvasTexture(floorCanvas);floorMap.colorSpace=T.SRGBColorSpace;floorMap.wrapS=floorMap.wrapT=T.RepeatWrapping;floorMap.repeat.set(1,1);
       const pathMaterial=new T.MeshStandardMaterial({map:floorMap,color:0x9ac7c2,roughness:.74,metalness:0,side:T.DoubleSide});
       pathRibbon(-2.6,endingZ-.8,2.05,pathMaterial,.027);window.fadeEndingFloor(pathMaterial,'path',endingZ);
       yield;
@@ -1165,7 +1130,8 @@
     async function prepareJungle(){
       if(preparing)return;preparing=true;root.dataset.scenePreparation='downloading';
       try{
-        await window.loadJourneyJungle();skyMaps=window.preloadJungleSky(T);
+        const [,surfaces]=await Promise.all([window.loadJourneyJungle(),surfacesReady]);
+        surfaceMaps=surfaces.maps;root.dataset.surfaceMode=surfaces.mode;skyMaps=window.preloadJungleSky(T);
         root.dataset.scenePreparation='building';preparation=prepareResources();queuePreparation();
       }catch(error){
         preparing=false;root.dataset.scenePreparation='download-interrupted';
@@ -1725,7 +1691,8 @@
       effectsCadence.setHz(quality.effectsHz);
       const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);
       if(machineRunning||changed||lastEffectTime<0){
-        updateMachine(entrancePrepared?dt:0);
+        // Preserve the whole power-up sequence until preparation has finished.
+        updateMachine(revealReady&&entrancePrepared?dt:0);
         const jungleActive=revealReady&&p>.27;
         // Camera remains at display cadence. Movement does not bypass this budget.
         if(effectDelta!==null){
@@ -1757,6 +1724,12 @@
       renderer.render(scene,camera);lastVisualProgress=p;
       root.journeyHealth?.frame(elapsed,p,guideState.mode);
       if(root.dataset.firstFrame!=='true'){root.dataset.firstFrame='true';root.dataset.firstFrameMs=performance.now().toFixed(0);}
+      // Handoff only after an actually rendered, fully prepared opening frame.
+      if(guideState.ready&&root.dataset.openingReady!=='true'){root.dataset.openingReady='true';root.dataset.openingReadyMs=performance.now().toFixed(0);}
+      if(profileFrames&&guideState.mode==='intro'&&root.dataset.openingReady==='true'){
+        root.dataset.openingProgress=p.toFixed(6);
+        if(changed){root.dataset.openingMaxFrameMs=String(Math.max(Number(root.dataset.openingMaxFrameMs)||0,elapsed*1000).toFixed(1));}
+      }
       if(profileFrames){
         totalFrames++;sampleFrames++;sampleSeconds+=elapsed;frameCosts.push(performance.now()-frameStarted);
         root.dataset.renderedFrames=String(totalFrames);

@@ -11,11 +11,29 @@
       "gzipBytes": 10019
     },
     "entry": {
-      "file": "journey-entry.ad24ce135fe0.js",
-      "bytes": 131338,
-      "gzipBytes": 47972
+      "file": "journey-entry.675a66d32c47.js",
+      "bytes": 130588,
+      "gzipBytes": 47741
     }
   },
-  "htmlBytes": 86809,
-  "htmlGzipBytes": 19370
+  "surfaces": {
+    "bark": {
+      "file": "jungle-bark.6996ffb59e0b.png",
+      "bytes": 33860
+    },
+    "barkColor": {
+      "file": "jungle-barkColor.588ffb109154.png",
+      "bytes": 4937
+    },
+    "stone": {
+      "file": "jungle-stone.510a3bf4d5e5.png",
+      "bytes": 17112
+    },
+    "path": {
+      "file": "jungle-path.4ef9500c9f59.png",
+      "bytes": 42301
+    }
+  },
+  "htmlBytes": 87391,
+  "htmlGzipBytes": 19487
 }

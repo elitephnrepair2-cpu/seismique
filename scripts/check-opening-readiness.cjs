@@ -12,7 +12,7 @@ work.preparationScheduler={schedule:fn=>work.requestIdleCallback(fn),cancel(){}}
 work.root.dataset.menuOpen='true';jobs.shift()({timeRemaining:()=>10});assert.equal(calls,1,'Opening preparation rests behind navigation');
 console.log('PASS: entrance shaders before animation; unchanged-quality canvas protection; bounded preparation slices; overlay suspension.');
 const T=require('../dist/assets/three.min.js');
-const branchSource=source.slice(source.indexOf('    function* organicBranch('),source.indexOf('    // Seamless value noise'));
+const branchSource=source.slice(source.indexOf('    function* organicBranch('),source.indexOf('    function pathRibbon('));
 const parent=new T.Group(),material=new T.MeshStandardMaterial();material.userData.bark=true;
 const branchCtx={T,quality:{compact:true},revealWorld:parent,revealRandom:n=>{const v=Math.sin(n*127.13+53.7)*43758.5453;return v-Math.floor(v);},mesh(g,m,x,y,z,p){const node=new T.Mesh(g,m);node.position.set(x,y,z);p.add(node);return node;}};
 vm.createContext(branchCtx);vm.runInContext(branchSource,branchCtx);

@@ -42,32 +42,28 @@ g.advance();run(g,1.55);assert.equal(g.state().mode,'transition','Destination tr
 g=make();g.tick(90);assert(g.state().progress<.001,'A loading stall must not fast-forward the opening');
 assert(html.includes("document.addEventListener('DOMContentLoaded'"),'Construction waits until dependency parsing completes');
 assert([...html.matchAll(/<script src=[^>]+>/g)].every(m=>m[0].includes('defer')),'Dependencies must not block the loading UI parser');
-assert(html.includes('[data-first-frame="true"] .loading-portal'),'Loading cover remains until the first actual render');
+assert(html.includes('[data-opening-ready="true"] .loading-portal'),'Loading cover remains until the first prepared opening render');
 console.log('PASS: faster intro independent of original destination pace, calm reduced-motion dissolves, stall protection and visible loading handoff.');
 
-g=make();g.tick(1/60,{sceneReady:false});assert(g.state().progress>0,'Automatic camera movement starts on the first active frame, before jungle readiness');
-run(g,.5,{sceneReady:false});assert(g.state().progress>.01,'The opening must visibly progress within half a second');
-run(g,20,{sceneReady:false});assert(g.state().progress<=.26&&g.state().progress>.25,'Unusually slow loading approaches the safe lobby-side limit');
-const checkpoint=g.state().progress;g.tick(1/60,{sceneReady:true});assert(g.state().progress>checkpoint&&g.state().progress-checkpoint<.0002,'A delayed-ready handoff resumes without a position jump');run(g,8);assert.equal(g.state().index,0);
-assert(html.includes('introPlaying:(machineRunning||reducedMotion)&&entrancePrepared'),'Entrance shader preparation must gate cinematic movement');
-assert(html.includes('if(renderer.getPixelRatio()!==quality.ratio)'),'An unchanged quality setting must not clear the opening canvas');
-console.log('PASS: safe loading limit and smooth handoff; entrance preparation before motion; no redundant canvas resize.');
-
-// Reproduce the phone's 3–5 second readiness window. Camera progress must
-// remain continuous through the old checkpoint and must not relaunch from rest.
-for(const readyAt of [0,3,4,5,6]){
- g=make();let previous=0,previousStep=null;const steps=[];
- for(let i=0;i<60*14;i++){
-  const state=g.tick(1/60,{sceneReady:i/60>=readyAt});const step=state.progress-previous;
-  assert(step>=-1e-12,'The opening must never move backward');
-  if(i>=120&&i<=330&&state.mode==='intro')steps.push(step);
-  if(i===readyAt*60&&readyAt>=3&&previousStep>.00001)assert(step/previousStep<1.25,'Readiness must not abruptly multiply the camera speed');
-  previous=state.progress;previousStep=step;
+// A late shader/download previously produced 4.65 seconds of almost no movement
+// at .26 progress. Preparation must now finish before the camera clock starts.
+for(const readyAt of [0,3,6,12,25]){
+ g=make();let previous=0;const movingSteps=[];
+ for(let i=0;i<60*(readyAt+10);i++){
+  const ready=i>=readyAt*60;
+  const state=g.tick(1/60,{sceneReady:ready}),step=state.progress-previous;
+  if(!ready)assert.equal(state.progress,0,'Loading must not start a camera route that will hit a barrier');
+  else if(state.mode==='intro')movingSteps.push(step);
+  assert(step>=0,'The camera never reverses while waiting or travelling');previous=state.progress;
  }
- assert(Math.min(...steps)>.00002,'No stopped camera frames in the observed phone loading window');
  assert.equal(g.state().index,0);assert.equal(g.state().mode,'idle');
+ assert.equal(movingSteps.length,549,'Preparation delay must not stretch or truncate the visible intro');
+ assert(Math.min(...movingSteps.slice(0,-3))>.00001,'No loading checkpoint or motionless frame after launch');
 }
-console.log('PASS: continuous opening through 3–6 second readiness delays; no stopped checkpoint, backward movement or abrupt speed restart.');
+assert(html.includes('introPlaying:(machineRunning||reducedMotion)&&entrancePrepared'));
+assert(html.includes('updateMachine(revealReady&&entrancePrepared?dt:0)'),'Power-up must remain intact after loading');
+assert(html.includes('if(renderer.getPixelRatio()!==quality.ratio)'));
+console.log('PASS: 0/3/6/12/25-second readiness delays; one complete continuous opening after preparation; intact power-up; unchanged quality does not clear the canvas.');
 const ten=make(),sixty=make();for(let i=0;i<50;i++)ten.tick(.1);for(let i=0;i<300;i++)sixty.tick(1/60);
 assert(Math.abs(ten.state().progress-sixty.state().progress)<1e-5,'A sustained 10 FPS intro must retain real elapsed time instead of running at half speed');
 const stalled=make();stalled.tick(3);assert(stalled.state().progress<.001,'A single long stall must still avoid a camera teleport');

@@ -11,12 +11,8 @@
     let progress=Number.isFinite(initialProgress)?clamp(initialProgress,0,1):0;
     let index=progress>=first-.006?points().reduce((best,n,i,all)=>Math.abs(n-progress)<Math.abs(all[best]-progress)?i:best,0):-1;
     let mode=index<0?'intro':'idle',ready=false,skipPending=false,transition=null;
-    let introFrom=progress,introElapsed=0,introRate=1,readyElapsed=0,motionVeil=0;
+    let introFrom=progress,introElapsed=0,motionVeil=0;
     const introDuration=Math.max(1,11/introSpeed*(first-progress)/first);
-    const safeEnd=Math.max(progress,Math.min(.26,first));
-    let lo=0,hi=1;
-    for(let i=0;i<32;i++){const t=(lo+hi)/2;if(introEase(t)<(safeEnd-progress)/(first-progress||1))lo=t;else hi=t;}
-    const safeElapsed=introDuration*(lo+hi)/2;
     function state(){return {progress,target:mode==='intro'?stops()[0]:points()[index],index,mode,busy:mode!=='idle',skipPending,ready,motionVeil};}
     function settle(i){index=i;progress=points()[i];mode='idle';transition=null;skipPending=false;motionVeil=0;}
     return {
@@ -47,16 +43,10 @@
             }
             return state();
           }
-          if(introPlaying&&!skipPending){
-            // Slow the clock gently only if preparation is unusually late.
-            // Do not finish one easing curve, stop, and launch a second one.
-            // The camera stays on the lobby side of the threshold until ready.
-            readyElapsed=ready?Math.min(.45,readyElapsed+dt):0;
-            const safeRate=clamp((safeElapsed-introElapsed)/.8,0,1);
-            const desiredRate=safeRate+(1-safeRate)*ease(readyElapsed/.45);
-            introRate+=(desiredRate-introRate)*(1-Math.exp(-dt/.18));
-            const limit=ready?introDuration:safeElapsed;
-            introElapsed=Math.min(limit,introElapsed+dt*introRate);
+          if(ready&&introPlaying&&!skipPending){
+            // Preparation is a separate loading state. Once visible movement
+            // starts, it uses one clock and never brakes at a loading checkpoint.
+            introElapsed=Math.min(introDuration,introElapsed+dt);
             progress=introFrom+(stops()[0]-introFrom)*introEase(introElapsed/introDuration);
             if(introElapsed===introDuration)settle(0);
           }

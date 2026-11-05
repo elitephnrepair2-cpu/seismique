@@ -14,7 +14,7 @@ const cases=[
 for(const [compact,radius,expected] of cases){
  const parent=new T.Group(),material=new T.MeshStandardMaterial();material.userData.bark=true;
  const ctx={T,quality:{compact},revealWorld:parent,revealRandom:n=>{const v=Math.sin(n*127.13+53.7)*43758.5453;return v-Math.floor(v);},mesh(g,m,x,y,z,p){const node=new T.Mesh(g,m);p.add(node);return node;}};
- vm.createContext(ctx);vm.runInContext(source.slice(source.indexOf('    function* organicBranch('),source.indexOf('    // Seamless value noise')),ctx);
+ vm.createContext(ctx);vm.runInContext(source.slice(source.indexOf('    function* organicBranch('),source.indexOf('    function pathRibbon(')),ctx);
  const iterator=ctx.organicBranch([[-4.1,0,-11.5],[-4.2,2,-11.4],[-3.8,5,-11.7],[-3.2,7.3,-11.1]],radius,.035,material,56);let step,yields=0;
  do{step=iterator.next();if(!step.done){yields++;assert.equal(parent.children.length,0);}}while(!step.done);
  const hash=crypto.createHash('sha256');for(const key of ['position','normal','uv'])hash.update(Buffer.from(step.value.branch.geometry.attributes[key].array.buffer));
