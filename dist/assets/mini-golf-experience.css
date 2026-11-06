@@ -1,7 +1,7 @@
 /* Mini Golf + Arcade: real photography, Seismique ink, quiet purple accents. */
 .golf-page{--ink:#08070d;background:var(--ink)}
 .golf-page .experience-header{padding-top:calc(14px + env(safe-area-inset-top));background:#08070de0}
-.golf-page .brand-image{filter:brightness(0) invert(1)}
+.golf-page .brand-image{filter:grayscale(1) brightness(8) drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)}
 .golf-page .button{border-radius:3px;gap:12px}
 .golf-page .button svg{width:19px;height:19px;flex:none}
 .golf-page .header-ticket{background:#25113d;border:1px solid #b28aff80;box-shadow:inset 0 1px #e6d6ff19}

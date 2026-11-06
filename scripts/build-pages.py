@@ -18,13 +18,13 @@ def navigation(html,current=None,home=False):
  html=html.replace('/?resume=1#tour','/').replace('Seismique — back to the jungle','Seismique — home')
  html=re.sub(r'/assets/visitor.js(?:\?v=\d+)?','/assets/visitor.js?v=58',html)
  html=re.sub(r'<link rel="stylesheet" href="/assets/navigation.css[^\"]*">\s*','',html)
- return html.replace('</head>','<link rel="stylesheet" href="/assets/navigation.css?v=58">\n</head>')
+ return html.replace('</head>','<link rel="stylesheet" href="/assets/navigation.css?v=logo-outline-1">\n</head>')
 
 def shared_footer(html):
  html=re.sub(r'<!-- GLOBAL_FOOTER_START -->.*?<!-- GLOBAL_FOOTER_END -->\s*','',html,flags=re.S)
  html=re.sub(r'<link rel="stylesheet" href="/assets/global-footer.css(?:\?[^"]*)?">\s*','',html)
  html=re.sub(r'<script src="/assets/global-footer.js" defer></script>\s*','',html)
- html=html.replace('</head>','<link rel="stylesheet" href="/assets/global-footer.css?v=55">\n</head>')
+ html=html.replace('</head>','<link rel="stylesheet" href="/assets/global-footer.css?v=logo-outline-1">\n</head>')
  return html.replace('</body>','<!-- GLOBAL_FOOTER_START -->'+footer+'<!-- GLOBAL_FOOTER_END -->\n<script src="/assets/global-footer.js" defer></script></body>')
 
 def links(html,current):

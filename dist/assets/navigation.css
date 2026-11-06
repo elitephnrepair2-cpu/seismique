@@ -7,10 +7,10 @@
 #seismique-jungle-reveal .direct-nav a[aria-current="page"]{background:#ffffff06;color:#decfff;box-shadow:inset 2px 0 #a47aff}
 #seismique-jungle-reveal .direct-nav a:focus-visible{outline:2px solid #c5a5ff;outline-offset:-2px;background:#ffffff0b;color:#fff}
 #seismique-jungle-reveal .menu-home{display:flex;align-items:center;min-height:52px;width:160px;margin:0 12px 13px;padding:4px 0 12px;text-decoration:none}
-#seismique-jungle-reveal .menu-home img{display:block;width:100%;height:auto;filter:brightness(0) invert(1)}
+#seismique-jungle-reveal .menu-home img{display:block;width:100%;height:auto;filter:grayscale(1) brightness(8) drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)}
 #seismique-jungle-reveal .menu-settings{margin-top:14px;padding-top:10px;border-top:1px solid #ffffff20}
 #seismique-jungle-reveal .menu-settings button{color:#aaa3b3;font-size:12px}
-.experience-header .brand img{filter:brightness(0) invert(1)}
+.experience-header .brand img{filter:grayscale(1) brightness(8) drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)}
 .experience-header{padding-top:calc(12px + env(safe-area-inset-top))}
 .experience-header .header-ticket svg{width:18px;height:18px;flex:none}
 .experience-header .header-ticket{display:inline-flex;align-items:center;gap:8px}
