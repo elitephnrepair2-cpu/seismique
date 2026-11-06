@@ -1,56 +1,87 @@
-# Events manager workflow — foundation awaiting manager input
+# Events page and manager workflow
 
-Prepared November 5, 2026. This is a proposed staff workflow, not a live staff system or approved business policy.
+Updated November 6, 2026 with the manager's preliminary answers supplied by the user. This document distinguishes confirmed direction from proposed implementation. The manager said fuller answers would follow. The subsequent public-page redesign follows the direction below; booking-platform integration and a content editor remain pending.
 
-## What is working now
+## Confirmed by the manager
 
-The public Parties & Events page introduces corporate events, celebrations and performances. Its three-step planner gathers occasion, guest count, preferred date and flexibility, requested start time/duration, interests, estimated total budget or help estimating, notes and contact details. Visitors review a structured plan and explicitly email it using their own email service, or copy it. The website does not submit messages, create leads, store contact information, reserve dates or take payments. With JavaScript unavailable, the direct email/phone routes remain usable.
+- Private parties and rentals require direct communication with her. She must check supplies/inventory and staff scheduling before a booking can be arranged.
+- Customers can buy general admission and event admission tickets themselves. They cannot independently book private events or parties.
+- The business is returning to a ticketing/booking system that already gives staff booking details and outstanding balances, with a calendar, notes/messaging and invoices. Its name and supported inquiry route have not yet been supplied.
+- She is the sole person facilitating events. Other staff use the booking system and do not need website access for booking information.
+- Do not publish packages. She wants flexibility to accommodate special groups without discouraging inquiries.
+- She wants photos of the bar and gallery, a small selection of event photos, and flyers for special events as on the previous website.
+- The bar accommodates 65 guests. The gallery accommodates 100, with an extension into another room for approximately 150. Treat the larger arrangement as subject to discussion, not a guaranteed standard capacity or automatic eligibility rule.
+- Her previous inquiry route listed the events email and asked for the date, guest count and type of event. The actual events email address has not yet been supplied.
 
-No prices, guest capacities, available dates, package commitments or response-time promises have been invented. Optional budget is expressed in USD as the customer's estimate, not a quote. Date/time is a preference in Houston, not live inventory. The public inquiry address is the existing info@seismique.com.
+Source notes: user-provided `text-6F5BFF9CB5FE-1.txt` and `text-C26E0738F74A-1.txt`. These are preliminary business requirements, not instructions to submit messages or publish changes automatically.
 
-## Existing-system finding to confirm first
+## Public page direction
 
-The official https://www.seismique.com/private-events and https://www.seismique.com/corporate-events-houston pages link to https://seismique.tripleseat.com/party_request/47515. On November 5, 2026 this redirected in the browser to /404 and showed “Page Not Found!” No form was submitted. This establishes a broken public route, not whether the staff account/subscription is active.
+1. Introduce private events with authentic bar/gallery/event photography and a clear "Inquire about an event" action.
+2. Present the spaces: bar up to 65; gallery up to 100; larger gallery arrangements around 150 by discussion. Do not present unconfirmed prices, packages or promises about inclusions.
+3. Make the inquiry easy to start: event type, preferred date, estimated guest count and contact details. Offer flexibility/undecided choices so early inquiries can still reach her.
+4. Keep budget, preferred time/duration, space preferences and extra notes optional. Budget can help her tailor the conversation; do not use it to silently reject or exclude special groups. The manager has not yet approved any budget ranges or minimums.
+5. Explain that she checks availability, supplies and staffing before confirming the event. A date entered in the form is a preference, not a reservation or verified availability.
+6. Give public special events a separate flyer/listing area with approved dates, descriptions and admission-ticket links when available. Public ticket purchases and private-rental inquiries must have distinct actions. Private bookings never become public listings automatically.
 
-Ask the manager whether Tripleseat is still in use, which location owns events, and for the current approved inquiry URL or supported integration. Prefer their active system as the booking source of truth. Do not create a second calendar or duplicate inbox before that is resolved. Do not assume undocumented form endpoints are supported APIs.
+Use approved real photographs. The previous Gallery hero image was removed at the user's request; do not restore it or substitute generated event imagery without direction.
 
-## Proposed staff workspace
+## Staff tools: revised scope
 
-- **Today:** inquiries awaiting a reply; holds nearing expiry; upcoming events missing details or payments. Each entry opens the complete event record.
-- **Inquiries:** filter by occasion, date window, guest count, budget, owner and status. Keep a visible last-contact date and next action. Budget should inform recommendations, not silently discard customers.
-- **Event record:** contact, request details, guest count, chosen spaces, event/setup/cleanup times, conversation, internal notes, proposal revisions and an activity history. Keep internal notes and customer-facing messages distinct.
-- **Availability:** staff view of each space and its approved capacities, recurring windows, blackouts, holds and confirmed events. Represent resources blocked by full venue rentals. Enforce conflicts on the server when a hold or confirmation is created.
-- **Website:** edit approved packages, photos, inclusions and FAQs; preview changes before publishing. Public “What’s Happening” entries have their own publish state and approved ticket link. Private bookings never become public events automatically.
-- **Reporting:** inquiry response time, source, conversion, confirmed value and reasons bookings were declined, if the manager needs these.
+The existing booking platform remains responsible for bookings, calendar, customer records, notes/messaging, invoices and payment balances. The earlier proposed custom inquiry pipeline, quote builder, holds, calendar, payment tracking, reporting and multi-person events workspace are superseded by the manager's answers. Do not build a duplicate booking system or a public private-event reservation calendar.
 
-## Proposed lifecycle to validate
+If she wants to edit website content herself, propose a small authenticated content editor for one events manager. It would manage approved space photos/text and public event flyers, dates, descriptions, ticket links and publication state. Preview, unpublish and past-event archiving are proposed conveniences, not confirmed requirements. Confirm whether she wants self-service editing or prefers to send changes to the website maintainer before choosing an editor.
 
-New inquiry → Reviewing → Proposal sent → Temporary hold → Confirmed → Completed.
-Alternative outcomes: closed without booking, cancelled, or hold expired. Confirm exact statuses with the manager; quotation does not itself reserve capacity. Only an authorized manager can place a timed hold or confirm, and all required payment/agreement conditions must come from their policy. Track hold expiry, edits, notification outcomes and who made each change. Customer follow-up preferences and business reminder rules remain undecided.
+Other staff continue using the booking platform. Do not introduce website access to private booking records merely to support public content editing.
 
-## Decisions the manager must supply
+## What is working on the website now
 
-| Decision | Why it matters |
-|---|---|
-| Existing tools and valid inquiry route | Choose the canonical inbox/calendar and avoid duplicate entry |
-| Spaces, capacities, simultaneous events and buyout rules | Determine availability and resource conflicts |
-| Packages, prices, minimum spends, extras and taxes/fees | Determine quoting and what can be shown publicly |
-| Lead time, hours, duration, setup/cleanup and closures | Determine valid slots |
-| Holds and expiry; approval authority | Prevent requests from becoming unintended reservations |
-| Agreements, deposits, balances and cancellations | Define confirmation and payment workflow |
-| Staff users and roles | Restrict publishing, pricing, confirmation and private customer records |
-| Contact channels, response expectations and reminders | Define notifications and follow-up |
-| Data retention and access | Decide how contact records and attachments are handled |
-| Fixed offerings eligible for instant booking | Identify what can safely bypass a custom quote |
+The redesigned Parties & Events page presents the Gallery and Drinque bar with their supplied guest capacities. A single inquiry form gathers occasion, guest count, preferred date/flexibility, space preference, name and email. An optional disclosure holds timing, budget, interests, additional contact details and notes. Space-specific inquiry links preselect the room. The public-events section links to Seismique’s existing flyers and registrations until the manager supplies the current assets for this site. Visitors review a structured plan and explicitly email it using their own email service, or copy it. The website does not submit messages, create leads, store contact information, reserve dates or take payments. With JavaScript unavailable, direct email/phone routes remain usable.
 
-## Next implementation after answers
+The current inquiry address is the existing general address `info@seismique.com`, not a manager-confirmed events address. Do not describe the form as a successfully delivered inquiry merely because an email composer opened. A direct submission route must give truthful delivery/error feedback if added later.
 
-1. Verify the existing booking tool and supported connection; route requests into it with delivery/error confirmation. If it is being replaced, agree on the new source of truth before migrating.
-2. Add authenticated staff access with server-side permissions. A hidden URL is not access control. Use explicit roles and an activity log before exposing any private records.
-3. Add structured package/space configuration, quotes, timed holds and conflict-safe confirmation. Connect payment state to the actual provider; do not handle card details in the website database.
-4. Add public availability and instant booking only for manager-approved offerings and rules. Confirm availability again at reservation time.
-5. Validate a real inquiry-to-event example with the manager before enabling automatic customer messages or payments.
+The page uses the manager’s supplied capacities. It does not publish package prices, available dates or response-time promises. Optional budget is the customer's estimate in USD, not a quote. Date/time is a preference in Houston, not live inventory.
 
-## Public content / image provenance
+## Possible platform: Resova (identity unconfirmed)
 
-Event categories and possibilities were checked against the official private-events and corporate-events pages above. The Gallery hero photograph was removed at the user’s request. The mini-golf photo is an existing local website asset. Page content uses original concise copy; no new capacities or package guarantees are asserted.
+The user subsequently mentioned a possible move to a service pronounced "Rezovo" for payments and integrations. Resova is a plausible match, but neither the exact service nor the business's selected account/plan has been confirmed. Do not treat this as authorization to migrate bookings or change payment destinations.
+
+Official Resova documentation checked November 6, 2026 describes:
+
+- A booking calendar, staff/room/equipment scheduling, blocked periods, booking notes, PDF invoices and payment links: [feature overview](https://get.resova.com/features/feature/all-features/).
+- Items set to private for team members only: [calendar setup](https://info.resova.com/resova-knowledge-center/setting-up-the-calendar).
+- Staff creating bookings from calendar slots: [calendar bookings](https://info.resova.com/resova-knowledge-center/creating-bookings-on-time-slots-from-the-calendar).
+- Website embedding and external calendar connections: [integrations](https://get.resova.com/features/integrations/all-integrations/).
+
+If this is their chosen platform, the proposed flow is: private-event inquiry reaches the manager; she checks supplies, staffing and room availability; she arranges the booking and payment in Resova. General admission and public-event ticket actions can use their approved Resova destinations. Verify the account configuration before implementation; product documentation does not establish that these features are enabled for Seismique. An embedded checkout or booking API is not evidence of a supported inquiry intake endpoint. Keep private rentals unavailable for customer self-booking in accordance with the manager's instructions.
+
+Continue public-page content and inquiry design while awaiting the exact platform and working links. If the selected platform lacks a feature, establish the specific gap before proposing an additional tool.
+
+## Remaining inputs
+
+- The ticketing/booking platform's name, working public ticket links, and any supported private-event inquiry form/link or integration. Confirm the platform is ready before changing destinations.
+- The direct events email and preferred inquiry destination: that inbox or an approved form feeding the existing system. Do not assume she wants duplicate submissions to both.
+- Approved bar/gallery/event photos and current special-event flyers, with event dates and ticket destinations.
+- Whether she wants to publish website updates herself; if so, which fields she wants to control.
+- Any remaining public-facing details she wants included, such as venue access, catering options, visit/tour requests or response expectations. Await confirmation before making promises.
+
+## Prior link finding
+
+On November 5, 2026 the official private/corporate-events pages linked to `https://seismique.tripleseat.com/party_request/47515`, which redirected to `/404` and displayed "Page Not Found!" No form was submitted. This establishes a broken historical public route, not whether the business still uses Tripleseat or which platform it is returning to. Use the manager's confirmed current destination rather than guessing from this old link.
+
+## Implementation order
+
+1. Revise the public page around spaces and direct inquiries, keeping package listings and private-event self-booking out of scope.
+2. Connect the approved inquiry destination once supplied, preserving optional budget qualification and clear confirmation expectations.
+3. Add approved photography and public special-event flyers with correct ticket links.
+4. Add the small content editor only if the manager wants to maintain these items herself.
+5. Check the customer flow on phone/tablet and validate inquiry delivery through an agreed test; do not send a real inquiry or contact the manager without explicit authorization.
+
+## Redesign photography
+
+The redesigned page uses two photographs from Seismique’s existing website, downloaded and visually checked November 6, 2026, resized to 720/1600-pixel JPEGs. The removed hero image is not reused.
+
+- Gallery room: `IMG_5595.JPEG`, [corporate events page](https://www.seismique.com/corporate-events-houston), [original photograph](https://static.wixstatic.com/media/51d719_3d5a60e96ec9402994892eda572943de~mv2.jpeg).
+- Drinque bar: `20260121_131959.jpg`, [bar page](https://www.seismique.com/the-drinque), [original photograph](https://static.wixstatic.com/media/51d719_06f29dd5bd674ec1a7ea2ec8631366a8~mv2.jpg).
+
+Local files: `dist/assets/events/gallery-{720,1600}.jpg` and `dist/assets/events/drinque-{720,1600}.jpg`. No generated event imagery was added. The manager can replace these with her preferred photographs. Public flyers are currently reached through https://www.seismique.com/events-calendar; no unconfirmed event dates or prices were copied onto this page.

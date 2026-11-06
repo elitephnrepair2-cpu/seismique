@@ -5,11 +5,11 @@
     const clean=value=>String(value??'').trim();
     const date=clean(v.eventDate),prettyDate=/^\d{4}-\d{2}-\d{2}$/.test(date)?date.slice(5,7)+'/'+date.slice(8,10)+'/'+date.slice(0,4):'Still deciding';
     const budget=v.budgetHelp?'Help estimating a budget':clean(v.budget)?'$'+Number(v.budget).toLocaleString('en-US')+' USD total':'Not specified';
-    const rows=[['Occasion',clean(v.occasion)],['Guests',clean(v.guests)],['Date',prettyDate+(v.flexible?' · flexible':'')],['Start time',clean(v.startTime)?clean(v.startTime)+' (Houston time)':'To discuss'],['Duration',clean(v.duration)||'To discuss'],['Interests',(v.interests||[]).map(clean).filter(Boolean).join(', ')||'Open to suggestions'],['Budget',budget],['Notes',clean(v.notes)||'None added'],['Name',clean(v.name)],['Email',clean(v.email)]];
+    const rows=[['Occasion',clean(v.occasion)],['Guests',clean(v.guests)],['Space',clean(v.space)||'Help me choose'],['Date',prettyDate+(v.flexible?' · flexible':'')],['Start time',clean(v.startTime)?clean(v.startTime)+' (Houston time)':'To discuss'],['Duration',clean(v.duration)||'To discuss'],['Interests',(v.interests||[]).map(clean).filter(Boolean).join(', ')||'Open to suggestions'],['Budget',budget],['Notes',clean(v.notes)||'None added'],['Name',clean(v.name)],['Email',clean(v.email)]];
     if(clean(v.phone))rows.push(['Phone',clean(v.phone)]);
     if(clean(v.company))rows.push(['Company',clean(v.company)]);
     const subject='Seismique event inquiry — '+clean(v.occasion)+(date?' — '+date:'');
-    const body='Hello Seismique events team,\n\nI would like to discuss an event. Here is my plan:\n\n'+rows.map(([label,value])=>label+': '+value).join('\n')+'\n\nPlease let me know about availability, suitable options and pricing. I understand this inquiry does not reserve a date.\n\nThank you!';
+    const body='Hello Seismique events manager,\n\nI would like to discuss an event. Here is my plan:\n\n'+rows.map(([label,value])=>label+': '+value).join('\n')+'\n\nPlease let me know about availability, suitable options and pricing. I understand this inquiry does not reserve a date.\n\nThank you!';
     return {rows,body,mailto:'mailto:'+recipient+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)};
   }
   if(typeof module!=='undefined'&&module.exports)module.exports={buildPlan};
@@ -32,12 +32,12 @@
     updateDateMinimum();
     for(const input of steps[index].querySelectorAll('input,select,textarea')){
       if(input.name==='name')input.setCustomValidity(input.value.trim()?'':'Please enter your name.');
-      if(!input.disabled&&!input.checkValidity()){showStep(index,false);input.reportValidity();return false;}
+      if(!input.disabled&&!input.checkValidity()){showStep(index,false);const details=input.closest('details');if(details)details.open=true;input.reportValidity();return false;}
     }
     return true;
   }
   function values(){
-    const v={};for(const name of ['occasion','guests','eventDate','startTime','duration','budget','notes','name','email','phone','company'])v[name]=field(name).value;
+    const v={};for(const name of ['occasion','guests','space','eventDate','startTime','duration','budget','notes','name','email','phone','company'])v[name]=field(name).value;
     v.flexible=field('flexible').checked;v.budgetHelp=field('budgetHelp').checked;v.interests=[...form.querySelectorAll('[name="interests"]:checked')].map(input=>input.value);return v;
   }
   form.querySelectorAll('[data-next]').forEach(button=>button.addEventListener('click',()=>{if(validStep(current))showStep(current+1);}));
@@ -55,11 +55,12 @@
   document.getElementById('event-edit-plan').addEventListener('click',()=>showStep(0));
   document.getElementById('event-copy-plan').addEventListener('click',async()=>{
     if(!plan)return;
-    try{await navigator.clipboard.writeText(plan.body);copyStatus.textContent='Plan copied. Paste it into an email to '+recipient+'.';}
-    catch{copyFallback.hidden=false;copyFallback.querySelector('textarea').focus();copyFallback.querySelector('textarea').select();copyStatus.textContent='Select and copy the plan below, then paste it into your email.';}
+    try{await navigator.clipboard.writeText(plan.body);copyStatus.textContent='Inquiry copied. Paste it into an email to '+recipient+'.';}
+    catch{copyFallback.hidden=false;copyFallback.querySelector('textarea').focus();copyFallback.querySelector('textarea').select();copyStatus.textContent='Select and copy the inquiry below, then paste it into your email.';}
   });
-  emailLink.addEventListener('click',()=>{copyStatus.textContent='Finish sending in your email app. If it does not open, use Copy my plan.';});
+  emailLink.addEventListener('click',()=>{copyStatus.textContent='Finish sending in your email app. If it does not open, use Copy inquiry.';});
   document.querySelectorAll('[data-occasion]').forEach(link=>link.addEventListener('click',()=>{field('occasion').value=link.dataset.occasion;showStep(0,false);}));
+  document.querySelectorAll('a[href="#private-event-inquiry"]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();if(link.dataset.space)field('space').value=link.dataset.space;showStep(0);}));
   updateDateMinimum();document.getElementById('events-form-fallback').hidden=true;form.hidden=false;showStep(0,false);
   window.addEventListener('pageshow',()=>{updateDateMinimum();field('budget').disabled=field('budgetHelp').checked;});
 })(typeof window!=='undefined'?window:globalThis);
