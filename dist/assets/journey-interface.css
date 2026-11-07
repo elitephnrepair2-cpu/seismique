@@ -232,7 +232,7 @@ body.jungle-home #seismique-jungle-reveal .destination-open:active{position:rela
 body.jungle-home #seismique-jungle-reveal .destination-open-mark{display:inline-flex;width:20px;height:20px;flex:none}
 body.jungle-home #seismique-jungle-reveal .destination-open-mark svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 body.jungle-home #seismique-jungle-reveal .global-ticketbar{position:static;inset:auto;display:none;padding:0;margin:0;transform:none}
-body.jungle-home #seismique-jungle-reveal[data-destination]:not([data-destination=""]) .global-ticketbar{display:flex}
+body.jungle-home #seismique-jungle-reveal .destination-open:not([hidden])~.global-ticketbar{display:flex}
 body.jungle-home #seismique-jungle-reveal .global-ticketbar .button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:44px;padding:11px 22px;border:1px solid #bd92ff80;border-radius:999px;background:linear-gradient(120deg,#731fff,#6020d4);backdrop-filter:none;-webkit-backdrop-filter:none;color:#fff;font:600 11px/1.4 Arial,sans-serif;letter-spacing:.07em;text-transform:uppercase;box-shadow:0 4px 20px #6b24dc4d,inset 0 1px #ffffff16}
 body.jungle-home #seismique-jungle-reveal .global-ticketbar .button:hover{background:#843aff;border-color:#dfcaff}
 body.jungle-home #seismique-jungle-reveal .menu-toggle{min-width:86px;min-height:48px;padding:12px 14px;font-size:14px;gap:9px}
