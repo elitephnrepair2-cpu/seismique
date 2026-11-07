@@ -18,7 +18,7 @@ def navigation(html,current=None,home=False):
  html=html.replace('/?resume=1#tour','/').replace('Seismique — back to the jungle','Seismique — home')
  html=re.sub(r'/assets/visitor.js(?:\?v=\d+)?','/assets/visitor.js?v=58',html)
  html=re.sub(r'<link rel="stylesheet" href="/assets/navigation.css[^\"]*">\s*','',html)
- return html.replace('</head>','<link rel="stylesheet" href="/assets/navigation.css?v=logo-outline-1">\n</head>')
+ return html.replace('</head>','<link rel="stylesheet" href="/assets/navigation.css?v=menu-color-1">\n</head>')
 
 def shared_footer(html):
  html=re.sub(r'<!-- GLOBAL_FOOTER_START -->.*?<!-- GLOBAL_FOOTER_END -->\s*','',html,flags=re.S)
