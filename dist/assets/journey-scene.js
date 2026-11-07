@@ -1290,18 +1290,19 @@
       for(let j=0;j<longitudinal;j++)for(let i=0;i<radial;i++){const a=j*(radial+1)+i,b=a+radial+1;indices.push(a,b,a+1,b,b+1,a+1);}
       const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();
       const material=new T.ShaderMaterial({uniforms:portalUniforms,side:T.DoubleSide,
-        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;float bend=sin(uv.x*25.1327+uv.y*18.-uTime*.65);p.xy*=1.+sin(uv.y*3.14159)*(.008+uInstability*.013)*bend;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;float bend=sin(uv.x*25.1327+uv.y*18.-uTime*.65);p.xy*=1.+sin(uv.y*3.14159)*(.018+uInstability*.013)*bend;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
         fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uTravel;uniform float uOpening;uniform float uPower;uniform float uSurge,uInstability;
           ${electricNoiseGLSL}
-          void main(){float a=vUv.x*6.2831853,d=vUv.y,t=uTime;a+=sin(d*14.-t*.37)*(.025+uInstability*.025);vec2 cyc=vec2(cos(a),sin(a));
-            float n=eFbm(cyc*1.8+vec2(d*3.-t*.09,d*2.+t*.06));
-            float flow=.5+.5*sin(a*3.+d*5.-t*.45+n*1.8);
-            float silk=pow(flow,5.);float pearl=pow(.5+.5*sin(a*2.-d*6.+t*.24+n),14.);
-            vec3 col=mix(vec3(.018,.045,.095),vec3(.13,.045,.23),n);
-            col+=uColor*(.06+silk*.15)+vec3(.35,.055,.24)*(.06+pearl*.18);
+          void main(){float a=vUv.x*6.2831853,d=vUv.y,t=uTime;a+=sin(d*14.-t*.37)*(.045+uInstability*.025);vec2 cyc=vec2(cos(a),sin(a));
+            float n=eFbm(cyc*1.8+vec2(d*3.-t*.14,d*2.+t*.09));
+            // Helical streams travel inward at different rates on the existing tunnel.
+            float flow=.5+.5*sin(a*3.-d*15.+t*.95+n*2.4);
+            float silk=pow(flow,7.);float pearl=pow(.5+.5*sin(a*2.+d*11.-t*.55+n*2.),12.);
+            vec3 col=mix(vec3(.012,.025,.065),vec3(.10,.025,.18),n);
+            col+=uColor*(.045+silk*.46)+vec3(.42,.065,.32)*(.045+pearl*.39);
             float jungleHint=smoothstep(.54,.98,d)*smoothstep(.82,1.60,uTravel);
             col=mix(col,col*.60+vec3(.012,.080,.058)*(1.+silk),jungleHint*.78);
-            col*=.57*(1.-smoothstep(.7,1.,d)*.35);col+=uColor*uSurge*.075*exp(-d*3.);
+            col*=.76*(1.-smoothstep(.30,1.,d)*.62);col+=uColor*uSurge*.075*exp(-d*3.);
             col=mix(vec3(.002,.004,.012),col,uPower);gl_FragColor=vec4(col,1.);
             #include <tonemapping_fragment>
             #include <colorspace_fragment>
@@ -1310,27 +1311,30 @@
       const hitCount=quality.compact?2:3;
       fieldUniforms={uPortalNoise:portalUniforms.uPortalNoise,uTime:portalUniforms.uTime,uColor:portalUniforms.uColor,uCharge:portalUniforms.uCharge,uOpening:portalUniforms.uOpening,uPower:portalUniforms.uPower,uSurge:portalUniforms.uSurge,uInstability:portalUniforms.uInstability,uClarity:portalUniforms.uClarity,uHits:{value:Array.from({length:hitCount},()=>new T.Vector4())}};
       const fieldMaterial=new T.ShaderMaterial({uniforms:fieldUniforms,side:T.DoubleSide,transparent:true,depthWrite:false,
-        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;vec2 q=uv*2.-1.;float r=clamp(length(q),0.,1.);p.z-=.24*dot(q,q);p.z+=(.025+uInstability*.07)*(1.-r)*sin(uv.x*17.+uv.y*13.-uTime*.8);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;vec2 q=uv*2.-1.;float r=clamp(length(q),0.,1.);p.z-=.24*dot(q,q);p.z+=(.060+uInstability*.07)*(1.-r)*sin(uv.x*17.+uv.y*13.-uTime*.8);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
         fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uOpening;uniform float uPower,uSurge,uInstability,uClarity;uniform vec4 uHits[${hitCount}];
           ${electricNoiseGLSL}
           void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;float t=uTime;float a=atan(q.y,q.x);
-            float hole=uOpening*1.035;if(uOpening>.0001&&r<hole)discard;
-            vec2 warp=vec2(eFbm(q*2.+vec2(t*.045,-t*.04)),eFbm(q*2.4+vec2(8.1,-t*.05)))-.5;
+            // The opening breathes irregularly, then settles exactly into the fixed rim.
+            float ripple=(sin(a*5.-t*1.15)+.45*sin(a*9.+t*.82))*.052*sin(uOpening*3.14159265)*(.45+.55*uPower);
+            float hole=uOpening*1.035+ripple;if(uOpening>.0001&&r<hole)discard;
+            // Reuse the packed noise; the broad second warp needs only one lookup.
+            vec2 warp=vec2(eFbm(q*2.+vec2(t*.07,-t*.06)),eNoise(q*2.4+vec2(8.1,-t*.08)))-.5;
             vec2 refracted=q+warp*(.10+uInstability*.11)*(1.-r);
             float perspective=1./(.38+r*.85);
             float n=eFbm(refracted*2.8*perspective+warp*.8+vec2(t*.025,-t*.035));
-            float wave=.5+.5*sin(refracted.x*4.+refracted.y*3.-t*.45+warp.x*3.+warp.y*2.);
-            float silk=pow(wave,9.);float sheen=pow(.5+.5*sin(q.x*3.+q.y*2.+n*4.-t*.2),12.);
+            float wave=.5+.5*sin(a*3.+r*13.-t*.85+warp.x*3.+warp.y*2.);
+            float silk=pow(wave,9.);float sheen=pow(.5+.5*sin(a*2.-r*9.+n*4.+t*.36),12.);
             vec3 col=mix(vec3(.015,.025,.065),vec3(.125,.035,.205),n);
-            col+=uColor*(.035+silk*.095)+vec3(.29,.17,.40)*sheen*.17;
+            col+=uColor*(.035+silk*.22)+vec3(.29,.17,.40)*sheen*.28;
             float well=pow(1.-r,1.5);col*=1.-well*.67*uPower;
-            float depthVeil=pow(.5+.5*sin(r*19.+sin(a*3.+n)*1.5-t*.30),14.)*(1.-r)*.06;
+            float depthVeil=pow(.5+.5*sin(r*19.+sin(a*3.+n)*1.5+t*.65),14.)*(1.-r)*.13;
             col+=uColor*depthVeil+vec3(.012,.035,.06)*well*uPower;
             col+=uColor*uSurge*(.055+.12*pow(r,5.));
             for(int i=0;i<${hitCount};i++){vec4 hit=uHits[i];float dd=length(q-hit.xy);col+=uColor*exp(-dd*24.)*exp(-hit.z*6.)*hit.w*.30;}
             float edge=exp(-abs(r-hole)*52.)*smoothstep(.005,.045,uOpening);float border=exp(-abs(1.-r)*90.);
             float shimmer=pow(.5+.5*sin(a*5.+t*.38+warp.y*3.),9.);
-            col+=mix(uColor,vec3(.74,.91,1.),.38)*edge*.28+uColor*border*(.24+shimmer*.11);
+            col+=mix(uColor,vec3(.74,.91,1.),.38)*edge*(.40+shimmer*.30)+uColor*border*(.24+shimmer*.16);
             col+=vec3(.20,.035,.22)*exp(-abs(r-.965-warp.x*.006)*95.)*shimmer*.18;
             col=mix(vec3(.002,.004,.012),col,uPower);gl_FragColor=vec4(col,1.-pow(1.-smoothstep(.10,.82,r),1.3)*uClarity*.80);
             #include <tonemapping_fragment>
@@ -1413,18 +1417,22 @@
       let activeArcCount=0;
       for(const event of energy.events){
         if(activeArcCount++>=quality.arcs)break;
-        if(beamVisibility*visibility<.001)break;
-        const h=activeHeads[event.head],isCrawl=event.type==='crawl',isSurge=event.type==='surge';
+        // Existing discharges migrate to the rim as the doorway clears. Their
+        // count stays bounded; central bolts still retract before crossing.
+        const isCrawl=event.type==='crawl'||opening>.28;
+        const arcVisibility=isCrawl?visibility:beamVisibility*visibility;
+        if(arcVisibility<.001)continue;
+        const h=activeHeads[event.head],isSurge=event.type==='surge'&&!isCrawl;
         const beamHue=hue+event.turn*.045,angle=h.a+event.turn*(isSurge?.45:.25);
-        h.power=event.power*visibility*beamVisibility;
+        h.power=event.power*arcVisibility*(isCrawl?.78:1);
         h.arc.object.visible=h.power>.008;h.arc.uniforms.uPower.value=h.power;
-        h.arc.uniforms.uColor.value.setHSL(beamHue,.86,.61);h.arc.uniforms.uWidth.value=event.width*(1-retract*.75);h.arc.uniforms.uHead.value=event.age*1.5;
+        h.arc.uniforms.uColor.value.setHSL(beamHue,.86,.61);h.arc.uniforms.uWidth.value=event.width*(isCrawl?.68:1-retract*.75);h.arc.uniforms.uHead.value=event.age*1.5;
         if(isCrawl){
           // A short packet travels along the recessed channel, never a full neon circle.
-          const direction=event.turn<0?-1:1,from=h.a+direction*event.age*.65;
+          const direction=event.turn<0?-1:1,from=h.a+direction*event.age*.90;
           for(let j=0;j<h.arc.points.length;j++){
-            const u=j/(h.arc.points.length-1),a=from+direction*u*(.22+event.reach*.55),r=3.412+arcNoise(event.seed+j,energyTime*4)*.018*Math.sin(u*Math.PI);
-            h.arc.points[j].set(Math.cos(a)*r,apertureY+Math.sin(a)*r,-.20+Math.sin(u*Math.PI)*.025);
+            const u=j/(h.arc.points.length-1),a=from+direction*u*(.30+event.reach*.70),r=3.39+arcNoise(event.seed+j,energyTime*4)*.045*Math.sin(u*Math.PI);
+            h.arc.points[j].set(Math.cos(a)*r,apertureY+Math.sin(a)*r,-.20+Math.sin(u*Math.PI)*.045);
           }
           uploadArc(h.arc);h.end.copy(h.arc.points[h.arc.points.length-1]);
         }else{

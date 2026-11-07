@@ -50,6 +50,12 @@ Covered startup now uses bounded six-millisecond preparation slices with immedia
 
 At 414 × 896 in the local in-app browser, the instrumented baseline became visible at 1,136 ms on the first load and 930 ms on repeat. The final build measured 702 ms and 623 ms (25–33% less than the repeat baseline). Maximum moving-frame intervals in those final runs were 15.7 and 16.7 ms. These are small-sample measurements on this computer, not iPhone/Safari or mobile-network results. The complete journey release gate passes, including cancelled urgent work, covered rendering suspension, and successful/failed GPU warmup with render-state restoration.
 
+## November 6 portal depth refinement
+
+The opening now has a bounded, irregular moving edge that settles into the existing rim. Two helical color streams move through the original tunnel with stronger depth falloff. Existing electrical ribbons migrate to the rim during opening, stay outside the clear passage, and fade before the camera crosses the hardware. No lights, meshes, particles, image downloads, or animation loops were added; the membrane uses two fewer noise-texture samples per shaded pixel. Compressed entry JavaScript grew by 216 bytes. Camera timing and adaptive quality budgets are unchanged.
+
+The journey release gate and portal energy, noise, and geometry-budget checks pass. The new production-code regression exercises both detail levels, one/two-arc adaptive limits, clear-passage geometry, disappearance before crossing, frozen clocks, and reduced motion. Desktop and 414 × 896 in-app previews render without browser errors. The baseline phone-size opening took 9,216 ms after reveal; the final version took 9,184 ms, both approximately 9.2 seconds. The final run recorded a 34.3 ms maximum moving-frame interval versus 124.9 ms in the single baseline run. These are small-sample measurements on this computer, not evidence of an improvement on physical phones or a cross-device performance guarantee.
+
 ## Remaining limits
 
 - Scene generation and some GPU uploads still execute on the main thread. Cooperative yields reduce stalls but cannot preempt one expensive browser/GPU operation.
