@@ -1587,6 +1587,16 @@
     function applyJourneyCamera(){
       const state=pose(p);pos.set(...state.pos);look.set(...state.look);camera.position.copy(pos);camera.lookAt(look);
     }
+    function updateEntranceCopy(){
+      // Keep both lines through the first half of the tunnel, then slide below
+      // the viewport using the existing camera clock, including pause/skip.
+      const midpoint=mouthZ-portalDepth*.5;
+      const exit=1-T.MathUtils.smoothstep(camera.position.z,midpoint-2.6,midpoint);
+      entranceCopy.hidden=exit>=.999;
+      entranceCopy.style.opacity=String(1-T.MathUtils.smoothstep(exit,.55,1));
+      entranceCopy.style.transform=reducedMotion?'none':`translate3d(0,calc(${(exit*100).toFixed(2)}% + ${(exit*160).toFixed(1)}px),0)`;
+      entranceCopy.dataset.inTunnel=String(camera.position.z<mouthZ);
+    }
     function updateLabels(){
       root.dataset.journeyEnd=String(atJourneyEnd());
       root.dataset.ending=String(p>=.94);
@@ -1606,7 +1616,6 @@
       }
       skip.setAttribute('aria-label',failed?'Open site menu':guideState.skipPending?'Preparing jungle':'Skip intro');
       skip.dataset.entryState='moving';
-      entranceCopy.hidden=p>.075;
     }
     // The complete viewport owns travel gestures. Only menus and the visit room scroll.
     let travelPointer=null,dragStartX=0,dragStartY=0,dragConsumed=false,suppressTapUntil=0;
@@ -1707,7 +1716,7 @@
       // Quality recovery waits for a settled view to avoid resolution pumping.
       if(qualityPending&&(quality.ratio<renderer.getPixelRatio()||guideState.mode==='idle')){applyQuality();qualityPending=false;}
       const changed=p!==lastVisualProgress;
-      if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();}
+      if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();updateEntranceCopy();}
       if(root.dataset.effectsLevel!==String(quality.effectsLevel))applyQuality();
       effectsCadence.setHz(quality.effectsHz);
       const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);

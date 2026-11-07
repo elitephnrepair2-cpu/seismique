@@ -11,9 +11,9 @@
       "gzipBytes": 10019
     },
     "entry": {
-      "file": "journey-entry.6c8b13f250d4.js",
-      "bytes": 131891,
-      "gzipBytes": 48358
+      "file": "journey-entry.717e27eb6278.js",
+      "bytes": 132173,
+      "gzipBytes": 48472
     }
   },
   "surfaces": {
@@ -34,6 +34,6 @@
       "bytes": 42301
     }
   },
-  "htmlBytes": 91330,
-  "htmlGzipBytes": 19412
+  "htmlBytes": 91551,
+  "htmlGzipBytes": 19473
 }

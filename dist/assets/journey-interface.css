@@ -108,6 +108,7 @@ body.jungle-home #seismique-jungle-reveal .tour-controls .explore{pointer-events
 body.jungle-home .entrance-copy{width:100%;text-align:center;pointer-events:none}
 body.jungle-home #seismique-jungle-reveal .entrance-title{font:900 clamp(28px,3vw,42px)/1.03 Impact,'Arial Narrow',Arial,sans-serif;letter-spacing:-.025em;color:#21192e;margin:0 0 12px;text-shadow:0 1px 5px #fff9}
 body.jungle-home .entrance-copy .entrance-intro{position:static;transform:none;bottom:auto;left:auto;width:auto;max-width:none;margin:0 auto;padding:0;max-width:520px;font:500 15px/1.4 Arial,sans-serif;color:#302438;background:none;text-shadow:0 1px 5px #fff,0 0 12px #eee9e0}
+body.jungle-home #seismique-jungle-reveal .entrance-copy[data-in-tunnel="true"] .entrance-title,body.jungle-home .entrance-copy[data-in-tunnel="true"] .entrance-intro{color:#f5efff;text-shadow:0 2px 8px #0a0718,0 0 18px #0a0718}
 body.jungle-home #seismique-jungle-reveal .explore[data-entry-state="ready"]{font-size:15px;letter-spacing:.09em;min-width:240px}
 body.jungle-home .journey-cue{font-size:11px;letter-spacing:.025em;color:#e9e3ee}
 body.jungle-home .journey-cue>span:first-child{font-size:14px;margin-bottom:3px;opacity:.65}
