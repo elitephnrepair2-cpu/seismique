@@ -7,6 +7,11 @@ body.jungle-home main{height:100vh;height:100dvh;margin:0;max-width:none}
 body.jungle-home #seismique-jungle-reveal{touch-action:none;overscroll-behavior:none}
 body.jungle-home #seismique-jungle-reveal .scene,body.jungle-home #seismique-jungle-reveal .tour-view{touch-action:none;overscroll-behavior:none}
 body.jungle-home #seismique-jungle-reveal .site-header{position:absolute;padding:calc(var(--journey-safe-top) + 16px) calc(var(--journey-safe-right) + 16px) 0 calc(var(--journey-safe-left) + 16px)}
+body.jungle-home .journey-header-actions{display:flex;align-items:center;gap:16px;min-height:48px;margin-left:auto;flex-shrink:0}
+body.jungle-home .journey-brand{display:flex;align-items:center;justify-content:center;width:clamp(104px,11vw,132px);min-height:48px;flex-shrink:0;text-decoration:none}
+body.jungle-home .journey-brand img{display:block;width:100%;height:auto;filter:drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)}
+body.jungle-home .journey-brand:focus-visible{outline:2px solid #c5a5ff;outline-offset:4px;border-radius:3px}
+@media(max-width:700px){body.jungle-home .journey-brand{width:clamp(80px,22vw,92px)}body.jungle-home .journey-header-actions{gap:10px}}
 body.jungle-home #seismique-jungle-reveal .menu-panel{top:calc(var(--journey-safe-top) + 72px);left:calc(var(--journey-safe-left) + 16px);width:min(320px,calc(100% - var(--journey-safe-left) - var(--journey-safe-right) - 32px));touch-action:pan-y;overscroll-behavior:contain;background:#111017f5;border:1px solid #b7aac66b;border-radius:4px 15px 5px 13px;max-height:calc(100dvh - var(--journey-safe-top) - var(--journey-safe-bottom) - 92px)}
 body.jungle-home #seismique-jungle-reveal .footer-shortcut{color:#fff;font-size:13px;min-height:44px;display:flex;align-items:center;text-decoration:none;padding:0 12px;background:#15121ddd;border:1px solid #bfa9d180;border-radius:3px 10px 3px 7px}
 body.jungle-home #seismique-jungle-reveal .menu-toggle{border-radius:3px 10px 4px 8px;background:#111018d9;border-color:#ffffffaa;box-shadow:inset 0 -2px #c0a3ed33;padding:10px 13px;font-size:13px;letter-spacing:.03em}
@@ -253,6 +258,7 @@ body.jungle-home #seismique-jungle-reveal[data-menu-open="true"] .menu-panel{tra
 body.jungle-home #seismique-jungle-reveal .menu-toggle{z-index:1}
 body.jungle-home #seismique-jungle-reveal .site-header>a{transition:opacity .2s}
 body.jungle-home #seismique-jungle-reveal[data-menu-open="true"] .site-header>a{visibility:hidden}
+body.jungle-home #seismique-jungle-reveal[data-menu-open="true"] .journey-header-actions{visibility:hidden}
 body.jungle-home #seismique-jungle-reveal .menu-home{width:200px;max-width:100%;margin:0 0 22px;padding:0;flex-shrink:0}
 body.jungle-home #seismique-jungle-reveal .direct-nav{flex-shrink:0;margin-bottom:30px}
 body.jungle-home #seismique-jungle-reveal .direct-nav a{min-height:66px;padding:16px 0;font-size:clamp(18px,5vw,23px);justify-content:space-between;gap:12px}
