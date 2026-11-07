@@ -1587,6 +1587,15 @@
     function applyJourneyCamera(){
       const state=pose(p);pos.set(...state.pos);look.set(...state.look);camera.position.copy(pos);camera.lookAt(look);
     }
+    const wordmarkBottom=new T.Vector3();
+    function updateCornerBrand(){
+      // Hand branding to the header only after the physical sign clears the
+      // viewport. Projection follows the camera and responsive sign sizing.
+      entranceWordmark.updateWorldMatrix(true,false);
+      wordmarkBottom.set(0,-1.5,0).applyMatrix4(entranceWordmark.matrixWorld).project(camera);
+      const visible=String(p>0&&(p>=.33||wordmarkBottom.y>1.01));
+      if(root.dataset.cornerBrandVisible!==visible)root.dataset.cornerBrandVisible=visible;
+    }
     function updateEntranceCopy(){
       // Keep both lines through the first half of the tunnel, then slide below
       // the viewport using the existing camera clock, including pause/skip.
@@ -1716,7 +1725,7 @@
       // Quality recovery waits for a settled view to avoid resolution pumping.
       if(qualityPending&&(quality.ratio<renderer.getPixelRatio()||guideState.mode==='idle')){applyQuality();qualityPending=false;}
       const changed=p!==lastVisualProgress;
-      if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();updateEntranceCopy();}
+      if(changed||viewportChanged){applyJourneyCamera();camera.updateMatrixWorld();updateEntranceCopy();updateCornerBrand();}
       if(root.dataset.effectsLevel!==String(quality.effectsLevel))applyQuality();
       effectsCadence.setHz(quality.effectsHz);
       const effectDelta=effectsCadence.consume(dt,modeChanged||lastVisualProgress<0);

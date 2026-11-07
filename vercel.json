@@ -11,6 +11,15 @@
   },
   "headers": [
     {
+      "source": "/assets/journey-entry.89ce72c85fbd.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
       "source": "/assets/jungle-stone.510a3bf4d5e5.png",
       "headers": [
         {
