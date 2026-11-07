@@ -35,5 +35,5 @@
 body.jungle-home #seismique-jungle-reveal .seismique-closure{top:calc(env(safe-area-inset-top,0px) + 16px);left:50%;right:auto;transform:translateX(-50%) rotate(-2deg);width:146px;min-height:44px;padding:6px 10px}
 #seismique-jungle-reveal[data-menu-open="true"] .seismique-closure{visibility:hidden}
 .visit-room .closure-details,#seismique-jungle-reveal .closure-details{margin-top:18px;padding:12px 15px;border-left:2px solid #b793ed;background:#21172d;color:#f6eeff;font:700 14px/1.5 Arial,sans-serif;letter-spacing:0}
-@media(max-width:700px){body.jungle-home #seismique-jungle-reveal .seismique-closure{left:44%;width:112px;min-height:43px;padding:5px 7px}body.jungle-home #seismique-jungle-reveal .seismique-closure strong{font-size:14px}body.jungle-home #seismique-jungle-reveal .seismique-closure span{font-size:8px}}
-@media(max-width:350px){body.jungle-home #seismique-jungle-reveal .seismique-closure{left:50%;top:calc(env(safe-area-inset-top,0px) + 74px);width:136px;min-height:38px}}
+@media(max-width:700px){body.jungle-home #seismique-jungle-reveal .seismique-closure{left:50%;width:132px;min-height:51px;padding:7px 9px}body.jungle-home #seismique-jungle-reveal .seismique-closure strong{font-size:17px}body.jungle-home #seismique-jungle-reveal .seismique-closure span{font-size:9px}}
+@media(max-width:350px){body.jungle-home #seismique-jungle-reveal .seismique-closure{top:calc(env(safe-area-inset-top,0px) + 74px);width:136px}}

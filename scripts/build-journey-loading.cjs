@@ -24,7 +24,7 @@ const groups={
  replace('preloads',/<link rel="preload" href="\/assets\/three[^\n]+\n<link rel="preload" href="\/assets\/journey-scene[^\n]+/,
   `<link rel="preload" href="/assets/three.min.js?v=160" as="script" fetchpriority="high">\n<link rel="preload" href="/assets/${bundles.entry.file}" as="script" fetchpriority="high">\n<link rel="preload" href="/assets/${bundles.jungle.file}" as="script" fetchpriority="low">\n`+
   [...Object.values(surfaces).map(asset=>asset.file),'nebula-canopy-v1.webp','nebula-horizon-v1.webp'].map(file=>`<link rel="preload" href="/assets/${file}" as="image" fetchpriority="low">`).join('\n'));
- const styles=['visitor.css','journey-interface.css','navigation.css'].map(read).join('\n');
+ const styles=['visitor.css','journey-interface.css','navigation.css'].map(read).join('\n').replace(/\/\*[\s\S]*?\*\//g,'');
  replace('styles',/<link rel="stylesheet" href="\/assets\/visitor[^\n]+\n<link rel="stylesheet" href="\/assets\/journey-interface[^\n]+\n<link rel="stylesheet" href="\/assets\/navigation[^\n]+/,
   '<style data-journey-styles>\n'+styles+'\n</style>');
  replace('ui',/<script src="\/assets\/visitor[^>]+><\/script>/,`<script src="/assets/${bundles.ui.file}" defer fetchpriority="high"></script>`);

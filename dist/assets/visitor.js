@@ -7,12 +7,28 @@
   const planning=['tickets','hours-location','parking','accessibility','faqs','contact','policies'];
   const aliases={'coming-soon':'/whats-happening/#upcoming',calendar:'/whats-happening/#calendar','artists-team':'/exhibits/#meet-artists',overview:'/',museum:'/exhibits/'};
   const inTour=!!root.querySelector('.tour-view');
+  const surface=root.querySelector('.journey-surface');
   const urlFor=id=>inTour&&id==='plan-your-visit'?'#visit-room':id==='tour'?'/':aliases[id]|| (planning.includes(id)?'/plan-your-visit/#'+id:routes.includes(id)?'/'+id+'/':null);
-  function closeMenu(){root.dataset.menuOpen='false';menu.hidden=true;menuButton.setAttribute('aria-expanded','false');}
-  menuButton.addEventListener('click',()=>{const opening=menu.hidden;root.dataset.menuOpen=String(opening);menu.hidden=!opening;menuButton.setAttribute('aria-expanded',String(opening));root.tourControls?.pause();});
+  function setMenu(open){
+    if(!open&&menu.contains(document.activeElement))menuButton.focus({preventScroll:true});
+    root.dataset.menuOpen=String(open);menuButton.setAttribute('aria-expanded',String(open));
+    if(surface){menu.hidden=false;menu.inert=!open;surface.inert=open;menu.setAttribute('aria-hidden',String(!open));menuButton.lastChild.textContent=open?' Close':' Menu';}
+    else menu.hidden=!open;
+  }
+  function closeMenu(){setMenu(false);}
+  if(surface)closeMenu();
+  menuButton.addEventListener('click',()=>{setMenu(menuButton.getAttribute('aria-expanded')!=='true');root.tourControls?.pause();});
   root.closeNavigation=closeMenu;
   document.addEventListener('click',event=>{if(!event.target.closest('.menu-panel,.menu-toggle'))closeMenu();});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){event.preventDefault();closeMenu();menuButton.focus();}});
+  document.addEventListener('keydown',event=>{
+    if(root.dataset.menuOpen!=='true')return;
+    if(event.key==='Escape'){event.preventDefault();closeMenu();menuButton.focus();}
+    if(surface&&event.key==='Tab'){
+      const last=menu.querySelector('.menu-tickets');
+      if(event.shiftKey&&document.activeElement===menuButton){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();menuButton.focus();}
+    }
+  });
   function remember(){if(!inTour)return;root.tourControls?.pause();const progress=root.navigationState?.().progress;if(Number.isFinite(progress)){try{sessionStorage.setItem('seismique-jungle-progress',String(progress));}catch{}}}
   root.querySelectorAll('a[href^="#"]').forEach(a=>{
     if(!inTour&&document.getElementById(a.hash.slice(1)))return;
