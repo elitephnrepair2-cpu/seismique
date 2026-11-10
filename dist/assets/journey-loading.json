@@ -6,14 +6,14 @@
       "gzipBytes": 4516
     },
     "jungle": {
-      "file": "journey-jungle.9ebd209a2c1e.js",
-      "bytes": 27034,
-      "gzipBytes": 10019
+      "file": "journey-jungle.278459ae3f3a.js",
+      "bytes": 23347,
+      "gzipBytes": 8695
     },
     "entry": {
-      "file": "journey-entry.89ce72c85fbd.js",
-      "bytes": 132405,
-      "gzipBytes": 48560
+      "file": "journey-entry.522cd269c04c.js",
+      "bytes": 132941,
+      "gzipBytes": 48747
     }
   },
   "surfaces": {

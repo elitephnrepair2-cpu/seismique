@@ -1289,21 +1289,35 @@
       }
       for(let j=0;j<longitudinal;j++)for(let i=0;i<radial;i++){const a=j*(radial+1)+i,b=a+radial+1;indices.push(a,b,a+1,b,b+1,a+1);}
       const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();
-      const material=new T.ShaderMaterial({uniforms:portalUniforms,side:T.DoubleSide,
-        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;float bend=sin(uv.x*25.1327+uv.y*18.-uTime*.65);p.xy*=1.+sin(uv.y*3.14159)*(.018+uInstability*.013)*bend;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
-        fragmentShader:`varying vec2 vUv;uniform float uTime;uniform vec3 uColor;uniform float uCharge;uniform float uTravel;uniform float uOpening;uniform float uPower;uniform float uSurge,uInstability;
+      // One inward-facing surface replaces the separate reflective panels.
+      // The far end fades out without adding shells, lights or texture samples.
+      const material=new T.ShaderMaterial({uniforms:portalUniforms,side:T.BackSide,transparent:true,depthWrite:false,
+        vertexShader:`varying vec2 vUv;uniform float uTime,uInstability;void main(){vUv=uv;vec3 p=position;float bend=sin(uv.x*18.849556+uv.y*12.-uTime*.48);p.xy*=1.+sin(uv.y*3.141593)*(.012+uInstability*.008)*bend;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+        fragmentShader:`varying vec2 vUv;uniform float uTime,uPower,uSurge;uniform vec3 uColor;
           ${electricNoiseGLSL}
-          void main(){float a=vUv.x*6.2831853,d=vUv.y,t=uTime;a+=sin(d*14.-t*.37)*(.045+uInstability*.025);vec2 cyc=vec2(cos(a),sin(a));
-            float n=eFbm(cyc*1.8+vec2(d*3.-t*.14,d*2.+t*.09));
-            // Helical streams travel inward at different rates on the existing tunnel.
-            float flow=.5+.5*sin(a*3.-d*15.+t*.95+n*2.4);
-            float silk=pow(flow,7.);float pearl=pow(.5+.5*sin(a*2.+d*11.-t*.55+n*2.),12.);
-            vec3 col=mix(vec3(.012,.025,.065),vec3(.10,.025,.18),n);
-            col+=uColor*(.045+silk*.46)+vec3(.42,.065,.32)*(.045+pearl*.39);
-            float jungleHint=smoothstep(.54,.98,d)*smoothstep(.82,1.60,uTravel);
-            col=mix(col,col*.60+vec3(.012,.080,.058)*(1.+silk),jungleHint*.78);
-            col*=.76*(1.-smoothstep(.30,1.,d)*.62);col+=uColor*uSurge*.075*exp(-d*3.);
-            col=mix(vec3(.002,.004,.012),col,uPower);gl_FragColor=vec4(col,1.);
+          void main(){float a=vUv.x*6.2831853,d=vUv.y,t=uTime;
+            a+=sin(d*9.-t*.32)*.065;vec2 cyc=vec2(cos(a),sin(a));
+            float n=eFbm(cyc*1.65+vec2(d*2.4-t*.10,d*1.6+t*.065));
+            // Broad overlapping currents keep the wall soft and continuous.
+            float flow=.5+.5*sin(a*2.-d*9.+t*.72+(n-.5)*2.6);
+            float counter=.5+.5*sin(a*3.+d*7.-t*.43+(n-.5)*2.);
+            float blue=flow*flow*flow,violet=counter*counter*counter*counter;
+            vec3 col=mix(vec3(.005,.012,.035),vec3(.045,.012,.09),n);
+            col+=vec3(.025,.23,.43)*blue*.62+vec3(.26,.045,.43)*violet*.64;
+            float ripple=pow(.5+.5*sin(d*24.-a*2.+(n-.5)*4.-t*1.2),10.);
+            col+=mix(vec3(.035,.20,.42),vec3(.18,.045,.36),flow)*ripple*.22;
+            // A fine electrical thread travels along the wall, outside the view ahead.
+            float thread=abs(sin(a*2.-d*12.+t*.65+(n-.5)*2.));
+            float line=1.-smoothstep(.012,.065,thread);
+            float packet=exp(-pow((d-fract(t*.13))/.15,2.));
+            float pulse=.25+.75*smoothstep(-.4,.95,sin(t*1.15));
+            col+=vec3(.12,.48,.75)*line*packet*pulse*.32;
+            float depth=1.-smoothstep(.18,1.,d)*.66;
+            col*=depth;col+=uColor*uSurge*.045*exp(-d*4.);
+            float canopy=smoothstep(.58,1.,d);
+            col=mix(col,col*.60+vec3(.008,.045,.032)*(1.+blue),canopy*.65);
+            col=mix(vec3(.002,.004,.012),col,uPower);
+            gl_FragColor=vec4(col,1.-smoothstep(.70,1.,d));
             #include <tonemapping_fragment>
             #include <colorspace_fragment>
           }`});
