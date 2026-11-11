@@ -95,3 +95,8 @@ Local files: `dist/assets/events/gallery-{720,1600}.jpg` and `dist/assets/events
 - Removed the tentative weekday-special and future-concept promotions from the public events page. Compatibility section anchors and legacy redirects remain valid.
 - Birthday parties and adult/private gatherings now have distinct paths that preselect the appropriate occasion in the existing inquiry. The accompanying-adult / no-drop-off policy appears with birthday content, in the inquiry area and on the public-events page. Guest count remains required (positive whole number); date, budget and space preferences retain their original optional behavior. Existing contact routing, review-before-email flow, manager confirmation and room capacities are unchanged.
 - Targeted regeneration: `python3 scripts/build-bar-events.py`; the full page builder also invokes this refresh. After homepage navigation changes, run the existing journey build and release gate.
+
+
+## Latest user direction: inquiry budget and email
+
+The user removed the budget question and confirmed `events@seismique.com` as the events inbox. The form no longer asks for an estimated budget or budgeting help; the review, copied inquiry and email body omit budget entirely. The related FAQ and optional-details label were updated. Event-page direct email links, the no-JavaScript fallback and the prepared email all use `events@seismique.com`. General site contact details remain separate. This supersedes earlier notes describing the general inbox as a temporary event contact and budget as an optional input.

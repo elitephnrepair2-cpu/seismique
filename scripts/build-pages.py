@@ -57,7 +57,7 @@ for id,title in pages.items():
   html=navigation(shared_footer(links(html,id)),id)
   if id=="parties":
    html=html.replace("</head>",'<link rel="stylesheet" href="/assets/events-experience.css?v=3">\n</head>')
-   html=html.replace("</body>",'<script src="/assets/events-inquiry.js?v=2" defer></script>\n</body>')
+   html=html.replace("</body>",'<script src="/assets/events-inquiry.js?v=3" defer></script>\n</body>')
  path=Path('dist')/id/'index.html';path.parent.mkdir(exist_ok=True);path.write_text(html)
 # Legacy URLs only forward visitors; they no longer expose extra pages or menus.
 for old,target in legacy.items():

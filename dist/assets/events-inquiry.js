@@ -1,11 +1,10 @@
 /* Event inquiry preparation only. No booking, remote submission or browser storage. */
 (function(scope){
-  const recipient='info@seismique.com';
+  const recipient='events@seismique.com';
   function buildPlan(v){
     const clean=value=>String(value??'').trim();
     const date=clean(v.eventDate),prettyDate=/^\d{4}-\d{2}-\d{2}$/.test(date)?date.slice(5,7)+'/'+date.slice(8,10)+'/'+date.slice(0,4):'Still deciding';
-    const budget=v.budgetHelp?'Help estimating a budget':clean(v.budget)?'$'+Number(v.budget).toLocaleString('en-US')+' USD total':'Not specified';
-    const rows=[['Occasion',clean(v.occasion)],['Guests',clean(v.guests)],['Space',clean(v.space)||'Help me choose'],['Date',prettyDate+(v.flexible?' · flexible':'')],['Start time',clean(v.startTime)?clean(v.startTime)+' (Houston time)':'To discuss'],['Duration',clean(v.duration)||'To discuss'],['Interests',(v.interests||[]).map(clean).filter(Boolean).join(', ')||'Open to suggestions'],['Budget',budget],['Notes',clean(v.notes)||'None added'],['Name',clean(v.name)],['Email',clean(v.email)]];
+    const rows=[['Occasion',clean(v.occasion)],['Guests',clean(v.guests)],['Space',clean(v.space)||'Help me choose'],['Date',prettyDate+(v.flexible?' · flexible':'')],['Start time',clean(v.startTime)?clean(v.startTime)+' (Houston time)':'To discuss'],['Duration',clean(v.duration)||'To discuss'],['Interests',(v.interests||[]).map(clean).filter(Boolean).join(', ')||'Open to suggestions'],['Notes',clean(v.notes)||'None added'],['Name',clean(v.name)],['Email',clean(v.email)]];
     if(clean(v.phone))rows.push(['Phone',clean(v.phone)]);
     if(clean(v.company))rows.push(['Company',clean(v.company)]);
     const subject='Seismique event inquiry — '+clean(v.occasion)+(date?' — '+date:'');
@@ -37,12 +36,11 @@
     return true;
   }
   function values(){
-    const v={};for(const name of ['occasion','guests','space','eventDate','startTime','duration','budget','notes','name','email','phone','company'])v[name]=field(name).value;
-    v.flexible=field('flexible').checked;v.budgetHelp=field('budgetHelp').checked;v.interests=[...form.querySelectorAll('[name="interests"]:checked')].map(input=>input.value);return v;
+    const v={};for(const name of ['occasion','guests','space','eventDate','startTime','duration','notes','name','email','phone','company'])v[name]=field(name).value;
+    v.flexible=field('flexible').checked;v.interests=[...form.querySelectorAll('[name="interests"]:checked')].map(input=>input.value);return v;
   }
   form.querySelectorAll('[data-next]').forEach(button=>button.addEventListener('click',()=>{if(validStep(current))showStep(current+1);}));
   form.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',()=>showStep(current-1)));
-  field('budgetHelp').addEventListener('change',()=>{field('budget').disabled=field('budgetHelp').checked;});
   form.addEventListener('submit',event=>{
     event.preventDefault();
     if(current<steps.length-1){if(validStep(current))showStep(current+1);return;}
@@ -62,5 +60,5 @@
   document.querySelectorAll('[data-occasion]').forEach(link=>link.addEventListener('click',()=>{field('occasion').value=link.dataset.occasion;showStep(0,false);}));
   document.querySelectorAll('a[href="#private-event-inquiry"]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();if(link.dataset.space)field('space').value=link.dataset.space;showStep(0);}));
   updateDateMinimum();document.getElementById('events-form-fallback').hidden=true;form.hidden=false;showStep(0,false);
-  window.addEventListener('pageshow',()=>{updateDateMinimum();field('budget').disabled=field('budgetHelp').checked;});
+  window.addEventListener('pageshow',updateDateMinimum);
 })(typeof window!=='undefined'?window:globalThis);

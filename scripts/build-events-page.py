@@ -10,6 +10,6 @@ assert n==1,'Expected one events main content block'
 html=re.sub(r'<link rel="stylesheet" href="/assets/events-experience.css[^\"]*">\s*','',html)
 html=re.sub(r'<script src="/assets/events-inquiry.js[^\"]*" defer></script>\s*','',html)
 html=html.replace('</head>','<link rel="stylesheet" href="/assets/events-experience.css?v=3">\n</head>')
-html=html.replace('</body>','<script src="/assets/events-inquiry.js?v=2" defer></script>\n</body>')
+html=html.replace('</body>','<script src="/assets/events-inquiry.js?v=3" defer></script>\n</body>')
 p.write_text(html)
 print('Built events page from the maintained content component.')
