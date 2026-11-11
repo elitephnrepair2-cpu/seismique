@@ -20,8 +20,8 @@ class Document(HTMLParser):
  def handle_endtag(self,tag):
   if tag=='a' and self.anchor is not None:self.nav.append(self.anchor);self.anchor=None
   if tag=='nav':self.innav=False
-expected=['Immersive Museum','Glow Mini Golf','Parties & Events','What’s Happening','Plan Your Visit']
-pages=['','exhibits','mini-golf','parties','whats-happening','plan-your-visit']
+expected=['Immersive Museum','Glow Mini Golf','Bar','Parties & Events','What’s Happening','Plan Your Visit']
+pages=['','exhibits','mini-golf','bar','parties','whats-happening','plan-your-visit']
 docs={('/'+p+'/' if p else '/'):Document(root/p/'index.html') for p in pages}
 for url,doc in docs.items():
  assert [label.strip() for _,label in doc.nav]==expected,(url,doc.nav)
@@ -41,8 +41,9 @@ for url,doc in docs.items():
 for name in ['calendar','upcoming','offers','announcements']:assert name in docs['/whats-happening/'].ids
 for name in ['meet-artists','behind-the-experience']:assert name in docs['/exhibits/'].ids
 for name in ['tickets','hours-location','parking','accessibility','faqs','contact','policies']:assert name in docs['/plan-your-visit/'].ids
-for phrase in ['A connected space station','Meet the vendors','Beyond the exhibits']:assert phrase in docs['/whats-happening/'].text
+for phrase in ['All Events','Adults','Kids & Families','Children must be accompanied by an adult']:assert phrase in docs['/whats-happening/'].text
+assert 'Museum admission is not required to visit the bar.' in docs['/bar/'].text
 for phrase in ['Toshiko Horiuchi MacAdam','CONTRIBUTING ARTISTS','EXHIBIT BUILDERS','CREATIVE DIRECTION']:assert phrase in docs['/exhibits/'].text
 for old,target in {'coming-soon':'/whats-happening/#upcoming','calendar':'/whats-happening/#calendar','artists-team':'/exhibits/#meet-artists','overview':'/','museum':'/exhibits/'}.items():
  data=(root/old/'index.html').read_text();assert 'location.replace('+repr(target)+')' in data and 'direct-nav' not in data
-print('PASS: six consistent five-item menus; all internal page/section links; no duplicate IDs; visitor details and artist/upcoming content retained; five legacy redirects.')
+print('PASS: seven consistent six-item menus; all internal page/section links; no duplicate IDs; visitor details and artist content retained; bar and event requirements present; five legacy redirects.')

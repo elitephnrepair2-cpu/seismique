@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const context={module:{exports:{}}};vm.runInNewContext(fs.readFileSync('dist/assets/calendar.js','utf8'),context);
+const {filterEvents,eventsOnDate}=context.module.exports;
+const fixtures=[{id:'adult',audiences:['adults'],status:'published',dates:['2026-12-12']},{id:'family',audiences:['families'],status:'published',dates:['2026-12-13']},{id:'shared',audiences:['adults','families'],status:'published',dates:['2026-12-12']},{id:'tentative',audiences:['adults'],status:'draft',dates:['2026-12-12']}];
+assert.equal(filterEvents(fixtures,'all').length,3);
+assert.equal(filterEvents(fixtures,'adults').map(e=>e.id).join(','),'adult,shared');
+assert.equal(filterEvents(fixtures,'families').map(e=>e.id).join(','),'family,shared');
+assert.equal(eventsOnDate(fixtures,'families','2026-12-12').map(e=>e.id).join(','),'shared');
+assert.equal(eventsOnDate(fixtures,'all','2026-12-14').length,0);
+const html=fs.readFileSync('dist/whats-happening/index.html','utf8');
+const published=JSON.parse(html.match(/id="public-events-data">(.*?)<\/script>/s)[1]);
+assert(published.every(e=>e.status==='published'&&e.dates.length===0),'Do not infer dates from recurring listings. Update this assertion when dated sessions are approved.');
+const parties=fs.readFileSync('dist/parties/index.html','utf8');
+assert(parties.includes('name="guests" type="number" min="1" step="1" inputmode="numeric" required'));
+assert(parties.includes('This is not a drop-off activity.'));
+console.log('PASS: adult/family/shared filters, tentative exclusion, date matching, explicit empty dates and guest-count policy.');
