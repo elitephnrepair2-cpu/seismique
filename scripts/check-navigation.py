@@ -20,8 +20,8 @@ class Document(HTMLParser):
  def handle_endtag(self,tag):
   if tag=='a' and self.anchor is not None:self.nav.append(self.anchor);self.anchor=None
   if tag=='nav':self.innav=False
-expected=['Immersive Museum','Glow Mini Golf','Bar','Parties & Events','What’s Happening','Plan Your Visit']
-pages=['','exhibits','mini-golf','bar','parties','whats-happening','plan-your-visit']
+expected=['Immersive Museum','Glow Mini Golf','Bar','Parties & Events','Plan Your Visit']
+pages=['','exhibits','mini-golf','bar','parties','plan-your-visit']
 docs={('/'+p+'/' if p else '/'):Document(root/p/'index.html') for p in pages}
 for url,doc in docs.items():
  assert [label.strip() for _,label in doc.nav]==expected,(url,doc.nav)
@@ -38,12 +38,14 @@ for url,doc in docs.items():
   # The homepage router translates these compatibility anchors before use.
   if url=='/' and not link.path and fragment in ['exhibits','tour']:continue
   if fragment:assert fragment in page.ids,(url,'Missing target',href)
-for name in ['calendar','upcoming','offers','announcements']:assert name in docs['/whats-happening/'].ids
 for name in ['meet-artists','behind-the-experience']:assert name in docs['/exhibits/'].ids
 for name in ['tickets','hours-location','parking','accessibility','faqs','contact','policies']:assert name in docs['/plan-your-visit/'].ids
-for phrase in ['All Events','Adults','Kids & Families','Children must be accompanied by an adult']:assert phrase in docs['/whats-happening/'].text
 assert 'Museum admission is not required to visit the bar.' in docs['/bar/'].text
 for phrase in ['Toshiko Horiuchi MacAdam','CONTRIBUTING ARTISTS','EXHIBIT BUILDERS','CREATIVE DIRECTION']:assert phrase in docs['/exhibits/'].text
-for old,target in {'coming-soon':'/whats-happening/#upcoming','calendar':'/whats-happening/#calendar','artists-team':'/exhibits/#meet-artists','overview':'/','museum':'/exhibits/'}.items():
+for old,target in {'whats-happening':'/plan-your-visit/','coming-soon':'/plan-your-visit/','calendar':'/plan-your-visit/','artists-team':'/exhibits/#meet-artists','overview':'/','museum':'/exhibits/'}.items():
  data=(root/old/'index.html').read_text();assert 'location.replace('+repr(target)+')' in data and 'direct-nav' not in data
-print('PASS: seven consistent six-item menus; all internal page/section links; no duplicate IDs; visitor details and artist content retained; bar and event requirements present; five legacy redirects.')
+print('PASS: six consistent five-item menus; all internal page/section links; no duplicate IDs; visitor details and artist content retained; bar and event requirements present; six legacy redirects.')
+
+assert (root.parent/'archive/whats-happening/index.html').exists()
+assert 'public-events-data' not in (root/'whats-happening/index.html').read_text()
+print('PASS: original page archived outside public output; no archived-page links; former URLs forward to visitor information.')

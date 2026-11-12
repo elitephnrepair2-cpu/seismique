@@ -123,7 +123,7 @@
       {id:'exhibits',side:1,z:-25,color:0x61dce3},
       {id:'mini-golf',side:-1,z:-30.2,color:0xbba3ff},
       {id:'parties',side:1,z:-35.4,color:0xee8ab9},
-      {id:'whats-happening',side:-1,z:-40.6,color:0xb69ae2}
+      {id:'bar',side:-1,z:-40.6,color:0xb69ae2}
     ].map(stop=>{
       const z=jungleZ(stop.z),x=junglePathX(z),side=stop.side;
       const curve=new T.CatmullRomCurve3([

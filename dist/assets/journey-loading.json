@@ -1,9 +1,9 @@
 {
   "bundles": {
     "ui": {
-      "file": "journey-ui.647909ecfb3b.js",
-      "bytes": 11611,
-      "gzipBytes": 4516
+      "file": "journey-ui.b578905a0c13.js",
+      "bytes": 11616,
+      "gzipBytes": 4505
     },
     "jungle": {
       "file": "journey-jungle.278459ae3f3a.js",
@@ -11,9 +11,9 @@
       "gzipBytes": 8695
     },
     "entry": {
-      "file": "journey-entry.522cd269c04c.js",
-      "bytes": 132941,
-      "gzipBytes": 48747
+      "file": "journey-entry.f3a5a75f2ba2.js",
+      "bytes": 132929,
+      "gzipBytes": 48739
     }
   },
   "surfaces": {
@@ -34,6 +34,6 @@
       "bytes": 42301
     }
   },
-  "htmlBytes": 93207,
-  "htmlGzipBytes": 19717
+  "htmlBytes": 93146,
+  "htmlGzipBytes": 19688
 }

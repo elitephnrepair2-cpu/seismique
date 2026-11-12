@@ -3,9 +3,9 @@
   if(!root)return;
   const menuButton=root.querySelector('.menu-toggle'),menu=root.querySelector('.menu-panel');
   if(!menuButton||!menu)return;
-  const routes=['exhibits','mini-golf','parties','whats-happening','plan-your-visit'];
+  const routes=['exhibits','mini-golf','parties','bar','plan-your-visit'];
   const planning=['tickets','hours-location','parking','accessibility','faqs','contact','policies'];
-  const aliases={'coming-soon':'/whats-happening/#upcoming',calendar:'/whats-happening/#calendar','artists-team':'/exhibits/#meet-artists',overview:'/',museum:'/exhibits/'};
+  const aliases={'whats-happening':'/plan-your-visit/','coming-soon':'/plan-your-visit/',calendar:'/plan-your-visit/','artists-team':'/exhibits/#meet-artists',overview:'/',museum:'/exhibits/'};
   const inTour=!!root.querySelector('.tour-view');
   const surface=root.querySelector('.journey-surface');
   const urlFor=id=>inTour&&id==='plan-your-visit'?'#visit-room':id==='tour'?'/':aliases[id]|| (planning.includes(id)?'/plan-your-visit/#'+id:routes.includes(id)?'/'+id+'/':null);

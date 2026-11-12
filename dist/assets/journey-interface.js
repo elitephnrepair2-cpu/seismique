@@ -8,7 +8,7 @@
   const finish=root.querySelector('.journey-finish'),cue=root.querySelector('.journey-cue'),progress=root.querySelector('.journey-progress');
   const cueDevice=matchMedia('(pointer:coarse), (max-width:700px)');
   const controls=root.querySelector('.destination-controls'),next=root.querySelector('.destination-next'),nextLabel=next.querySelector('[data-next-label]'),gesture=root.querySelector('#destination-gesture'),announcement=root.querySelector('.journey-announcement');
-  const labels=['Immersive Museum','Glow Mini Golf','Parties & Events','What’s Happening'];
+  const labels=['Immersive Museum','Glow Mini Golf','Parties & Events','The Drinque Bar'];
   function updatePageActions(){
     root.querySelectorAll('[data-page-label]').forEach(label=>{label.textContent=(cueDevice.matches?'TAP':'CLICK')+' TO OPEN '+label.dataset.pageLabel.toUpperCase()+' PAGE';});
   }

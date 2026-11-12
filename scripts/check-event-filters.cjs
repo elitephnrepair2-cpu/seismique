@@ -7,7 +7,7 @@ assert.equal(filterEvents(fixtures,'adults').map(e=>e.id).join(','),'adult,share
 assert.equal(filterEvents(fixtures,'families').map(e=>e.id).join(','),'family,shared');
 assert.equal(eventsOnDate(fixtures,'families','2026-12-12').map(e=>e.id).join(','),'shared');
 assert.equal(eventsOnDate(fixtures,'all','2026-12-14').length,0);
-const html=fs.readFileSync('dist/whats-happening/index.html','utf8');
+const html=fs.readFileSync('archive/whats-happening/index.html','utf8');
 const published=JSON.parse(html.match(/id="public-events-data">(.*?)<\/script>/s)[1]);
 assert(published.every(e=>e.status==='published'&&e.dates.length===0),'Do not infer dates from recurring listings. Update this assertion when dated sessions are approved.');
 const parties=fs.readFileSync('dist/parties/index.html','utf8');

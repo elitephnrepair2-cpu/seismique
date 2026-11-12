@@ -9,8 +9,8 @@ for(const [w,h] of [[320,568],[390,844],[430,932],[844,390],[1280,720]]){
  const ctx={T,camera,ease:t=>t*t*(3-2*t),lerp:(a,b,t)=>a+(b-a)*t};vm.createContext(ctx);
  vm.runInContext(route+pose+'\nconst pageStops=jungleSidePaths;\n'+solve+'\nthis.stops=pageStops;this.targets=stopProgress();this.final=pose(1);this.clearingZ=endingZ;',ctx);
  assert.equal(ctx.stops.length,4,'Only four jungle destinations remain');
- assert.equal(ctx.stops.at(-1).id,'whats-happening');
- assert(1-ctx.targets.at(-1)<.19,'One normal swipe can finish after What’s Happening');
+ assert.equal(ctx.stops.at(-1).id,'bar');
+ assert(1-ctx.targets.at(-1)<.19,'One normal swipe can finish after The Drinque Bar');
  assert(ctx.stops.at(-1).z+8.1-ctx.final.pos[2]<13,'Final approach must remain under 13m');
  for(let i=0;i<ctx.stops.length;i++){
   const stop=ctx.stops[i],distance=ctx.pose(ctx.targets[i]).pos[2]-stop.z;

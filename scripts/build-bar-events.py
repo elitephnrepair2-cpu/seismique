@@ -4,16 +4,13 @@ import re
 root=Path(__file__).resolve().parents[1]
 nav=(root/'components/navigation.html').read_text().strip()
 footer=(root/'components/footer.html').read_text().strip()
-for slug,component in [('parties','parties'),('whats-happening','happening'),('bar','bar')]:
+for slug,component in [('parties','parties'),('bar','bar')]:
  path=root/'dist'/slug/'index.html'
- html=path.read_text() if path.exists() else (root/'dist/whats-happening/index.html').read_text()
+ html=path.read_text() if path.exists() else (root/'archive/whats-happening/index.html').read_text()
  content=(root/f'components/{component}-content.html').read_text()
  html=re.sub(r'<main id="main-content">.*?</main>',lambda _: '<main id="main-content">'+content+'</main>',html,flags=re.S)
  html=re.sub(r'<link rel="stylesheet" href="/assets/bar-events.css[^\"]*">\s*','',html)
  html=html.replace('</head>','<link rel="stylesheet" href="/assets/bar-events.css?v=1">\n</head>')
- if slug=='whats-happening':
-  html=re.sub(r'/assets/calendar.js(?:\?[^\"]*)?','/assets/calendar.js?v=gm-1',html)
-  html=re.sub(r'<meta name="description" content="[^"]*">','<meta name="description" content="Find Seismique events for adults and kids &amp; families, explore the calendar, and plan birthday parties or private gatherings.">',html)
  if slug=='bar':
   html=html.replace('<body class="hub-page">','<body class="hub-page bar-page">')
   html=re.sub(r'<title>.*?</title>','<title>The Drinque Bar | Seismique Houston</title>',html)
@@ -24,6 +21,7 @@ for slug,component in [('parties','parties'),('whats-happening','happening'),('b
 # Retain current page content, homepage delivery blocks, active-page labels and footer styling.
 for path in [*root.glob('dist/**/index.html'),*root.glob('pages/*.html')]:
  html=path.read_text()
+ html=html.replace('/assets/visitor.js?v=58','/assets/visitor.js?v=59')
  if 'class="direct-nav"' not in html:continue
  slug=path.parent.name if path.parent.name!='dist' else ''
  if path.parent.name=='pages':slug=path.stem
@@ -35,3 +33,9 @@ for path in [*root.glob('dist/**/index.html'),*root.glob('pages/*.html')]:
  html=re.sub(r'<!-- GLOBAL_FOOTER_START -->.*?<!-- GLOBAL_FOOTER_END -->',lambda _:'<!-- GLOBAL_FOOTER_START -->'+foot+'<!-- GLOBAL_FOOTER_END -->',html,flags=re.S)
  path.write_text(html)
 print('Updated Bar, Events, party choices and shared navigation.')
+
+# Keep archived public URLs safe even after a targeted page refresh.
+for slug in ['whats-happening','calendar','coming-soon']:
+ path=root/'dist'/slug/'index.html';path.parent.mkdir(exist_ok=True)
+ target='/plan-your-visit/'
+ path.write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url='+target+'"><title>Plan Your Visit | Seismique</title></head><body><p><a href="'+target+'">Continue to Plan Your Visit</a>.</p><script>location.replace('+repr(target)+');</script></body></html>')

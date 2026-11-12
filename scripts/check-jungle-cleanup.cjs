@@ -11,7 +11,7 @@ for(const material of [leaf,bark,trail]){
  assert(shader.fragmentShader.includes('outgoingLight*=mix(1.,livingEdgeCalm'),'The edge falloff must be attached to the actual shader output');
  assert(shader.vertexShader.includes('instanceMatrix*livingPosition'),'Instanced foliage must shade in world coordinates');
 }
-const ids=['exhibits','mini-golf','parties','whats-happening','plan-your-visit'];
+const ids=['exhibits','mini-golf','parties','bar','plan-your-visit'];
 function setup(reducedMotion=false){
  const buttons=ids.map(()=>({hidden:true,dataset:{},style:{setProperty(){}},addEventListener(){}}));
  const parent=new T.Group(),root={querySelector(selector){if(selector==='.scene')return{clientWidth:390};return buttons[ids.findIndex(id=>selector.includes('"'+id+'"'))];}};
