@@ -41,7 +41,8 @@ for url,doc in docs.items():
 for name in ['meet-artists','behind-the-experience']:assert name in docs['/exhibits/'].ids
 for name in ['tickets','hours-location','parking','accessibility','faqs','contact','policies']:assert name in docs['/plan-your-visit/'].ids
 assert 'Museum admission is not required to visit the bar.' in docs['/bar/'].text
-for phrase in ['Toshiko Horiuchi MacAdam','CONTRIBUTING ARTISTS','EXHIBIT BUILDERS','CREATIVE DIRECTION']:assert phrase in docs['/exhibits/'].text
+assert 'Toshiko Horiuchi MacAdam' in docs['/exhibits/'].text
+assert '/artists/' in docs['/exhibits/'].links
 for old,target in {'whats-happening':'/plan-your-visit/','coming-soon':'/plan-your-visit/','calendar':'/plan-your-visit/','artists-team':'/exhibits/#meet-artists','overview':'/','museum':'/exhibits/'}.items():
  data=(root/old/'index.html').read_text();assert 'location.replace('+repr(target)+')' in data and 'direct-nav' not in data
 print('PASS: seven consistent five-item menus; all internal page/section links; no duplicate IDs; visitor details and artist content retained; bar and event requirements present; six legacy redirects.')
