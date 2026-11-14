@@ -21,7 +21,7 @@ class Document(HTMLParser):
   if tag=='a' and self.anchor is not None:self.nav.append(self.anchor);self.anchor=None
   if tag=='nav':self.innav=False
 expected=['Immersive Museum','Glow Mini Golf','Bar','Parties & Events','Plan Your Visit']
-pages=['','exhibits','mini-golf','bar','parties','plan-your-visit']
+pages=['','exhibits','mini-golf','bar','parties','plan-your-visit','artists']
 docs={('/'+p+'/' if p else '/'):Document(root/p/'index.html') for p in pages}
 for url,doc in docs.items():
  assert [label.strip() for _,label in doc.nav]==expected,(url,doc.nav)
@@ -44,7 +44,7 @@ assert 'Museum admission is not required to visit the bar.' in docs['/bar/'].tex
 for phrase in ['Toshiko Horiuchi MacAdam','CONTRIBUTING ARTISTS','EXHIBIT BUILDERS','CREATIVE DIRECTION']:assert phrase in docs['/exhibits/'].text
 for old,target in {'whats-happening':'/plan-your-visit/','coming-soon':'/plan-your-visit/','calendar':'/plan-your-visit/','artists-team':'/exhibits/#meet-artists','overview':'/','museum':'/exhibits/'}.items():
  data=(root/old/'index.html').read_text();assert 'location.replace('+repr(target)+')' in data and 'direct-nav' not in data
-print('PASS: six consistent five-item menus; all internal page/section links; no duplicate IDs; visitor details and artist content retained; bar and event requirements present; six legacy redirects.')
+print('PASS: seven consistent five-item menus; all internal page/section links; no duplicate IDs; visitor details and artist content retained; bar and event requirements present; six legacy redirects.')
 
 assert (root.parent/'archive/whats-happening/index.html').exists()
 assert 'public-events-data' not in (root/'whats-happening/index.html').read_text()

@@ -67,3 +67,6 @@ print('Built five main pages, shared navigation, and six legacy URL redirects.')
 
 # Keep the focused GM content/navigation refresh authoritative.
 exec(compile(Path('scripts/build-bar-events.py').read_text(), 'scripts/build-bar-events.py', 'exec'), {'__file__': str(Path('scripts/build-bar-events.py').resolve())})
+
+# The artist directory has its own maintained profile data and page builder.
+exec(compile(Path('scripts/build-artist-directory.py').read_text(), 'scripts/build-artist-directory.py', 'exec'), {'__file__': str(Path('scripts/build-artist-directory.py').resolve())})
