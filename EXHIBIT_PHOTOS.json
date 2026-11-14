@@ -1,7 +1,7 @@
 {
   "source": "https://www.seismique.com/immersive-art-museum",
   "checked_on": "2026-10-02",
-  "usage": "Official photographs and user-supplied exhibit imagery; Eden, Mission Control and Abduction use the user-supplied photos recorded below.",
+  "usage": "Official photographs and user-supplied exhibit imagery; Eden, Mission Control, Abduction and Brainwasher use the user-supplied photos recorded below.",
   "images": {
     "alien-grass": "https://static.wixstatic.com/media/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg",
     "abduction": "Resized_20241121_114645_1737083979952.jpg (user-supplied original)",
@@ -9,7 +9,7 @@
     "facemaking": "https://static.wixstatic.com/media/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg",
     "mission-control": "RHP06892.jpg (user-supplied original)",
     "eden": "RHP06900.jpg (user-supplied original)",
-    "brainwasher": "https://static.wixstatic.com/media/95b67b_64b2c29880e54c82be6fe2f3dfb731a3~mv2.jpg",
+    "brainwasher": "RHP06984.jpg (user-supplied original)",
     "venus": "https://static.wixstatic.com/media/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg",
     "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
   },
@@ -20,7 +20,7 @@
     "facemaking": "https://static.wixstatic.com/media/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg",
     "mission-control": "/assets/exhibits/mission-control-rhp06892-1920.jpg",
     "eden": "/assets/exhibits/eden-rhp06900-1920.jpg",
-    "brainwasher": "https://static.wixstatic.com/media/95b67b_64b2c29880e54c82be6fe2f3dfb731a3~mv2.jpg/v1/fill/w_980,h_550,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_64b2c29880e54c82be6fe2f3dfb731a3~mv2.jpg",
+    "brainwasher": "/assets/exhibits/brainwasher-rhp06984-1920.jpg",
     "venus": "https://static.wixstatic.com/media/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg",
     "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg/v1/fill/w_980,h_1073,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
   },
@@ -56,6 +56,17 @@
         "640": "/assets/exhibits/abduction-20241121-640.jpg",
         "1280": "/assets/exhibits/abduction-20241121-1280.jpg",
         "2000": "/assets/exhibits/abduction-20241121-2000.jpg"
+      }
+    },
+    "brainwasher": {
+      "source_file": "RHP06984.jpg",
+      "supplied_on": "2026-11-13",
+      "credit": "Photo \u00a9 C. Brielmaier - Rogues Hollow Productions : RoguesHollow.com",
+      "processing": "Resized and compressed only; no generated edits or cropping. Original photo credit preserved.",
+      "renditions": {
+        "640": "/assets/exhibits/brainwasher-rhp06984-640.jpg",
+        "1280": "/assets/exhibits/brainwasher-rhp06984-1280.jpg",
+        "1920": "/assets/exhibits/brainwasher-rhp06984-1920.jpg"
       }
     }
   }
