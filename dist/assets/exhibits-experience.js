@@ -6,6 +6,15 @@
   motionState();
   preference.addEventListener?.('change',event=>{paused=event.matches;motionState();});
   document.body.classList.add('enhanced');
+  const teamToggle=document.getElementById('behind-the-experience');
+  const teamDetails=document.getElementById('artist-team-details');
+  if(teamToggle&&teamDetails){
+    teamToggle.addEventListener('click',()=>{
+      const expanded=teamToggle.getAttribute('aria-expanded')==='true';
+      teamToggle.setAttribute('aria-expanded',String(!expanded));
+      teamDetails.hidden=expanded;
+    });
+  }
   if('IntersectionObserver' in window){
     const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){entry.target.classList.add('in-view');observer.unobserve(entry.target);}}},{threshold:.15});
     root.querySelectorAll('.world').forEach(section=>observer.observe(section));
