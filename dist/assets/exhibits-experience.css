@@ -22,9 +22,13 @@
 
 .artist-directory-cta{gap:16px;scroll-margin-top:110px}.artist-directory-cta svg{flex:none}
 
-/* Frame the portrait photos around the parts of the exhibit visitors recognize. */
 @media (min-width: 701px) {
+  #world-abduction {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
   #world-abduction .world-image {
+    /* Keep the portrait inside its column even when the row is taller. */
+    width: 100%;
     aspect-ratio: 12 / 13;
   }
 }
