@@ -55,9 +55,10 @@
 .arcade-heading h2{font-size:clamp(3.4rem,7vw,7.8rem)}
 .arcade-heading .eyebrow{color:#600dff}
 .arcade-heading>p{color:#5b5364;font-size:1.05rem;max-width:35ch}
-.arcade-layout{display:grid;grid-template-columns:1.25fr 1fr;gap:30px;margin:0 auto;padding:0 var(--gutter);max-width:1600px}
+.arcade-layout{display:grid;grid-template-columns:1.25fr 1fr;align-items:start;gap:30px;margin:0 auto;padding:0 var(--gutter);max-width:1600px}
 .arcade-layout figure{min-width:0}
-.arcade-layout img{aspect-ratio:1.3;object-fit:cover}
+/* Let each photo size itself so captions stay within the grid row. */
+.arcade-layout img{height:auto;aspect-ratio:1.3;object-fit:cover}
 .arcade-layout figure:nth-child(2){margin-top:100px}
 .arcade-layout figure:nth-child(2) img{aspect-ratio:1.13}
 .arcade-layout figcaption{padding:24px 0 0}
