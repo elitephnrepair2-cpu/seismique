@@ -1,30 +1,30 @@
 {
   "source": "https://www.seismique.com/immersive-art-museum",
   "checked_on": "2026-10-02",
-  "usage": "Official photographs and user-supplied exhibit imagery; Eden, Mission Control, Abduction and Brainwasher use the user-supplied photos recorded below.",
+  "usage": "Official photographs and user-supplied exhibit imagery. Supplied photos are recorded below.",
   "images": {
     "alien-grass": "https://static.wixstatic.com/media/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg",
-    "abduction": "Resized_20241121_114645_1737083979952.jpg (user-supplied original)",
-    "archive": "https://static.wixstatic.com/media/51d719_05c50e841acf4b06ac38fa0f7e78ba9a~mv2.jpg",
+    "abduction": "image2.png (user-supplied original)",
+    "gastropod": "image0.png (user-supplied original)",
     "facemaking": "https://static.wixstatic.com/media/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg",
     "mission-control": "RHP06892.jpg (user-supplied original)",
     "eden": "RHP06900.jpg (user-supplied original)",
     "brainwasher": "RHP06984.jpg (user-supplied original)",
-    "venus": "https://static.wixstatic.com/media/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg",
+    "venus": "image1 (1).png (user-supplied original)",
     "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
   },
   "display_images": {
     "alien-grass": "https://static.wixstatic.com/media/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg",
-    "abduction": "/assets/exhibits/abduction-20241121-2000.jpg",
-    "archive": "https://static.wixstatic.com/media/51d719_05c50e841acf4b06ac38fa0f7e78ba9a~mv2.jpg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_05c50e841acf4b06ac38fa0f7e78ba9a~mv2.jpg",
+    "abduction": "/assets/exhibits/abduction-ufo-beam.jpg",
+    "gastropod": "/assets/exhibits/gastropod-three-eyes.jpg",
     "facemaking": "https://static.wixstatic.com/media/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_56160d5fc8ed443793d774041e1a944f~mv2.jpeg",
     "mission-control": "/assets/exhibits/mission-control-rhp06892-1920.jpg",
     "eden": "/assets/exhibits/eden-rhp06900-1920.jpg",
     "brainwasher": "/assets/exhibits/brainwasher-rhp06984-1920.jpg",
-    "venus": "https://static.wixstatic.com/media/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_befb6c952cd84620844c10d7b7ff721a~mv2.jpeg",
+    "venus": "/assets/exhibits/venus-crochet-playground.jpg",
     "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg/v1/fill/w_980,h_1073,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
   },
-  "rendition_note": "Official gallery photos retain their Wix renditions. Supplied photographs use responsive local JPEGs preserving the full original images and aspect ratios. Abduction retains the supplied 2000-pixel original for its enlarged view.",
+  "rendition_note": "Official gallery photos retain their Wix renditions. Supplied photos are compressed for the web, with smaller renditions where useful. The local files retain the original aspect ratios.",
   "supplied_images": {
     "eden": {
       "source_file": "RHP06900.jpg",
@@ -49,13 +49,11 @@
       }
     },
     "abduction": {
-      "source_file": "Resized_20241121_114645_1737083979952.jpg",
-      "supplied_on": "2026-11-13",
-      "processing": "Original retained at 2000 pixels; smaller versions resized and compressed only. No generated edits or cropping.",
+      "source_file": "image2.png",
+      "supplied_on": "2026-11-16",
+      "processing": "Encoded as JPEG at the supplied dimensions.",
       "renditions": {
-        "640": "/assets/exhibits/abduction-20241121-640.jpg",
-        "1280": "/assets/exhibits/abduction-20241121-1280.jpg",
-        "2000": "/assets/exhibits/abduction-20241121-2000.jpg"
+        "486": "/assets/exhibits/abduction-ufo-beam.jpg"
       }
     },
     "brainwasher": {
@@ -68,6 +66,23 @@
         "1280": "/assets/exhibits/brainwasher-rhp06984-1280.jpg",
         "1920": "/assets/exhibits/brainwasher-rhp06984-1920.jpg"
       }
+    },
+    "venus": {
+      "source_file": "image1 (1).png",
+      "supplied_on": "2026-11-16",
+      "processing": "Encoded as JPEG at the supplied dimensions.",
+      "renditions": {
+        "520": "/assets/exhibits/venus-crochet-playground.jpg"
+      }
+    },
+    "gastropod": {
+      "source_file": "image0.png",
+      "supplied_on": "2026-11-16",
+      "processing": "Encoded as JPEG at the supplied dimensions.",
+      "renditions": {
+        "480": "/assets/exhibits/gastropod-three-eyes.jpg"
+      },
+      "description_source": "User-supplied photograph of the Gastropod exhibit sign."
     }
   }
 }

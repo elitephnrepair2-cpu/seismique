@@ -21,3 +21,17 @@
 @media(max-width:700px){.optical-divider{height:92px}.optical-divider::before{background-size:1050px 100%}.dialog-copy h2{font-size:clamp(1.9rem,8.3vw,2.5rem)}}
 
 .artist-directory-cta{gap:16px;scroll-margin-top:110px}.artist-directory-cta svg{flex:none}
+
+/* Frame the portrait photos around the parts of the exhibit visitors recognize. */
+@media (min-width: 701px) {
+  #world-abduction .world-image {
+    aspect-ratio: 12 / 13;
+  }
+}
+@media (max-width: 700px) {
+  #world-gastropod .world-image img {
+    height: auto;
+    -webkit-mask-image: linear-gradient(#000 76%, transparent);
+    mask-image: linear-gradient(#000 76%, transparent);
+  }
+}
