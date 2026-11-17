@@ -39,3 +39,10 @@
     mask-image: linear-gradient(#000 76%, transparent);
   }
 }
+
+@media (max-width: 430px) {
+  .people-layout figure:not(.people-main) img {
+    height: auto;
+    aspect-ratio: 2 / 3;
+  }
+}
