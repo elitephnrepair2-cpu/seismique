@@ -10,7 +10,7 @@ for slug,component in [('parties','parties'),('bar','bar')]:
  content=(root/f'components/{component}-content.html').read_text()
  html=re.sub(r'<main id="main-content">.*?</main>',lambda _: '<main id="main-content">'+content+'</main>',html,flags=re.S)
  html=re.sub(r'<link rel="stylesheet" href="/assets/bar-events.css[^\"]*">\s*','',html)
- html=html.replace('</head>','<link rel="stylesheet" href="/assets/bar-events.css?v=1">\n</head>')
+ html=html.replace('</head>','<link rel="stylesheet" href="/assets/bar-events.css?v=bar-photos-20261118">\n</head>')
  if slug=='bar':
   html=html.replace('<body class="hub-page">','<body class="hub-page bar-page">')
   html=re.sub(r'<title>.*?</title>','<title>The Drinque Bar | Seismique Houston</title>',html)
