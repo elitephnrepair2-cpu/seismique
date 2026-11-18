@@ -46,3 +46,12 @@
     aspect-ratio: 2 / 3;
   }
 }
+
+@media (max-width: 700px) {
+  .final-cta {
+    /* Keep the headline below the faces in the portrait photo. */
+    min-height: max(75svh, 570px);
+    align-items: end;
+    padding-bottom: 40px;
+  }
+}
