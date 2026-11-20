@@ -12,5 +12,5 @@ const published=JSON.parse(html.match(/id="public-events-data">(.*?)<\/script>/s
 assert(published.every(e=>e.status==='published'&&e.dates.length===0),'Do not infer dates from recurring listings. Update this assertion when dated sessions are approved.');
 const parties=fs.readFileSync('dist/parties/index.html','utf8');
 assert(parties.includes('name="guests" type="number" min="1" step="1" inputmode="numeric" required'));
-assert(parties.includes('This is not a drop-off activity.'));
+assert(parties.includes('Guests 16 and under must attend with a ticketed adult.'));
 console.log('PASS: adult/family/shared filters, tentative exclusion, date matching, explicit empty dates and guest-count policy.');
