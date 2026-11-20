@@ -8,12 +8,12 @@ header=Path('components/page-header.html').read_text().strip()
 footer=Path('components/footer.html').read_text().strip()
 pages={'exhibits':'Immersive Museum','mini-golf':'Glow Mini Golf','bar':'Bar','parties':'Parties & Events','plan-your-visit':'Plan Your Visit'}
 legacy={'whats-happening':'/plan-your-visit/','coming-soon':'/plan-your-visit/','calendar':'/plan-your-visit/','artists-team':'/exhibits/#meet-artists','overview':'/','museum':'/exhibits/'}
-planning={'tickets','hours-location','parking','accessibility','faqs','contact','policies'}
+planning={'tickets','accessibility','faqs','contact','policies'}
 
 def navigation(html,current=None,home=False):
  menu=nav
  if current:menu=menu.replace('href="/'+current+'/"','href="/'+current+'/" aria-current="page"')
- if home:menu=menu.replace('href="/plan-your-visit/"','href="#visit-room"')
+ if current=='plan-your-visit':menu=menu.replace('href="/plan-your-visit/#accessibility"','href="/plan-your-visit/#accessibility" aria-current="page"')
  html=re.sub(r'<nav class="direct-nav".*?</nav>',menu,html,flags=re.S)
  html=html.replace('/?resume=1#tour','/').replace('Seismique — back to the jungle','Seismique — home')
  html=re.sub(r'/assets/visitor.js(?:\?v=\d+)?','/assets/visitor.js?v=59',html)
@@ -24,7 +24,7 @@ def shared_footer(html):
  html=re.sub(r'<!-- GLOBAL_FOOTER_START -->.*?<!-- GLOBAL_FOOTER_END -->\s*','',html,flags=re.S)
  html=re.sub(r'<link rel="stylesheet" href="/assets/global-footer.css(?:\?[^"]*)?">\s*','',html)
  html=re.sub(r'<script src="/assets/global-footer.js" defer></script>\s*','',html)
- html=html.replace('</head>','<link rel="stylesheet" href="/assets/global-footer.css?v=logo-outline-1">\n</head>')
+ html=html.replace('</head>','<link rel="stylesheet" href="/assets/global-footer.css?v=accessibility-nav-20261120">\n</head>')
  return html.replace('</body>','<!-- GLOBAL_FOOTER_START -->'+footer+'<!-- GLOBAL_FOOTER_END -->\n<script src="/assets/global-footer.js" defer></script></body>')
 
 def links(html,current):
@@ -52,7 +52,7 @@ for id,title in pages.items():
   fragment={'bar':'bar','parties':'parties','plan-your-visit':'visit','whats-happening':'happening'}[id]
   content=Path('components/'+fragment+'-content.html').read_text()
   if id not in ('whats-happening','parties','bar'):content='<div class="info-shell">'+content+'</div>'
-  description={'bar':'Meet friends and watch games at The Drinque. Museum admission is not required to visit the bar.','parties':'Plan a birthday, private celebration or corporate event at Seismique in Houston.','plan-your-visit':'Plan your Seismique visit: tickets, Houston address, hours, parking, accessibility, FAQs and contact details.','whats-happening':'Find Seismique events for adults and kids &amp; families, with event dates and registration links.'}[id]
+  description={'bar':'Meet friends and watch games at The Drinque. Museum admission is not required to visit the bar.','parties':'Plan a birthday, private celebration or corporate event at Seismique in Houston.','plan-your-visit':'Plan your Seismique visit: tickets, accessibility, FAQs, policies and contact details.','whats-happening':'Find Seismique events for adults and kids &amp; families, with event dates and registration links.'}[id]
   html='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>'''+escape(title)+''' | Seismique</title><meta name="description" content="'''+description+'''"><link rel="stylesheet" href="/assets/exhibits-experience.css?v=49"><link rel="stylesheet" href="/assets/consolidated-pages.css?v=55"></head><body class="hub-page"><div id="seismique-jungle-reveal" data-view="info"><a class="skip-link" href="#main-content">Skip to content</a>'''+header+'''<main id="main-content">'''+content+'''</main></div><script src="/assets/visitor.js?v=59" defer></script>'''+('<script src="/assets/calendar.js?v=gm-1" defer></script>' if id=='whats-happening' else '')+'''</body></html>'''
   html=navigation(shared_footer(links(html,id)),id)
   if id=="parties":

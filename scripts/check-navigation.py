@@ -20,7 +20,7 @@ class Document(HTMLParser):
  def handle_endtag(self,tag):
   if tag=='a' and self.anchor is not None:self.nav.append(self.anchor);self.anchor=None
   if tag=='nav':self.innav=False
-expected=['Immersive Museum','Glow Mini Golf','Bar','Parties & Events','Plan Your Visit']
+expected=['Immersive Museum','Glow Mini Golf','Bar','Parties & Events','Accessibility']
 pages=['','exhibits','mini-golf','bar','parties','plan-your-visit','artists']
 docs={('/'+p+'/' if p else '/'):Document(root/p/'index.html') for p in pages}
 for url,doc in docs.items():
@@ -39,7 +39,8 @@ for url,doc in docs.items():
   if url=='/' and not link.path and fragment in ['exhibits','tour']:continue
   if fragment:assert fragment in page.ids,(url,'Missing target',href)
 for name in ['meet-artists','behind-the-experience']:assert name in docs['/exhibits/'].ids
-for name in ['tickets','hours-location','parking','accessibility','faqs','contact','policies']:assert name in docs['/plan-your-visit/'].ids
+for name in ['tickets','accessibility','faqs','contact','policies']:assert name in docs['/plan-your-visit/'].ids
+assert 'hours-location' not in docs['/plan-your-visit/'].ids
 assert 'Museum admission is not required to visit the bar.' in docs['/bar/'].text
 assert 'Toshiko Horiuchi MacAdam' in docs['/exhibits/'].text
 assert '/artists/' in docs['/exhibits/'].links
