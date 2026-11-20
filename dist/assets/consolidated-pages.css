@@ -5,3 +5,6 @@
 @media(prefers-reduced-motion:reduce){.hub-page{scroll-behavior:auto}}
 
 .event-options{display:flex;flex-wrap:wrap;gap:16px 26px;padding:30px 0;margin:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px;color:#d8c6ed}.inquiry-panel{padding:24px 0 36px}.inquiry-panel .button{margin-top:24px}.artist-team{scroll-margin-top:110px}
+
+/* In-page navigation focuses this section without framing the whole panel. */
+.info-shell #accessibility[tabindex="-1"]:focus{outline:none}
