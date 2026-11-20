@@ -11,7 +11,8 @@
     "eden": "RHP06900.jpg (user-supplied original)",
     "brainwasher": "RHP06984.jpg (user-supplied original)",
     "venus": "image1 (1).png (user-supplied original)",
-    "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
+    "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg",
+    "exhibits-hero": "RHP07007.jpg (user-supplied original)"
   },
   "display_images": {
     "alien-grass": "https://static.wixstatic.com/media/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg/v1/fill/w_980,h_1307,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/95b67b_8f27d81af701412b9994dec16b6c7519~mv2.jpeg",
@@ -22,7 +23,8 @@
     "eden": "/assets/exhibits/eden-rhp06900-1920.jpg",
     "brainwasher": "/assets/exhibits/brainwasher-rhp06984-1920.jpg",
     "venus": "/assets/exhibits/venus-crochet-playground.jpg",
-    "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg/v1/fill/w_980,h_1073,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg"
+    "fraction": "https://static.wixstatic.com/media/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg/v1/fill/w_980,h_1073,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/51d719_4fce67793aeb4e73acf96c67b3fb0943~mv2.jpg",
+    "exhibits-hero": "/assets/exhibits/hero-rhp07007-1920.jpg"
   },
   "rendition_note": "Official gallery photos retain their Wix renditions. Supplied photos are compressed for the web, with smaller renditions where useful. The local files retain the original aspect ratios.",
   "supplied_images": {
@@ -83,6 +85,17 @@
         "480": "/assets/exhibits/gastropod-three-eyes.jpg"
       },
       "description_source": "User-supplied photograph of the Gastropod exhibit sign."
+    },
+    "exhibits-hero": {
+      "source_file": "RHP07007.jpg",
+      "supplied_on": "2026-11-20",
+      "credit": "Photo \u00a9 C. Brielmaier \u00b7 Rogues Hollow Productions \u00b7 RoguesHollow.com",
+      "processing": "Resized and compressed only. Original photo credit preserved in each rendition.",
+      "renditions": {
+        "640": "/assets/exhibits/hero-rhp07007-640.jpg",
+        "1280": "/assets/exhibits/hero-rhp07007-1280.jpg",
+        "1920": "/assets/exhibits/hero-rhp07007-1920.jpg"
+      }
     }
   }
 }
